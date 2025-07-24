@@ -1,0 +1,174 @@
+[2025-07-06T07:05:24.061Z] Starting to process accepted quotes without bookings...
+[2025-07-06T07:05:24.157Z] Found 8 accepted quotes
+[2025-07-06T07:05:24.165Z] ℹ️ Quote Q459833 already has booking B2506-4786
+[2025-07-06T07:05:24.172Z] ℹ️ Quote Q858704 already has booking B2506-8391
+[2025-07-06T07:05:24.181Z] ℹ️ Quote Q725516 already has booking B2506-5759
+[2025-07-06T07:05:24.187Z] 
+=== Creating booking with data ===
+[2025-07-06T07:05:24.188Z] {
+  "agent": "684417afd5b924dcab909621",
+  "quote": "6853a80be888577eb5d268ba",
+  "customerDetails": {
+    "name": "Ayush Gupta",
+    "email": "ayush199816@gmail.com",
+    "phone": "07409726481",
+    "address": ""
+  },
+  "travelDates": {
+    "startDate": "2025-06-22T00:00:00.000Z",
+    "endDate": "2025-06-26T00:00:00.000Z"
+  },
+  "travelers": [
+    {
+      "name": "Ayush Gupta",
+      "age": 30,
+      "gender": "other",
+      "type": "adult"
+    }
+  ],
+  "totalAmount": 50000,
+  "agentCommission": 0,
+  "specialRequirements": "4N and 5D for Phuket and Krabi",
+  "paymentStatus": "unpaid",
+  "bookingStatus": "pending",
+  "destination": "THAILAND"
+}
+[2025-07-06T07:05:24.220Z] ❌ Error creating booking: Booking validation failed: travelers: Cast to Embedded failed for value "[ { name: 'Ayush Gupta', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError", pricing.totalAmount: Please add total amount, pricing.agentPrice: Path `pricing.agentPrice` is required., pricing.packagePrice: Path `pricing.packagePrice` is required., package: Path `package` is required.
+[2025-07-06T07:05:24.221Z] Validation errors:
+[2025-07-06T07:05:24.222Z]   - travelers: Cast to Embedded failed for value "[ { name: 'Ayush Gupta', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError" (Embedded)
+[2025-07-06T07:05:24.223Z]     Value: [{"name":"Ayush Gupta","age":30,"gender":"other","type":"adult"}]
+[2025-07-06T07:05:24.223Z]   - pricing.totalAmount: Please add total amount (required)
+[2025-07-06T07:05:24.224Z]     Value: undefined
+[2025-07-06T07:05:24.225Z]   - pricing.agentPrice: Path `pricing.agentPrice` is required. (required)
+[2025-07-06T07:05:24.225Z]     Value: undefined
+[2025-07-06T07:05:24.226Z]   - pricing.packagePrice: Path `pricing.packagePrice` is required. (required)
+[2025-07-06T07:05:24.226Z]     Value: undefined
+[2025-07-06T07:05:24.227Z]   - package: Path `package` is required. (required)
+[2025-07-06T07:05:24.227Z]     Value: undefined
+[2025-07-06T07:05:24.229Z] Error stack: ValidationError: Booking validation failed: travelers: Cast to Embedded failed for value "[ { name: 'Ayush Gupta', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError", pricing.totalAmount: Please add total amount, pricing.agentPrice: Path `pricing.agentPrice` is required., pricing.packagePrice: Path `pricing.packagePrice` is required., package: Path `package` is required.
+    at Document.invalidate (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:3343:32)
+    at model.$set (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:1486:12)
+    at model.$set (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:1132:16)
+    at model.Document (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:178:12)
+    at model.Model (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:127:12)
+    at new model (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:4807:15)
+    at D:\Navigatio\backend\node_modules\mongoose\lib\model.js:2757:20
+    at Array.map (<anonymous>)
+    at Function.create (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:2745:34)
+    at createBookingsFromAcceptedQuotes (D:\Navigatio\backend\scripts\createBookingsFromAcceptedQuotes.js:119:41)
+[2025-07-06T07:05:24.240Z] 
+=== Creating booking with data ===
+[2025-07-06T07:05:24.241Z] {
+  "agent": "684417afd5b924dcab909621",
+  "quote": "68565671c84d6afc4c8e5a02",
+  "customerDetails": {
+    "name": "Test",
+    "email": "ayush199816@gmail.com",
+    "phone": "Test",
+    "address": ""
+  },
+  "travelDates": {
+    "startDate": "2025-06-23T00:00:00.000Z",
+    "endDate": "2025-06-29T00:00:00.000Z"
+  },
+  "travelers": [
+    {
+      "name": "Test",
+      "age": 30,
+      "gender": "other",
+      "type": "adult"
+    }
+  ],
+  "totalAmount": 1,
+  "agentCommission": 0,
+  "specialRequirements": "",
+  "paymentStatus": "unpaid",
+  "bookingStatus": "pending",
+  "destination": "Thailand"
+}
+[2025-07-06T07:05:24.249Z] ❌ Error creating booking: Booking validation failed: travelers: Cast to Embedded failed for value "[ { name: 'Test', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError", pricing.totalAmount: Please add total amount, pricing.agentPrice: Path `pricing.agentPrice` is required., pricing.packagePrice: Path `pricing.packagePrice` is required., package: Path `package` is required.
+[2025-07-06T07:05:24.250Z] Validation errors:
+[2025-07-06T07:05:24.251Z]   - travelers: Cast to Embedded failed for value "[ { name: 'Test', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError" (Embedded)
+[2025-07-06T07:05:24.251Z]     Value: [{"name":"Test","age":30,"gender":"other","type":"adult"}]
+[2025-07-06T07:05:24.252Z]   - pricing.totalAmount: Please add total amount (required)
+[2025-07-06T07:05:24.252Z]     Value: undefined
+[2025-07-06T07:05:24.253Z]   - pricing.agentPrice: Path `pricing.agentPrice` is required. (required)
+[2025-07-06T07:05:24.254Z]     Value: undefined
+[2025-07-06T07:05:24.255Z]   - pricing.packagePrice: Path `pricing.packagePrice` is required. (required)
+[2025-07-06T07:05:24.255Z]     Value: undefined
+[2025-07-06T07:05:24.256Z]   - package: Path `package` is required. (required)
+[2025-07-06T07:05:24.257Z]     Value: undefined
+[2025-07-06T07:05:24.257Z] Error stack: ValidationError: Booking validation failed: travelers: Cast to Embedded failed for value "[ { name: 'Test', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError", pricing.totalAmount: Please add total amount, pricing.agentPrice: Path `pricing.agentPrice` is required., pricing.packagePrice: Path `pricing.packagePrice` is required., package: Path `package` is required.
+    at Document.invalidate (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:3343:32)
+    at model.$set (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:1486:12)
+    at model.$set (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:1132:16)
+    at model.Document (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:178:12)
+    at model.Model (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:127:12)
+    at new model (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:4807:15)
+    at D:\Navigatio\backend\node_modules\mongoose\lib\model.js:2757:20
+    at Array.map (<anonymous>)
+    at Function.create (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:2745:34)
+    at createBookingsFromAcceptedQuotes (D:\Navigatio\backend\scripts\createBookingsFromAcceptedQuotes.js:119:41)
+[2025-07-06T07:05:24.266Z] ℹ️ Quote Q082507 already has booking B2506-4182
+[2025-07-06T07:05:24.273Z] ℹ️ Quote Q848872 already has booking B2507-3439
+[2025-07-06T07:05:24.278Z] 
+=== Creating booking with data ===
+[2025-07-06T07:05:24.279Z] {
+  "agent": "684417afd5b924dcab909621",
+  "quote": "686a1ca001345e872d01a968",
+  "customerDetails": {
+    "name": "My Quote Test",
+    "email": "MyQuoteTest@gmail.com",
+    "phone": "07409726481",
+    "address": ""
+  },
+  "travelDates": {
+    "startDate": "2025-07-24T00:00:00.000Z",
+    "endDate": "2025-07-26T00:00:00.000Z"
+  },
+  "travelers": [
+    {
+      "name": "My Quote Test",
+      "age": 30,
+      "gender": "other",
+      "type": "adult"
+    }
+  ],
+  "totalAmount": 18000,
+  "agentCommission": 0,
+  "specialRequirements": "3D/2N Phuket package",
+  "paymentStatus": "unpaid",
+  "bookingStatus": "pending",
+  "destination": "Thailand"
+}
+[2025-07-06T07:05:24.283Z] ❌ Error creating booking: Booking validation failed: travelers: Cast to Embedded failed for value "[ { name: 'My Quote Test', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError", pricing.totalAmount: Please add total amount, pricing.agentPrice: Path `pricing.agentPrice` is required., pricing.packagePrice: Path `pricing.packagePrice` is required., package: Path `package` is required.
+[2025-07-06T07:05:24.284Z] Validation errors:
+[2025-07-06T07:05:24.284Z]   - travelers: Cast to Embedded failed for value "[ { name: 'My Quote Test', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError" (Embedded)
+[2025-07-06T07:05:24.285Z]     Value: [{"name":"My Quote Test","age":30,"gender":"other","type":"adult"}]
+[2025-07-06T07:05:24.285Z]   - pricing.totalAmount: Please add total amount (required)
+[2025-07-06T07:05:24.286Z]     Value: undefined
+[2025-07-06T07:05:24.287Z]   - pricing.agentPrice: Path `pricing.agentPrice` is required. (required)
+[2025-07-06T07:05:24.287Z]     Value: undefined
+[2025-07-06T07:05:24.288Z]   - pricing.packagePrice: Path `pricing.packagePrice` is required. (required)
+[2025-07-06T07:05:24.288Z]     Value: undefined
+[2025-07-06T07:05:24.289Z]   - package: Path `package` is required. (required)
+[2025-07-06T07:05:24.290Z]     Value: undefined
+[2025-07-06T07:05:24.290Z] Error stack: ValidationError: Booking validation failed: travelers: Cast to Embedded failed for value "[ { name: 'My Quote Test', age: 30, gender: 'other', type: 'adult' } ]" (type Array) at path "travelers" because of "ObjectExpectedError", pricing.totalAmount: Please add total amount, pricing.agentPrice: Path `pricing.agentPrice` is required., pricing.packagePrice: Path `pricing.packagePrice` is required., package: Path `package` is required.
+    at Document.invalidate (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:3343:32)
+    at model.$set (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:1486:12)
+    at model.$set (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:1132:16)
+    at model.Document (D:\Navigatio\backend\node_modules\mongoose\lib\document.js:178:12)
+    at model.Model (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:127:12)
+    at new model (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:4807:15)
+    at D:\Navigatio\backend\node_modules\mongoose\lib\model.js:2757:20
+    at Array.map (<anonymous>)
+    at Function.create (D:\Navigatio\backend\node_modules\mongoose\lib\model.js:2745:34)
+    at createBookingsFromAcceptedQuotes (D:\Navigatio\backend\scripts\createBookingsFromAcceptedQuotes.js:119:41)
+[2025-07-06T07:05:24.296Z] 
+=== Summary ===
+[2025-07-06T07:05:24.297Z] Total accepted quotes: 8
+[2025-07-06T07:05:24.297Z] Bookings created: 0
+[2025-07-06T07:05:24.298Z] Already had bookings: 5
+[2025-07-06T07:05:24.298Z] Errors encountered: 3
+[2025-07-06T07:05:24.299Z] 
+Note: Some quotes could not be processed. Check the error messages above and the migration_log.txt file for details.
