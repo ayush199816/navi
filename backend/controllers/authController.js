@@ -31,16 +31,18 @@ exports.register = async (req, res) => {
     }
 
     // For guest users (role: 'user' with user_type: 'guest')
-    if (role === 'user' && req.body.user_type === 'guest') {
+    let isApproved, user_type, userRole = role;
+    if (userRole === 'user' && req.body.user_type === 'guest') {
       // Automatically approve guest users
       isApproved = true;
       // Set role to 'user' and user_type to 'guest'
-      role = 'user';
+      userRole = 'user';
       user_type = 'guest';
     } else {
       // For other roles, use existing logic
       // Only admin users are auto-approved
-      isApproved = role === 'admin';
+      isApproved = userRole === 'admin';
+      user_type = 'regular';
     }
 
     // For agent role, company name is required
@@ -56,7 +58,7 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
-      role: role || 'agent',
+      role: userRole || 'agent',
       companyName,
       phone,
       address,

@@ -224,11 +224,20 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
 // @access  Public
 const getGuestSightseeing = asyncHandler(async (req, res, next) => {
   try {
-    const sightseeing = await GuestSightseeing.findById(req.params.id).lean();
+    const { id } = req.params;
+    
+    // Check if ID is provided and is a valid MongoDB ObjectId
+    if (!id || id === 'undefined' || !mongoose.Types.ObjectId.isValid(id)) {
+      return next(
+        new ErrorResponse(`Invalid sightseeing ID: ${id}`, 400)
+      );
+    }
+
+    const sightseeing = await GuestSightseeing.findById(id).lean();
 
     if (!sightseeing) {
       return next(
-        new ErrorResponse(`Sightseeing not found with id of ${req.params.id}`, 404)
+        new ErrorResponse(`Sightseeing not found with id of ${id}`, 404)
       );
     }
     
@@ -248,10 +257,14 @@ const getGuestSightseeing = asyncHandler(async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error in getGuestSightseeing:', error);
+    
+    // Handle specific error types
+    if (error.name === 'CastError') {
+      return next(new ErrorResponse('Invalid sightseeing ID format', 400));
+    }
+    
     next(new ErrorResponse('Server error', 500));
   }
-
-  // Response is already sent in the try block
 });
 
 // @desc    Create new guest sightseeing

@@ -50,12 +50,12 @@ const AnalogClock = ({ timeZone, city }) => {
 
   return (
     <div className="flex flex-col items-center p-1">
-      <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-white/50 shadow-lg">
+      <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-blue-100 shadow-md bg-white">
         {/* Clock face - simplified with just 12, 3, 6, 9 markers */}
         {[0, 3, 6, 9].map((i) => (
           <div
             key={i}
-            className="absolute w-0.5 h-1.5 bg-white/80 origin-bottom left-1/2 bottom-1/2"
+            className="absolute w-0.5 h-1.5 bg-blue-300 origin-bottom left-1/2 bottom-1/2"
             style={{
               transform: `translateX(-50%) rotate(${i * 30}deg)`,
               transformOrigin: '50% 100%',
@@ -65,29 +65,29 @@ const AnalogClock = ({ timeZone, city }) => {
         ))}
         
         {/* Center dot */}
-        <div className="absolute w-1.5 h-1.5 bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"></div>
+        <div className="absolute w-1.5 h-1.5 bg-blue-500 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"></div>
         
         {/* Hour hand */}
         <div 
-          className="absolute w-1 h-5 md:h-6 bg-white rounded-full origin-bottom left-1/2 bottom-1/2 transform -translate-x-1/2 z-5"
+          className="absolute w-1 h-5 md:h-6 bg-blue-700 rounded-full origin-bottom left-1/2 bottom-1/2 transform -translate-x-1/2 z-5"
           style={{ transform: `translateX(-50%) rotate(${hoursDegrees}deg)` }}
         />
         
         {/* Minute hand */}
         <div 
-          className="absolute w-0.5 h-7 md:h-8 bg-white/90 rounded-full origin-bottom left-1/2 bottom-1/2 transform -translate-x-1/2 z-4"
+          className="absolute w-0.5 h-7 md:h-8 bg-blue-600 rounded-full origin-bottom left-1/2 bottom-1/2 transform -translate-x-1/2 z-4"
           style={{ transform: `translateX(-50%) rotate(${minutesDegrees}deg)` }}
         />
         
         {/* Second hand - thinner and shorter */}
         <div 
-          className="absolute w-[1px] h-8 md:h-9 bg-blue-300 origin-bottom left-1/2 bottom-1/2 transform -translate-x-1/2 z-3"
+          className="absolute w-[1px] h-8 md:h-9 bg-blue-500 origin-bottom left-1/2 bottom-1/2 transform -translate-x-1/2 z-3"
           style={{ transform: `translateX(-50%) rotate(${secondsDegrees}deg)` }}
         />
       </div>
       
-      <div className="mt-2 text-sm font-medium text-white">{city}</div>
-      <div className="text-xs text-blue-100 font-medium">
+      <div className="mt-2 text-sm font-medium text-blue-700">{city}</div>
+      <div className="text-xs text-blue-500 font-medium">
         {displayTime}
       </div>
     </div>

@@ -27,20 +27,25 @@ const Checkout = () => {
     // Check if all pax counts are the same
     const allSamePax = paxCounts.every(count => count === paxCounts[0]);
     
-    // Calculate total pax
+    // Calculate total pax (sum of all pax counts)
     const totalPax = paxCounts.reduce((sum, count) => sum + count, 0);
     
-    // Calculate display pax based on the rules
+    // For display in the form, we want to show the max pax count if all are the same,
+    // otherwise show the sum of all pax counts
     let displayPax;
-    if (allSamePax) {
-      // If all pax counts are the same, use that count
+    if (allSamePax && cart.items.length > 0) {
+      // If all pax counts are the same, use that count (not the sum)
       displayPax = paxCounts[0];
     } else {
       // If pax counts are different, sum them up
       displayPax = totalPax;
     }
     
-    return { totalPax, displayPax, allSamePax };
+    return { 
+      totalPax,    // Total pax (sum of all pax counts)
+      displayPax,  // Either the common pax count or the sum if different
+      allSamePax   // Boolean indicating if all pax counts are the same
+    };
   };
   
   const { totalPax, displayPax, allSamePax } = calculatePaxCounts();
@@ -63,27 +68,64 @@ const Checkout = () => {
     // Fetch sightseeing details for all items in cart
     const fetchSightseeings = async () => {
       try {
-        // Get unique sightseeing IDs from cart
-        const sightseeingIds = [...new Set(cart.items.map(item => item.originalId || item.id))];
+        // Get unique sightseeing IDs from cart, filtering out any undefined or invalid IDs
+        const validItems = cart.items.filter(item => {
+          const id = item.originalId || item.id;
+          return id && id !== 'undefined' && id !== 'null';
+        });
+
+        if (validItems.length === 0) {
+          console.error('No valid items found in cart');
+          toast.error('No valid items found in your cart');
+          navigate('/guest-dashboard');
+          return;
+        }
+
+        const sightseeingIds = [...new Set(validItems.map(item => item.originalId || item.id))];
         
-        // Fetch all sightseeings in parallel
+        // Fetch all sightseeings in parallel with error handling for each request
         const sightseeingPromises = sightseeingIds.map(id => 
-          axios.get(`/api/guest-sightseeing/${id}`).then(res => res.data.data)
+          axios.get(`/api/guest-sightseeing/${id}`)
+            .then(res => ({
+              success: true,
+              data: res.data.data
+            }))
+            .catch(error => ({
+              success: false,
+              id,
+              error: error.response?.data?.message || 'Failed to fetch sightseeing details'
+            }))
         );
         
-        const sightseeingsData = await Promise.all(sightseeingPromises);
+        const results = await Promise.all(sightseeingPromises);
         
-        // Create a map of sightseeing ID to sightseeing data
+        // Process successful and failed requests
         const sightseeingsMap = {};
-        sightseeingsData.forEach(sightseeing => {
-          sightseeingsMap[sightseeing._id] = sightseeing;
+        const failedItems = [];
+        
+        results.forEach(result => {
+          if (result.success) {
+            sightseeingsMap[result.data._id] = result.data;
+          } else {
+            console.error(`Failed to load sightseeing with ID ${result.id}:`, result.error);
+            failedItems.push(result.id);
+          }
         });
         
         setSightseeings(sightseeingsMap);
         setLoading(false);
+        
+        if (failedItems.length > 0) {
+          toast.error(`Failed to load ${failedItems.length} item(s) from your cart`);
+        }
+        
+        if (Object.keys(sightseeingsMap).length === 0) {
+          toast.error('Could not load any items from your cart');
+          navigate('/guest-dashboard');
+        }
       } catch (error) {
-        console.error('Error fetching sightseeings:', error);
-        toast.error('Failed to load sightseeing details');
+        console.error('Error in fetchSightseeings:', error);
+        toast.error('An error occurred while loading your cart');
         navigate('/guest-dashboard');
       }
     };
@@ -97,9 +139,14 @@ const Checkout = () => {
 
   // Validation schema
   const validationSchema = Yup.object().shape({
-    bookingDate: Yup.date()
-      .required('Booking date is required')
-      .min(new Date(), 'Booking date cannot be in the past'),
+    items: Yup.array().of(
+      Yup.object().shape({
+        id: Yup.string().required(),
+        bookingDate: Yup.date()
+          .required('Booking date is required')
+          .min(new Date(), 'Booking date cannot be in the past')
+      })
+    ),
     leadPax: Yup.object().shape({
       name: Yup.string().required('Name is required'),
       age: Yup.number().required('Age is required').min(1),
@@ -115,40 +162,86 @@ const Checkout = () => {
     ),
   });
 
-  // Initial values
+  // Calculate the number of additional passengers needed
+  // For multiple activities, we need to consider the pax count for each activity
+  const calculateAdditionalPaxCount = () => {
+    if (cart.items.length === 0) return 0;
+    
+    // If only one activity, use its pax count
+    if (cart.items.length === 1) {
+      return Math.max(0, (cart.items[0].pax || 1) - 1);
+    }
+    
+    // For multiple activities, use the displayPax which is already calculated
+    // based on whether pax counts are the same or different
+    return Math.max(0, displayPax - 1);
+  };
+  
+  // Initial values with booking dates for each item
   const initialValues = {
-    bookingDate: new Date(),
+    items: Array.isArray(cart?.items) 
+      ? cart.items.map(item => ({
+          id: item.id || '',
+          bookingDate: item.date ? new Date(item.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        }))
+      : [],
     leadPax: {
       name: user?.name || '',
       age: '',
       passportNumber: '',
       panNumber: '',
     },
-    additionalPax: Array(Math.max(0, totalPax - 1)).fill({
+    additionalPax: Array(calculateAdditionalPaxCount()).fill().map(() => ({
       name: '',
       age: '',
       passportNumber: '',
-    }),
+    })),
   };
 
   // Handle form submission
   const handleSubmit = async (values) => {
     try {
+      // For multiple activities, we need to distribute the additional pax appropriately
+      let additionalPaxIndex = 0;
+      
       // Prepare booking data for each item in cart
-      const bookingPromises = cart.items.map(async (item) => {
+      const bookingPromises = cart.items.map(async (item, index) => {
+        const itemPax = item.pax || 1;
+        const itemAdditionalPaxCount = Math.max(0, itemPax - 1);
+        
+        // Get the slice of additionalPax for this item
+        const itemAdditionalPax = values.additionalPax.slice(
+          additionalPaxIndex, 
+          additionalPaxIndex + itemAdditionalPaxCount
+        );
+        
+        // Move the index for the next item
+        additionalPaxIndex += itemAdditionalPaxCount;
+        
+        // Get the booking date for this specific item
+        const itemBookingDate = values.items.find(i => i.id === item.id)?.bookingDate || new Date();
+        
+        // Calculate the total amount for this item
+        const hasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
+        const itemPrice = hasOffer ? item.offerPrice : item.price;
+        const totalAmount = itemPrice * itemPax;
+        
         const bookingData = {
           sightseeingId: item.originalId || item.id,
           userId: user?._id,
           leadPax: values.leadPax,
-          additionalPax: values.additionalPax.slice(0, Math.max(0, (item.pax || 1) - 1)),
-          bookingDate: item.date || values.bookingDate,
-          totalAmount: item.totalPrice || (item.price * (item.pax || 1)),
-          paxCount: item.pax || 1,
+          additionalPax: itemAdditionalPax,
+          bookingDate: itemBookingDate,
+          totalAmount: totalAmount,
+          paxCount: itemPax,
           itemDetails: {
             name: item.name,
-            price: item.price,
+            price: itemPrice,
+            originalPrice: item.price,
+            hasOffer: hasOffer,
+            offerPrice: item.offerPrice,
             date: item.date,
-            pax: item.pax || 1
+            pax: itemPax
           }
         };
         
@@ -370,17 +463,43 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {/* Booking Date */}
+                {/* Booking Dates */}
                 <div className="mb-6">
-                  <label htmlFor="bookingDate" className="block text-sm font-medium text-gray-700">
-                    Booking Date
-                  </label>
-                  <Field
-                    type="date"
-                    name="bookingDate"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  />
-                  <ErrorMessage name="bookingDate" component="div" className="text-red-500 text-sm" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Booking Dates</h3>
+                  <div className="space-y-4">
+                    {Array.isArray(values.items) ? values.items.map((item, index) => {
+                      const cartItem = cart?.items?.find(cartItem => cartItem.id === item.id);
+                      if (!cartItem) return null;
+                      
+                      return (
+                        <div key={item.id || index} className="p-4 border rounded-lg bg-gray-50 mb-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">
+                            {cartItem.name}
+                          </h4>
+                          <div className="flex items-center">
+                            <label 
+                              htmlFor={`items.${index}.bookingDate`} 
+                              className="block text-sm font-medium text-gray-700 mr-2 whitespace-nowrap"
+                            >
+                              Booking Date:
+                            </label>
+                            <Field
+                              type="date"
+                              id={`items.${index}.bookingDate`}
+                              name={`items.${index}.bookingDate`}
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                              min={new Date().toISOString().split('T')[0]}
+                            />
+                          </div>
+                          <ErrorMessage 
+                            name={`items.${index}.bookingDate`} 
+                            component="div" 
+                            className="text-red-500 text-sm mt-1" 
+                          />
+                        </div>
+                      );
+                    }) : null}
+                  </div>
                 </div>
 
                 {/* Total Amount */}

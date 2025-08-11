@@ -69,10 +69,33 @@ const MyQuotes = () => {
   };
 
   // Status badge component
-  const StatusBadge = ({ status }) => {
+  const StatusBadge = ({ status, respondedBy }) => {
     let badgeClass = '';
     let icon = null;
+    let statusText = '';
     
+    // Determine status text based on who responded
+    if (respondedBy && Object.keys(respondedBy).length > 0) {
+      if (respondedBy.role === 'agent') {
+        statusText = 'Agent responded';
+      } else if (respondedBy.name) {
+        statusText = `${respondedBy.name} responded`;
+      } else if (respondedBy.role === 'operations' || respondedBy.role === 'admin') {
+        statusText = 'Operations responded';
+      } else {
+        statusText = 'Responded';
+      }
+      
+      // If the current user is an agent and the response is from operations, show as pending
+      if (respondedBy.role !== 'agent' && localStorage.getItem('userRole') === 'agent') {
+        statusText = 'Pending';
+      }
+    } else {
+      // Default status text
+      statusText = status.charAt(0).toUpperCase() + status.slice(1);
+    }
+    
+    // Set badge style based on status
     switch (status) {
       case 'pending':
         badgeClass = 'bg-yellow-100 text-yellow-800';
@@ -98,7 +121,7 @@ const MyQuotes = () => {
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}`}>
         {icon}
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {statusText}
       </span>
     );
   };
@@ -140,7 +163,7 @@ const MyQuotes = () => {
       // Make the API call to submit the response
       const response = await api.put(`/quotes/${selectedQuote._id}/response`, { 
         response: agentResponse,
-        status: 'responded' // Explicitly set status to 'responded' for tracking
+        status: 'pending' // Set status to 'pending' to notify operations team
       });
       
       // Update the UI with the response
@@ -317,7 +340,7 @@ const MyQuotes = () => {
                       </p>
                     </div>
                     <div className="ml-2 flex-shrink-0 flex">
-                      <StatusBadge status={quote.status} />
+                      <StatusBadge status={quote.status} respondedBy={quote.respondedBy} />
                     </div>
                   </div>
                   
@@ -375,7 +398,11 @@ const MyQuotes = () => {
                         View
                       </button>
                       
-                      {quote.status === 'pending' && (
+                      {(quote.status === 'pending' || quote.status === 'responded') && 
+                       !['accepted', 'rejected'].includes(quote.status) && 
+                       (localStorage.getItem('userRole') === 'agent' ? 
+                         (!quote.respondedBy || quote.respondedBy.role !== 'agent') : 
+                         true) && (
                         <>
                           <button
                             type="button"

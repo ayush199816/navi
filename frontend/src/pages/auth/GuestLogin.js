@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -9,13 +9,28 @@ const GuestLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, loading, error, user } = useSelector(state => state.auth);
+  const location = useLocation();
+  const from = location.state?.from || '/guest-dashboard';
 
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated && user) {
-      navigate('/guest-dashboard');
+      // If user is a guest, redirect to guest dashboard or the requested URL
+      if (user.role === 'user' && user.user_type === 'guest') {
+        navigate(from, { replace: true });
+      } 
+      // If user is not a guest, redirect to appropriate dashboard
+      else if (user.role === 'agent') {
+        navigate(user.isApproved ? '/agent' : 
+                user.onboardingCompleted ? '/pending-approval' : '/onboarding', 
+                { replace: true });
+      } else if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate, user]);
+  }, [isAuthenticated, user, navigate, from]);
 
   // Validation schema
   const validationSchema = Yup.object({

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiMapPin, FiInfo, FiImage, FiStar, FiArrowLeft, FiShoppingCart, FiUser } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 
 const SightseeingNav = ({ sightseeing }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const path = location.pathname;
@@ -13,13 +15,31 @@ const SightseeingNav = ({ sightseeing }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
   };
 
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: <FiInfo className="mr-2" /> },
+    { id: 'overview', label: 'Over', icon: <FiInfo className="mr-2" /> },
     { id: 'gallery', label: 'Gallery', icon: <FiImage className="mr-2" /> },
     { id: 'location', label: 'Location', icon: <FiMapPin className="mr-2" /> },
     { id: 'reviews', label: 'Reviews', icon: <FiStar className="mr-2" /> },
@@ -72,9 +92,12 @@ const SightseeingNav = ({ sightseeing }) => {
               </button>
               
               {isAuthenticated ? (
-                <div className="relative group">
+                <div className="relative" ref={dropdownRef}>
                   <button 
+                    onClick={toggleDropdown}
                     className="flex items-center space-x-2 focus:outline-none"
+                    aria-expanded={isDropdownOpen}
+                    aria-haspopup="true"
                   >
                     <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                       <span className="text-blue-600 font-medium">
@@ -85,12 +108,23 @@ const SightseeingNav = ({ sightseeing }) => {
                       {user?.name || 'User'}
                     </span>
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                  <div 
+                    className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 ${isDropdownOpen ? 'block' : 'hidden'}`}
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu"
+                  >
                     <Link
                       to="/profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Profile
+                    </Link>
+                    <Link
+                      to="/my-bookings"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      My Bookings
                     </Link>
                     <button
                       onClick={handleLogout}

@@ -15,6 +15,7 @@ import userReducer from './slices/userSlice';
 import salesLeadReducer from './slices/salesLeadSlice';
 import guestSightseeingReducer from './slices/guestSightseeingSlice';
 import cartReducer from './slices/cartSlice';
+import notificationReducer from './slices/notificationSlice';
 
 // Persist configuration for the cart
 const cartPersistConfig = {
@@ -37,7 +38,8 @@ const rootReducer = combineReducers({
   users: userReducer,
   salesLeads: salesLeadReducer,
   guestSightseeings: guestSightseeingReducer,
-  cart: persistReducer(cartPersistConfig, cartReducer)
+  cart: persistReducer(cartPersistConfig, cartReducer),
+  notifications: notificationReducer
 });
 
 const store = configureStore({

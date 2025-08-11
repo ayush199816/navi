@@ -1,18 +1,71 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { FiShoppingCart, FiUsers, FiCalendar, FiUser } from 'react-icons/fi';
 
 const GuestDashboard = () => {
   const navigate = useNavigate();
-  const { user } = useSelector(state => state.auth);
+  const { user, isAuthenticated, loading } = useSelector(state => state.auth);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // Redirect if not authenticated as guest
+  // Handle authentication and redirects
   useEffect(() => {
-    if (!user || user.role !== 'user' || user.user_type !== 'guest') {
-      navigate('/login');
+    console.log('GuestDashboard - Auth state:', { 
+      isAuthenticated, 
+      loading, 
+      user: user ? { 
+        id: user._id, 
+        role: user.role, 
+        user_type: user.user_type 
+      } : null 
+    });
+
+    // If still loading initial auth state, do nothing
+    if (loading) {
+      console.log('GuestDashboard - Still loading auth state');
+      return;
     }
-  }, [user, navigate]);
+    
+    // If not authenticated, redirect to login
+    if (!isAuthenticated || !user) {
+      console.log('GuestDashboard - Not authenticated, redirecting to login');
+      navigate('/login', { 
+        state: { 
+          from: '/guest-dashboard',
+          reason: 'not_authenticated'
+        },
+        replace: true 
+      });
+      return;
+    }
+    
+    // If authenticated but not a guest user, redirect to appropriate dashboard
+    if (user.role !== 'user' || user.user_type !== 'guest') {
+      console.log('GuestDashboard - User is not a guest, redirecting based on role:', user.role);
+      if (user.role === 'agent') {
+        navigate(user.isApproved ? '/agent' : '/onboarding', { replace: true });
+      } else if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+      return;
+    }
+    
+    // If we get here, user is authenticated as a guest
+    console.log('GuestDashboard - User is authenticated as guest, rendering dashboard');
+    setIsCheckingAuth(false);
+    
+  }, [user, isAuthenticated, loading, navigate]);
+  
+  // Show loading state while checking auth
+  if (loading || isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   const dashboardItems = [
     {

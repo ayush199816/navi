@@ -242,24 +242,9 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.data;
         
-        // Redirect based on user role and type
-        if (action.payload.data && action.payload.data.role === 'user' && action.payload.data.user_type === 'guest') {
+        // Show welcome message
+        if (action.payload.data) {
           toast.success('Welcome back!');
-          window.location.href = '/guest-dashboard';
-        } else if (action.payload.data && action.payload.data.role === 'agent') {
-          if (!action.payload.data.isApproved) {
-            if (!action.payload.data.onboardingCompleted) {
-              window.location.href = '/onboarding';
-            } else {
-              window.location.href = '/pending-approval';
-            }
-          } else {
-            window.location.href = '/agent';
-          }
-        } else if (action.payload.data && action.payload.data.role === 'admin') {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/dashboard';
         }
       })
       .addCase(login.rejected, (state, action) => {

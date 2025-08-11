@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Lead = require('../models/Lead');
 const Booking = require('../models/Booking');
 const Package = require('../models/Package');
+const { sendNotification, notifyOperationsTeam } = require('../services/notificationService');
 const { generateQuoteId } = require('../utils/idGenerator');
 
 // @desc    Get all quotes
@@ -732,14 +733,38 @@ exports.respondToQuote = async (req, res) => {
       } else if (req.body.response.toLowerCase() === 'rejected') {
         newStatus = 'rejected';
       } else if (req.body.response.trim() !== '') {
-        // If there's a response but it's not 'accepted' or 'rejected', set status to 'responded'
-        newStatus = 'responded';
+        // If it's an agent responding, set status to 'pending' to allow operations to see it
+        if (req.user.role === 'agent') {
+          newStatus = 'pending';
+        } else {
+          // For non-agents, set to 'responded'
+          newStatus = 'responded';
+        }
       }
     }
 
     // If we have a new status, update the quote
     if (newStatus) {
       quote.status = newStatus;
+      
+      // Send notifications based on who is responding
+      if (req.user.role === 'agent') {
+        // Notify operations team when agent responds
+        await notifyOperationsTeam(
+          'New Quote Response',
+          `Agent ${req.user.name} has responded to quote #${quote.quoteId || quote._id.toString().slice(-6)}`,
+          quote._id
+        );
+      } else if (['operations', 'admin'].includes(req.user.role) && quote.agent) {
+        // Notify agent when operations responds
+        await sendNotification(
+          quote.agent._id,
+          'Quote Update',
+          `The operations team has responded to your quote #${quote.quoteId || quote._id.toString().slice(-6)}`,
+          'quote_response',
+          quote._id
+        );
+      }
     }
 
     // If the quote is accepted or rejected, handle special cases

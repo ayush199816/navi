@@ -9,16 +9,18 @@ const {
   updateBookingStatus,
   generateInvoice,
   cancelBooking,
-  claimPayment
+  claimPayment,
+  getGuestBookings
 } = require('../controllers/bookingController');
 const { protect, authorize, isApprovedAgent } = require('../middleware/auth');
 
 // Protected routes
 router.use(protect);
 
-// Special route for my-bookings - must be defined before the :id route
-// This ensures 'my-bookings' is not treated as an ID parameter
+// Special routes for my-bookings - must be defined before the :id route
+// This ensures these routes are not treated as ID parameters
 router.get('/my-bookings', authorize('agent'), isApprovedAgent, getMyBookings);
+router.get('/guest/my-bookings', authorize('user'), getGuestBookings);
 
 // Routes for all authenticated users
 router.post('/', authorize('agent'), isApprovedAgent, createBooking);

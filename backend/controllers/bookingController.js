@@ -6,6 +6,54 @@ const Wallet = require('../models/Wallet');
 const Lead = require('../models/Lead');
 const ErrorResponse = require('../utils/errorResponse');
 
+// @desc    Get bookings for guest users
+// @route   GET /api/bookings/guest/my-bookings
+// @access  Private/Guest
+exports.getGuestBookings = async (req, res) => {
+  try {
+    const { status, startDate, endDate } = req.query;
+    
+    // Build query - only return bookings for the logged-in guest user
+    const query = {
+      'customerDetails.email': req.user.email
+    };
+    
+    // Filter by status
+    if (status) {
+      query.bookingStatus = status;
+    }
+    
+    // Filter by date range
+    if (startDate || endDate) {
+      query.travelDates = {};
+      if (startDate) {
+        query['travelDates.startDate'] = { $gte: new Date(startDate) };
+      }
+      if (endDate) {
+        query['travelDates.endDate'] = { $lte: new Date(endDate) };
+      }
+    }
+    
+    // Execute query
+    const bookings = await Booking.find(query)
+      .populate('package', 'name destination duration image')
+      .populate('agent', 'name email companyName')
+      .sort({ createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      data: bookings,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching guest bookings',
+    });
+  }
+};
+
 // @desc    Get all bookings
 // @route   GET /api/bookings
 // @access  Private/Admin/Operations

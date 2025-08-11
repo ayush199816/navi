@@ -18,6 +18,7 @@ import Dashboard from './pages/Dashboard';
 import GuestDashboard from './pages/guest/GuestDashboard';
 import Checkout from './pages/guest/Checkout';
 import BookingConfirmation from './pages/guest/BookingConfirmation';
+import GuestBookings from './pages/guest/GuestBookings';
 import Login from './pages/auth/Login';
 import GuestLogin from './pages/auth/GuestLogin';
 import SimpleRegister from './pages/auth/SimpleRegister';
@@ -39,6 +40,7 @@ import MyItineraries from './pages/agent/MyItineraries';
 import MyClaims from './pages/agent/MyClaims';
 import ItineraryBuilder from './pages/agent/ItineraryBuilder';
 import ItineraryCreator from './pages/agent/ItineraryCreator';
+import NotificationsPage from './pages/notifications/NotificationsPage';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -67,18 +69,55 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
   const location = useLocation();
   
   useEffect(() => {
-    // Don't run redirect logic if still loading or not authenticated
-    if (loading || !isAuthenticated || !user) return;
+    console.log('ProtectedRoute - Checking access:', {
+      isAuthenticated,
+      user: user ? { role: user.role, user_type: user.user_type } : null,
+      currentPath: location.pathname,
+      loading
+    });
+    
+    // Don't run redirect logic if still loading
+    if (loading) {
+      console.log('ProtectedRoute - Still loading auth state');
+      return;
+    }
+    
+    // If not authenticated, redirect to login
+    if (!isAuthenticated || !user) {
+      console.log('ProtectedRoute - Not authenticated, redirecting to login');
+      navigate('/login', { 
+        state: { 
+          from: location.pathname === '/guest-dashboard' ? '/guest-dashboard' : location.pathname 
+        }, 
+        replace: true 
+      });
+      return;
+    }
     
     const currentPath = location.pathname;
     const isGuestUser = user.role === 'user' && user.user_type === 'guest';
     
     // Handle guest users
     if (isGuestUser) {
-      // If trying to access non-guest routes, redirect to guest dashboard
-      if (!currentPath.startsWith('/guest') && currentPath !== '/cart' && currentPath !== '/sightseeing') {
-        navigate('/guest-dashboard', { replace: true });
+      console.log('ProtectedRoute - Handling guest user access');
+      // Allow access to guest routes, cart, and sightseeing
+      const allowedPaths = [
+        '/guest-dashboard',
+        '/cart',
+        '/sightseeing',
+        '/guest/checkout',
+        '/guest/booking'
+      ];
+      
+      const isAllowedPath = allowedPaths.some(path => currentPath.startsWith(path));
+      
+      if (isAllowedPath) {
+        console.log('ProtectedRoute - Allowing access to guest path:', currentPath);
+        return;
       }
+      
+      console.log('ProtectedRoute - Redirecting guest to dashboard from:', currentPath);
+      navigate('/guest-dashboard', { replace: true });
       return;
     }
 
@@ -127,12 +166,13 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
     );
   }
   
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  // This check is now handled in the useEffect
+  if (!isAuthenticated || !user) {
+    return null; // Will be redirected by the useEffect
   }
 
   // For guest users, allow access to guest-specific routes
-  if (user?.role === 'user' && user?.user_type === 'guest') {
+  if (user.role === 'user' && user.user_type === 'guest') {
     if (roles && !roles.includes(user.role)) {
       return <Navigate to="/unauthorized" replace />;
     }
@@ -205,8 +245,13 @@ function App() {
         }>
           {/* Guest Dashboard */}
           <Route path="/guest-dashboard" element={
-            <ProtectedRoute roles={['user']}>
+            <ProtectedRoute roles={['user']} requireApproval={false}>
               <GuestDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-bookings" element={
+            <ProtectedRoute roles={['user']} requireApproval={false}>
+              <GuestBookings />
             </ProtectedRoute>
           } />
           {/* Guest Booking Routes */}
@@ -222,6 +267,13 @@ function App() {
           } />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
+          
+          {/* Notifications */}
+          <Route path="notifications" element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          } />
 
           {/* Agent Routes - Require approval */}
           <Route path="agent" element={

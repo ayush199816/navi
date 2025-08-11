@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
+import { fetchUnreadCount } from '../../redux/slices/notificationSlice';
+import NotificationDropdown from '../notifications/NotificationDropdown';
 import {
   Bars3Icon,
   XMarkIcon,
@@ -30,6 +32,13 @@ const MainLayout = () => {
     dispatch(logout());
     navigate('/login');
   };
+
+  // Fetch unread notification count on component mount
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchUnreadCount());
+    }
+  }, [dispatch, user]);
 
   // Navigation items based on user role
   const navigation = [
@@ -254,8 +263,29 @@ const MainLayout = () => {
                 {filteredNavigation.find(item => item.href === location.pathname)?.name || 'Dashboard'}
               </h1>
             </div>
-            <div className="ml-4 flex items-center md:ml-6">
-              {/* Profile dropdown can be added here */}
+            <div className="ml-4 flex items-center md:ml-6 space-x-4">
+              {/* Notification dropdown */}
+              <NotificationDropdown />
+              
+              {/* Profile dropdown */}
+              <div className="ml-3 relative">
+                <div>
+                  <button
+                    type="button"
+                    className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                    id="user-menu"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                  >
+                    <span className="sr-only">Open user menu</span>
+                    <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                      <span className="text-primary-600 font-medium">
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
