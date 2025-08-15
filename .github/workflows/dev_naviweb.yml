@@ -119,7 +119,11 @@ jobs:
         echo 'echo "Starting the Node.js application..."' >> startup.sh
         echo 'node server.js' >> startup.sh
         chmod +x startup.sh
-        
+    
+    # 🐛 FIX: Add a step to explicitly set execute permissions
+    - name: Add execute permissions to startup.sh
+      run: chmod +x startup.sh
+
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
