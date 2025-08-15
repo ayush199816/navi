@@ -1,0 +1,3 @@
+# This file tells Azure how to start your Node.js application
+# The following command will be used by Azure to start your app
+npm start
