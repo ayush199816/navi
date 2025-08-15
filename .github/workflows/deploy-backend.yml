@@ -54,23 +54,18 @@ jobs:
         # Add other required environment variables here
         EOL
     
-    # Create Azure resources with direct login
+    # Login to Azure with service principal
+    - name: 'Login to Azure'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    # Create Azure resources
     - name: 'Create Azure Resources'
       uses: azure/CLI@v1
       with:
         azcliversion: 2.0.72
         inlineScript: |
-          # Login using service principal from AZURE_CREDENTIALS
-          echo "Logging in with service principal..."
-          az login --service-principal \
-            -u ${{ secrets.AZURE_CLIENT_ID }} \
-            -p ${{ secrets.AZURE_CLIENT_SECRET }} \
-            --tenant ${{ secrets.AZURE_TENANT_ID }}
-          
-          # Verify login
-          echo "Successfully logged in with service principal"
-          az account show
-          
           # Set the active subscription
           echo "Setting active subscription..."
           az account set --subscription 0b39938f-1439-4596-9e1c-f82b58ebd47e
