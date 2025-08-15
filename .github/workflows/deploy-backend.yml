@@ -54,18 +54,18 @@ jobs:
         # Add other required environment variables here
         EOL
     
-    # Login to Azure and set subscription
-    - name: 'Login to Azure'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    # Create Azure Web App if it doesn't exist
+    # Create Azure Web App using Azure CLI with direct login
     - name: 'Create Azure Web App'
       uses: azure/CLI@v1
       with:
         azcliversion: 2.0.72
         inlineScript: |
+          # Login using service principal
+          az login --service-principal \
+            -u ${{ secrets.AZURE_CLIENT_ID }} \
+            -p ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
+          
           # Set the active subscription
           az account set --subscription 0b39938f-1439-4596-9e1c-f82b58ebd47e
           
