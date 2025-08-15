@@ -63,9 +63,13 @@ jobs:
           # Login using service principal from AZURE_CREDENTIALS
           echo "Logging in with service principal..."
           az login --service-principal \
-            --username ${{ secrets.AZURE_CLIENT_ID }} \
-            --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+            -u ${{ secrets.AZURE_CLIENT_ID }} \
+            -p ${{ secrets.AZURE_CLIENT_SECRET }} \
             --tenant ${{ secrets.AZURE_TENANT_ID }}
+          
+          # Verify login
+          echo "Successfully logged in with service principal"
+          az account show
           
           # Set the active subscription
           echo "Setting active subscription..."
