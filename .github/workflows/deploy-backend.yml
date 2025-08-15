@@ -54,7 +54,7 @@ jobs:
         # Add other required environment variables here
         EOL
     
-    # Login to Azure
+    # Login to Azure and set subscription
     - name: 'Login to Azure'
       uses: azure/login@v1
       with:
@@ -66,14 +66,27 @@ jobs:
       with:
         azcliversion: 2.0.72
         inlineScript: |
+          # Set the active subscription
+          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          
+          # Check if the app service plan exists, create if not
+          if ! az appservice plan show --name navi-plan --resource-group nav_hosting --query "name" -o tsv; then
+            echo "Creating App Service Plan..."
+            az appservice plan create \
+              --name navi-plan \
+              --resource-group nav_hosting \
+              --sku B1 \
+              --is-linux
+          fi
+          
+          # Create the web app if it doesn't exist
           if ! az webapp show --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting --query "name" -o tsv; then
             echo "Creating Azure Web App..."
             az webapp create \
               --name ${{ env.AZURE_WEBAPP_NAME }} \
               --resource-group nav_hosting \
               --runtime "NODE|20-lts" \
-              --plan "navi-plan" \
-              --deployment-local-git
+              --plan "navi-plan"
           else
             echo "Web App already exists, skipping creation."
           fi
