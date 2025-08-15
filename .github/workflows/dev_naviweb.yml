@@ -1,4 +1,4 @@
-name: Build and Deploy to Azure Web App
+name: Deploy Frontend to Azure Static Web App
 
 on:
   push:
@@ -8,8 +8,9 @@ on:
 env:
   NODE_VERSION: '22.x'
   AZURE_WEBAPP_NAME: 'naviWeb'
-  AZURE_WEBAPP_PACKAGE_PATH: '.'
   NODE_ENV: 'production'
+  APP_LOCATION: 'frontend'    # Location of your React app
+  OUTPUT_LOCATION: 'build'    # Location of the build output
 
 jobs:
   build-and-deploy:
@@ -24,105 +25,30 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: 'frontend/package-lock.json'
+        cache-dependency-path: '${{ env.APP_LOCATION }}/package-lock.json'
     
     - name: Install frontend dependencies
-      working-directory: ./frontend
+      working-directory: ${{ env.APP_LOCATION }}
       run: npm ci --legacy-peer-deps
     
     - name: Build frontend
-      working-directory: ./frontend
+      working-directory: ${{ env.APP_LOCATION }}
       env:
         REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net/api' }}
       run: |
         npm run build
-        
-    # Create server.js
-    - name: Create server.js
-      run: |
-        cat > server.js << 'EOL'
-        const express = require('express');
-        const path = require('path');
-        const app = express();
-        
-        // Middleware
-        app.use(express.json());
-        app.use(express.static(path.join(__dirname, 'build')));
-        
-        // Health check endpoint
-        app.get('/health', (req, res) => {
-          res.status(200).json({ status: 'ok' });
-        });
-        
-        // Serve React app
-        app.get('*', (req, res) => {
-          res.sendFile(path.join(__dirname, 'build', 'index.html'));
-        });
-        
-        // Start server
-        const PORT = process.env.PORT || 3000;
-        const server = app.listen(PORT, () => {
-          console.log(`Server is running on port ${PORT}`);
-        });
-        
-        // Handle shutdown gracefully
-        process.on('SIGTERM', () => {
-          console.log('SIGTERM received. Shutting down gracefully...');
-          server.close(() => {
-            console.log('Server closed');
-            process.exit(0);
-          });
-        });
-        EOL
     
-    # Create package.json in root
-    - name: Create root package.json
-      run: |
-        cat > package.json << 'EOL'
-        {
-          "name": "navi",
-          "version": "1.0.0",
-          "description": "Navi Web Application",
-          "main": "server.js",
-          "scripts": {
-            "start": "node server.js",
-            "build": "cd frontend && npm run build",
-            "test": "echo \"No tests specified\" && exit 0"
-          },
-          "dependencies": {
-            "express": "^4.18.2"
-          },
-          "engines": {
-            "node": "18.x"
-          }
-        }
-        EOL
-    
-    # Copy build files
-    - name: Copy build files to root
-      run: |
-        cp -r frontend/build .
-    
-    # Install production dependencies
-    - name: Install production dependencies
-      run: npm install --production
-    
-    # Install production dependencies in root
-    - name: Install production dependencies
-      run: npm install --production
-    
-    # Deploy to Azure
-    - name: 'Deploy to Azure WebApp'
-      uses: azure/webapps-deploy@v3
+    - name: Deploy to Azure Static Web App
+      uses: Azure/static-web-apps-deploy@v1
       with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        slot-name: 'Production'
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F974CCD36B0C4C6A9B7D0BC349107EBB }}
-        startup-command: 'npm start'
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        action: 'upload'
+        app_location: ${{ env.APP_LOCATION }}
+        output_location: ${{ env.OUTPUT_LOCATION }}
+        skip_app_build: true
     
-    # Verify deployment
     - name: Verify deployment
       run: |
-        echo "Deployment to Azure Web App completed successfully!"
-        echo "Application URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+        echo "Frontend deployment to Azure Static Web App completed successfully!"
+        echo "Application URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurestaticapps.net"
