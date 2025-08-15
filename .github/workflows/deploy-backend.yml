@@ -66,8 +66,17 @@ jobs:
       with:
         azcliversion: 2.0.72
         inlineScript: |
+          # List all available subscriptions
+          echo "Available subscriptions:"
+          az account list --output table
+          
           # Set the active subscription
+          echo "Setting active subscription..."
           az account set --subscription 0b39938f-1439-4596-9e1c-f82b58ebd47e
+          
+          # Verify the active subscription
+          echo "Current active subscription:"
+          az account show --output table
           
           # Check if the app service plan exists, create if not
           if ! az appservice plan show --name navi-plan --resource-group nav_hosting --query "name" -o tsv; then
