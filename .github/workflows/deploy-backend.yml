@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '22.x'
+  NODE_VERSION: '18-lts'
   AZURE_WEBAPP_NAME: 'navi-backend'
   NODE_ENV: 'production'
 
