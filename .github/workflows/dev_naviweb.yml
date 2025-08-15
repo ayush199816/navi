@@ -37,21 +37,65 @@ jobs:
       run: |
         npm run build
         
-    - name: Create server.js
+    - name: Create server.js with keep-alive
       run: |
         echo 'const express = require("express");' > server.js
         echo 'const path = require("path");' >> server.js
         echo 'const app = express();' >> server.js
+        echo '' >> server.js
+        echo '// Keep-alive ping endpoint' >> server.js
+        echo 'app.get("/keepalive", (req, res) => {' >> server.js
+        echo '  console.log("Keep-alive ping received");' >> server.js
+        echo '  res.status(200).send("OK");' >> server.js
+        echo '});' >> server.js
+        echo '' >> server.js
+        echo '// Serve static files from the React app' >> server.js
         echo 'app.use(express.static(path.join(__dirname, "build")));' >> server.js
-        echo 'app.get("*", (req, res) => {' >> server.js
+        echo '' >> server.js
+        echo '// Handle React routing, return all requests to React app' >> server.js
+        echo 'app.get("*", function (req, res) {' >> server.js
+        echo '  console.log(`Handling request for: ${req.originalUrl}`);' >> server.js
         echo '  res.sendFile(path.join(__dirname, "build", "index.html"));' >> server.js
         echo '});' >> server.js
+        echo '' >> server.js
         echo 'const port = process.env.PORT || 3000;' >> server.js
-        echo 'app.listen(port, () => console.log(`Server running on port ${port}`));' >> server.js
+        echo 'const server = app.listen(port, () => {' >> server.js
+        echo '  console.log(`Server is running on port ${port}`);' >> server.js
+        echo '  // Initial keep-alive log' >> server.js
+        echo '  console.log("Server started successfully");' >> server.js
+        echo '});' >> server.js
+        echo '' >> server.js
+        echo '// Keep-alive interval' >> server.js
+        echo 'setInterval(() => {' >> server.js
+        echo '  console.log("[Keep-alive] Server is still running...");' >> server.js
+        echo '}, 30000); // Log every 30 seconds' >> server.js
+        echo '' >> server.js
+        echo '// Handle shutdown gracefully' >> server.js
+        echo 'process.on("SIGTERM", () => {' >> server.js
+        echo '  console.log("SIGTERM received. Shutting down gracefully...");' >> server.js
+        echo '  server.close(() => {' >> server.js
+        echo '    console.log("Server closed");' >> server.js
+        echo '    process.exit(0);' >> server.js
+        echo '  });' >> server.js
+        echo '});' >> server.js
     
     - name: Create package.json in root
       run: |
-        echo '{"name":"navi","version":"1.0.0","description":"","main":"server.js","scripts":{"start":"node server.js"},"dependencies":{"express":"^4.18.2"}}' > package.json
+        echo '{' > package.json
+        echo '  "name": "navi",' >> package.json
+        echo '  "version": "1.0.0",' >> package.json
+        echo '  "description": "Navi Web Application",' >> package.json
+        echo '  "main": "server.js",' >> package.json
+        echo '  "scripts": {' >> package.json
+        echo '    "start": "node server.js",' >> package.json
+        echo '    "build": "cd frontend && npm run build",' >> package.json
+        echo '    "install-client": "cd frontend && npm install",' >> package.json
+        echo '    "heroku-postbuild": "npm run install-client && npm run build"' >> package.json
+        echo '  },' >> package.json
+        echo '  "dependencies": {' >> package.json
+        echo '    "express": "^4.18.2"' >> package.json
+        echo '  }' >> package.json
+        echo '}' >> package.json
     
     - name: Copy build files to root
       run: |
@@ -60,6 +104,21 @@ jobs:
     - name: Install production dependencies in root
       run: |
         npm install --production
+        
+    - name: Create startup.sh
+      run: |
+        echo '#!/bin/bash' > startup.sh
+        echo 'echo "Starting application..."' >> startup.sh
+        echo 'node server.js &' >> startup.sh
+        echo 'sleep 5' >> startup.sh
+        echo 'echo "Checking if server is running..."' >> startup.sh
+        echo 'curl -f http://localhost:3000/keepalive || exit 1' >> startup.sh
+        echo 'echo "Server is running"' >> startup.sh
+        echo 'while true; do' >> startup.sh
+        echo '  sleep 30' >> startup.sh
+        echo '  echo "[Keep-alive] Deployment process still active"' >> startup.sh
+        echo 'done' >> startup.sh
+        chmod +x startup.sh
         
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
