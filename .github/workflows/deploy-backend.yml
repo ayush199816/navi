@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '18-lts'
+  BUILD_NODE_VERSION: '22.x'  # For build process
+  RUNTIME_NODE_VERSION: '22-lts'  # For Azure Web App runtime
   AZURE_WEBAPP_NAME: 'navi-backend'
   NODE_ENV: 'production'
 
@@ -21,10 +22,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Set up Node.js
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ env.NODE_VERSION }}
+        node-version: ${{ env.BUILD_NODE_VERSION }}
         cache: 'npm'
         cache-dependency-path: 'package-lock.json'
     
@@ -81,7 +82,7 @@ jobs:
             az webapp create \
               --name ${{ env.AZURE_WEBAPP_NAME }} \
               --resource-group nav_hosting \
-              --runtime "NODE|${{ env.NODE_VERSION }}" \
+              --runtime "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
               --plan "navi-plan"
           else
             echo "Web App already exists, skipping creation."
