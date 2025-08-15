@@ -38,19 +38,24 @@ jobs:
         npm run build
     
     # Create a simple server to serve the frontend
-    - name: Create server.js
+    # Move build files to the correct location
+    - name: Prepare deployment files
       run: |
-        cat > server.js << 'EOL'
+        # Create a temporary directory for the deployment
+        mkdir -p deploy
+        
+        # Create server.js in the root of the deployment package
+        cat > deploy/server.js << 'EOL'
         const express = require('express');
         const path = require('path');
         const app = express();
         
         // Serve static files from the React app
-        app.use(express.static(path.join(__dirname, 'frontend/build')));
+        app.use(express.static(path.join(__dirname, 'build')));
         
         // Handle React routing, return all requests to React app
         app.get('*', (req, res) => {
-          res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+          res.sendFile(path.join(__dirname, 'build', 'index.html'));
         });
         
         const PORT = process.env.PORT || 3000;
@@ -58,11 +63,12 @@ jobs:
           console.log(`Server is running on port ${PORT}`);
         });
         EOL
-    
-    # Create package.json in root
-    - name: Create root package.json
-      run: |
-        cat > package.json << 'EOL'
+        
+        # Copy the built files to the deployment directory
+        cp -r frontend/build deploy/
+        
+        # Create package.json in the deployment directory
+        cat > deploy/package.json << 'EOL'
         {
           "name": "navi",
           "version": "1.0.0",
@@ -77,17 +83,19 @@ jobs:
         }
         EOL
     
-    # Install production dependencies
-    - name: Install production dependencies
-      run: npm install --production
-    
+    # Install production dependencies and deploy
+    - name: Install production dependencies and deploy
+      working-directory: ./deploy
+      run: |
+        npm install --production
+        
     # Deploy to Azure Web App
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         slot-name: 'Production'
-        package: .
+        package: ./deploy
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F974CCD36B0C4C6A9B7D0BC349107EBB }}
     
     - name: Verify deployment
