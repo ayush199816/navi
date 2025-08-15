@@ -9,6 +9,7 @@ env:
   NODE_VERSION: '22.x'
   AZURE_WEBAPP_NAME: 'naviWeb'
   NODE_ENV: 'production'
+  APP_LOCATION: 'frontend'  # Define APP_LOCATION here
 
 jobs:
   build-and-deploy:
@@ -23,14 +24,14 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: '${{ env.APP_LOCATION }}/package-lock.json'
+        cache-dependency-path: 'frontend/package-lock.json'
     
     - name: Install frontend dependencies
-      working-directory: ${{ env.APP_LOCATION }}
+      working-directory: ./frontend
       run: npm ci --legacy-peer-deps
     
     - name: Build frontend
-      working-directory: ${{ env.APP_LOCATION }}
+      working-directory: ./frontend
       env:
         REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net/api' }}
       run: |
