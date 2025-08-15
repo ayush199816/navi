@@ -53,7 +53,7 @@ const CreateQuoteModal = ({ open, onClose, onSuccess }) => {
       formData.append('flightBooked', flightBooked);
       formData.append('requirements', requirements);
       images.forEach(img => formData.append('images', img));
-      await axios.post('http://localhost:5000/api/quotes', formData, {
+      await axios.post('http://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net:5000/api/quotes', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       if (onSuccess) onSuccess();
