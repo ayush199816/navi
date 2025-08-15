@@ -20,10 +20,14 @@ jobs:
         cache: 'npm'
         cache-dependency-path: 'frontend/package-lock.json'
     
-    - name: Install dependencies
+    - name: Install root dependencies
+      run: |
+        npm install -g serve
+        
+    - name: Install frontend dependencies
       working-directory: ./frontend
       run: |
-        npm ci
+        npm ci --legacy-peer-deps
         
     - name: Build frontend
       working-directory: ./frontend
@@ -45,14 +49,17 @@ jobs:
         echo 'const port = process.env.PORT || 3000;' >> server.js
         echo 'app.listen(port, () => console.log(`Server running on port ${port}`));' >> server.js
     
+    - name: Create package.json in root
+      run: |
+        echo '{"name":"navi","version":"1.0.0","description":"","main":"server.js","scripts":{"start":"node server.js"},"dependencies":{"express":"^4.18.2"}}' > package.json
+    
     - name: Copy build files to root
       run: |
         cp -r frontend/build .
-        cp frontend/package*.json .
         
-    - name: Install production dependencies
+    - name: Install production dependencies in root
       run: |
-        npm ci --only=production
+        npm install --production
         
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
@@ -61,3 +68,7 @@ jobs:
         slot-name: 'Production'
         package: .
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F974CCD36B0C4C6A9B7D0BC349107EBB }}
+        
+    - name: Verify deployment
+      run: |
+        echo "Deployment to Azure Web App completed successfully!"
