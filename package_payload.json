@@ -1,4 +1,0 @@
-{
-  "name": "Test Package",
-  "itinerary": "[{\"day\":1,\"title\":\"Test\",\"description\":\"Test\",\"activities\":[\"test\",\"test\",\"test\"],\"meals\":{\"breakfast\":false,\"lunch\":false,\"dinner\":false},\"accommodation\":\"\"}]"
-}
