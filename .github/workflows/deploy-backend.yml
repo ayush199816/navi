@@ -5,7 +5,7 @@ on:
     branches: [dev]
     paths:
       - '**'
-      - '!frontend/**' 
+      - '!frontend/**'
   workflow_dispatch:
 
 env:
@@ -56,7 +56,7 @@ jobs:
     - name: 'Login to Azure'
       uses: azure/login@v1
       with:
-        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}","subscriptionId":"0b39938f-1439-4596-9e1c-f82b58ebd47e"}'
+        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}"}'
 
     # Create Azure resources
     - name: 'Create Azure Resources'
@@ -80,7 +80,7 @@ jobs:
             az webapp create \
               --name ${{ env.AZURE_WEBAPP_NAME }} \
               --resource-group nav_hosting \
-              --runtime "NODE|20-lts" \
+              --runtime "NODE|${{ env.NODE_VERSION }}" \
               --plan "navi-plan"
           else
             echo "Web App already exists, skipping creation."
