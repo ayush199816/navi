@@ -1,0 +1,69 @@
+name: Deploy Backend to Azure Web App
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '**'
+      - '!frontend/**'  # Exclude frontend changes from triggering backend deployment
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22.x'
+  AZURE_WEBAPP_NAME: 'navi-backend'
+  NODE_ENV: 'production'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: 'package-lock.json'
+    
+    - name: Install dependencies
+      run: npm ci
+      env:
+        NODE_ENV: development
+    
+    - name: Build (if needed)
+      run: npm run build --if-present
+    
+    - name: Install production dependencies
+      run: npm ci --only=production
+      env:
+        NODE_ENV: production
+    
+    # Create .env file for production
+    - name: Create production .env
+      run: |
+        cat > .env << 'EOL'
+        NODE_ENV=production
+        PORT=8080
+        MONGODB_URI=${{ secrets.MONGODB_URI }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        JWT_EXPIRE=30d
+        JWT_COOKIE_EXPIRE=30
+        # Add other required environment variables here
+        EOL
+    
+    # Deploy to Azure Web App
+    - name: 'Deploy to Azure Web App'
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        slot-name: 'Production'
+        package: .
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BACKEND }}
+    
+    - name: Verify deployment
+      run: |
+        echo "Backend deployment to Azure Web App completed successfully!"
+        echo "API URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
