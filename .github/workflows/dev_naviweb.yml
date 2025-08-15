@@ -1,4 +1,4 @@
-name: Build and Deploy Frontend
+name: Build and deploy Node.js app to Azure Web App - naviWeb
 
 on:
   push:
@@ -11,55 +11,53 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
-
-      - name: Install dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Build frontend
-        working-directory: ./frontend
-        run: npm run build
-        env:
-          NODE_ENV: production
-          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net/api' }}
-
-      - name: Prepare for deployment
-        run: |
-          # Copy frontend files to the root
-          cp -r frontend/build/* .
-          # Copy package.json and other necessary files
-          cp frontend/package*.json .
-          # Create a simple server.js if it doesn't exist
-          if [ ! -f server.js ]; then
-            echo 'const express = require("express");' > server.js
-            echo 'const path = require("path");' >> server.js
-            echo 'const app = express();' >> server.js
-            echo 'const port = process.env.PORT || 3000;' >> server.js
-            echo 'app.use(express.static(path.join(__dirname)));' >> server.js
-            echo 'app.get("*", (req, res) => {' >> server.js
-            echo '  res.sendFile(path.join(__dirname, "index.html"));' >> server.js
-            echo '});' >> server.js
-            echo 'app.listen(port, () => {' >> server.js
-            echo '  console.log(`Server is running on port ${port}`);' >> server.js
-            echo '});' >> server.js
-          fi
-
-      - name: Install production dependencies
-        run: npm install --production
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'naviWeb'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F974CCD36B0C4C6A9B7D0BC349107EBB }}
-          package: .
+    - uses: actions/checkout@v4
+    
+    - name: Set up Node.js version
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+    
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: |
+        npm ci
+        
+    - name: Build frontend
+      working-directory: ./frontend
+      env:
+        NODE_ENV: production
+        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net/api' }}
+      run: |
+        npm run build
+        
+    - name: Create server.js
+      run: |
+        echo 'const express = require("express");' > server.js
+        echo 'const path = require("path");' >> server.js
+        echo 'const app = express();' >> server.js
+        echo 'app.use(express.static(path.join(__dirname, "build")));' >> server.js
+        echo 'app.get("*", (req, res) => {' >> server.js
+        echo '  res.sendFile(path.join(__dirname, "build", "index.html"));' >> server.js
+        echo '});' >> server.js
+        echo 'const port = process.env.PORT || 3000;' >> server.js
+        echo 'app.listen(port, () => console.log(`Server running on port ${port}`));' >> server.js
+    
+    - name: Copy build files to root
+      run: |
+        cp -r frontend/build .
+        cp frontend/package*.json .
+        
+    - name: Install production dependencies
+      run: |
+        npm ci --only=production
+        
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'naviWeb'
+        slot-name: 'Production'
+        package: .
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F974CCD36B0C4C6A9B7D0BC349107EBB }}
