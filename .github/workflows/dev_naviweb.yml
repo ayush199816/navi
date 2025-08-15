@@ -1,137 +1,128 @@
-
-name: Build and deploy Node.js app to Azure Web App - naviWeb
+name: Build and Deploy to Azure Web App
 
 on:
   push:
-    branches:
-      - dev
+    branches: [dev]
   workflow_dispatch:
+
+env:
+  NODE_VERSION: '22.x'
+  AZURE_WEBAPP_NAME: 'naviWeb'
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  NODE_ENV: 'production'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
     
-    - name: Set up Node.js version
+    - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         cache-dependency-path: 'frontend/package-lock.json'
     
-    - name: Install root dependencies
-      run: |
-        npm install -g serve
-        
     - name: Install frontend dependencies
       working-directory: ./frontend
-      run: |
-        npm ci --legacy-peer-deps
-        
+      run: npm ci --legacy-peer-deps
+    
     - name: Build frontend
       working-directory: ./frontend
       env:
-        NODE_ENV: production
         REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net/api' }}
       run: |
         npm run build
         
-    - name: Create server.js with keep-alive
+    # Create server.js
+    - name: Create server.js
       run: |
-        echo 'const express = require("express");' > server.js
-        echo 'const path = require("path");' >> server.js
-        echo 'const app = express();' >> server.js
-        echo '' >> server.js
-        echo '// Keep-alive ping endpoint' >> server.js
-        echo 'app.get("/keepalive", (req, res) => {' >> server.js
-        echo '  console.log("Keep-alive ping received");' >> server.js
-        echo '  res.status(200).send("OK");' >> server.js
-        echo '});' >> server.js
-        echo '' >> server.js
-        echo '// Serve static files from the React app' >> server.js
-        echo 'app.use(express.static(path.join(__dirname, "build")));' >> server.js
-        echo '' >> server.js
-        echo '// Handle React routing, return all requests to React app' >> server.js
-        echo 'app.get("*", function (req, res) {' >> server.js
-        echo '  console.log(`Handling request for: ${req.originalUrl}`);' >> server.js
-        echo '  res.sendFile(path.join(__dirname, "build", "index.html"));' >> server.js
-        echo '});' >> server.js
-        echo '' >> server.js
-        echo 'const port = process.env.PORT || 3000;' >> server.js
-        echo 'const server = app.listen(port, () => {' >> server.js
-        echo '  console.log(`Server is running on port ${port}`);' >> server.js
-        echo '  // Initial keep-alive log' >> server.js
-        echo '  console.log("Server started successfully");' >> server.js
-        echo '});' >> server.js
-        echo '' >> server.js
-        echo '// Keep-alive interval' >> server.js
-        echo 'setInterval(() => {' >> server.js
-        echo '  console.log("[Keep-alive] Server is still running...");' >> server.js
-        echo '}, 30000); // Log every 30 seconds' >> server.js
-        echo '' >> server.js
-        echo '// Handle shutdown gracefully' >> server.js
-        echo 'process.on("SIGTERM", () => {' >> server.js
-        echo '  console.log("SIGTERM received. Shutting down gracefully...");' >> server.js
-        echo '  server.close(() => {' >> server.js
-        echo '    console.log("Server closed");' >> server.js
-        echo '    process.exit(0);' >> server.js
-        echo '  });' >> server.js
-        echo '});' >> server.js
+        cat > server.js << 'EOL'
+        const express = require('express');
+        const path = require('path');
+        const app = express();
+        
+        // Middleware
+        app.use(express.json());
+        app.use(express.static(path.join(__dirname, 'build')));
+        
+        // Health check endpoint
+        app.get('/health', (req, res) => {
+          res.status(200).json({ status: 'ok' });
+        });
+        
+        // Serve React app
+        app.get('*', (req, res) => {
+          res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        });
+        
+        // Start server
+        const PORT = process.env.PORT || 3000;
+        const server = app.listen(PORT, () => {
+          console.log(`Server is running on port ${PORT}`);
+        });
+        
+        // Handle shutdown gracefully
+        process.on('SIGTERM', () => {
+          console.log('SIGTERM received. Shutting down gracefully...');
+          server.close(() => {
+            console.log('Server closed');
+            process.exit(0);
+          });
+        });
+        EOL
     
-    - name: Create package.json in root
+    # Create package.json in root
+    - name: Create root package.json
       run: |
-        echo '{' > package.json
-        echo '  "name": "navi",' >> package.json
-        echo '  "version": "1.0.0",' >> package.json
-        echo '  "description": "Navi Web Application",' >> package.json
-        echo '  "main": "server.js",' >> package.json
-        echo '  "scripts": {' >> package.json
-        echo '    "start": "node server.js",' >> package.json
-        echo '    "build": "cd frontend && npm run build",' >> package.json
-        echo '    "install-client": "cd frontend && npm install",' >> package.json
-        echo '    "heroku-postbuild": "npm run install-client && npm run build"' >> package.json
-        echo '  },' >> package.json
-        echo '  "dependencies": {' >> package.json
-        echo '    "express": "^4.18.2"' >> package.json
-        echo '  }' >> package.json
-        echo '}' >> package.json
+        cat > package.json << 'EOL'
+        {
+          "name": "navi",
+          "version": "1.0.0",
+          "description": "Navi Web Application",
+          "main": "server.js",
+          "scripts": {
+            "start": "node server.js",
+            "build": "cd frontend && npm run build",
+            "test": "echo \"No tests specified\" && exit 0"
+          },
+          "dependencies": {
+            "express": "^4.18.2"
+          },
+          "engines": {
+            "node": "18.x"
+          }
+        }
+        EOL
     
+    # Copy build files
     - name: Copy build files to root
       run: |
         cp -r frontend/build .
-        
-    - name: Install production dependencies in root
-      run: |
-        npm install --production
-        
-    - name: Create startup.sh
-      run: |
-        echo '#!/bin/bash' > startup.sh
-        echo 'set -e' >> startup.sh
-        echo '' >> startup.sh
-        echo 'echo "Installing dependencies..."' >> startup.sh
-        echo 'npm install' >> startup.sh
-        echo '' >> startup.sh
-        echo 'echo "Building the frontend if needed..."' >> startup.sh
-        echo 'npm run build --if-present' >> startup.sh
-        echo '' >> startup.sh
-        echo 'echo "Starting the Node.js application..."' >> startup.sh
-        echo 'node server.js' >> startup.sh
     
-    # 🐛 FIX: Add a step to explicitly set execute permissions
-    - name: Add execute permissions to startup.sh
-      run: chmod +x startup.sh
-
-    - name: Deploy to Azure Web App
+    # Install production dependencies
+    - name: Install production dependencies
+      run: npm install --production
+    
+    # Install production dependencies in root
+    - name: Install production dependencies
+      run: npm install --production
+    
+    # Deploy to Azure
+    - name: 'Deploy to Azure WebApp'
       uses: azure/webapps-deploy@v3
       with:
-        app-name: 'naviWeb'
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
         slot-name: 'Production'
-        package: .
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F974CCD36B0C4C6A9B7D0BC349107EBB }}
-        
+        startup-command: 'npm start'
+    
+    # Verify deployment
     - name: Verify deployment
       run: |
         echo "Deployment to Azure Web App completed successfully!"
+        echo "Application URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
