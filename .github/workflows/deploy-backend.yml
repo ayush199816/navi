@@ -52,14 +52,13 @@ jobs:
         JWT_COOKIE_EXPIRE=30
         EOL
     
-    # 🐛 FIX: Login to Azure and set the subscription in a single step
+    # Login to Azure with service principal
     - name: 'Login to Azure'
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        allow-no-subscriptions: true
-        enable-AzPSSession: true
-        # Ensure the subscription ID is correct based on your Azure for Students account
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: 0b39938f-1439-4596-9e1c-f82b58ebd47e
 
     # Create Azure resources
