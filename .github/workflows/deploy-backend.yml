@@ -71,6 +71,7 @@ jobs:
             az appservice plan create \
               --name navi-plan \
               --resource-group nav_hosting \
+              --location eastasia \
               --sku B1 \
               --is-linux
           fi
