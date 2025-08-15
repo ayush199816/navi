@@ -5,7 +5,7 @@ on:
     branches: [dev]
     paths:
       - '**'
-      - '!frontend/**'  # Exclude frontend changes from triggering backend deployment
+      - '!frontend/**' 
   workflow_dispatch:
 
 env:
@@ -41,7 +41,6 @@ jobs:
       env:
         NODE_ENV: production
     
-    # Create .env file for production
     - name: Create production .env
       run: |
         cat > .env << 'EOL'
@@ -51,30 +50,26 @@ jobs:
         JWT_SECRET=${{ secrets.JWT_SECRET }}
         JWT_EXPIRE=30d
         JWT_COOKIE_EXPIRE=30
-        # Add other required environment variables here
         EOL
     
-    # Login to Azure with service principal
+    # 🐛 FIX: Login to Azure and set the subscription in a single step
     - name: 'Login to Azure'
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
+        allow-no-subscriptions: true
+        enable-AzPSSession: true
+        # Ensure the subscription ID is correct based on your Azure for Students account
+        subscription-id: 0b39938f-1439-4596-9e1c-f82b58ebd47e
+
     # Create Azure resources
     - name: 'Create Azure Resources'
       uses: azure/CLI@v1
       with:
-        azcliversion: 2.0.72
         inlineScript: |
-          # Set the active subscription
-          echo "Setting active subscription..."
-          az account set --subscription 0b39938f-1439-4596-9e1c-f82b58ebd47e
-          
-          # Verify the active subscription
           echo "Current active subscription:"
           az account show --output table
           
-          # Check if the app service plan exists, create if not
           if ! az appservice plan show --name navi-plan --resource-group nav_hosting --query "name" -o tsv; then
             echo "Creating App Service Plan..."
             az appservice plan create \
@@ -84,7 +79,6 @@ jobs:
               --is-linux
           fi
           
-          # Create the web app if it doesn't exist
           if ! az webapp show --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting --query "name" -o tsv; then
             echo "Creating Azure Web App..."
             az webapp create \
@@ -96,7 +90,6 @@ jobs:
             echo "Web App already exists, skipping creation."
           fi
 
-    # Deploy to Azure Web App
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
       with:
