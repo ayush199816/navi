@@ -12,6 +12,7 @@ env:
   BUILD_NODE_VERSION: '22.x'  # For build process
   RUNTIME_NODE_VERSION: '22-lts'  # For Azure Web App runtime
   AZURE_WEBAPP_NAME: 'navi-backend'
+  AZURE_RESOURCE_GROUP: 'nav_hosting'  # Resource group for Azure resources
   NODE_ENV: 'production'
 
 jobs:
@@ -101,31 +102,25 @@ jobs:
         inlineScript: |
           echo "Configuring web app with production settings..."
           
-          # Set all required settings at once
-          az webapp config appsettings set \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group nav_hosting \
-            --settings \
-              "NODE_ENV=production" \
-              "PORT=3000" \
-              "WEBSITES_PORT=3000" \
-              "WEBSITE_NODE_DEFAULT_VERSION=${{ env.RUNTIME_NODE_VERSION }}" \
-              "SCM_DO_BUILD_DURING_DEPLOYMENT=true" \
-              "MONGODB_URI=${{ secrets.MONGODB_URI }}" \
-              "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
-              "JWT_EXPIRE=30d" \
-              "JWT_COOKIE_EXPIRE=30" \
-              "NPM_CONFIG_PRODUCTION=false"
-          
+          # Configure the web app with production settings
+          az webapp config appsettings set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --settings \
+            NODE_ENV=production \
+            WEBSITE_NODE_DEFAULT_VERSION=22-lts \
+            WEBSITE_RUN_FROM_PACKAGE=1 \
+            SCM_DO_BUILD_DURING_DEPLOYMENT=true \
+            NPM_CONFIG_PRODUCTION=false
+            
+          # Set startup command separately
+          az webapp config set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --startup-file "bash startup.sh"
           # Configure Linux runtime and startup file
           az webapp config set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group nav_hosting \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --linux-fx-version "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
             --startup-command "bash startup.sh"
           
           # Restart the app to apply changes
-          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
+          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
           
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
