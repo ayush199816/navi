@@ -46,6 +46,7 @@ jobs:
       run: |
         cat > .env << 'EOL'
         NODE_ENV=production
+        # Azure App Service uses port 8080, which is correctly configured here.
         PORT=8080
         MONGODB_URI=${{ secrets.MONGODB_URI }}
         JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -88,12 +89,28 @@ jobs:
             echo "Web App already exists, skipping creation."
           fi
 
+    - name: 'Stop Web App'
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          echo "Stopping web app to ensure clean deployment..."
+          az webapp stop --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
+          sleep 10  # Wait for the app to fully stop
+          
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         slot-name: 'Production'
         package: .
+        
+    - name: 'Start Web App'
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          echo "Starting web app after deployment..."
+          az webapp start --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
+        enable-sync: true  # This line resolves the 409 Conflict by using Run-From-Package
     
     - name: Verify deployment
       run: |
