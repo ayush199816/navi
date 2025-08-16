@@ -95,7 +95,12 @@ jobs:
         inlineScript: |
           echo "Configuring web app..."
           
+          # Stop the web app first to prevent conflicts
+          echo "Stopping web app..."
+          az webapp stop --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
+          
           # Set basic configuration
+          echo "Updating web app configuration..."
           az webapp config set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group nav_hosting \
@@ -103,24 +108,26 @@ jobs:
             --startup-file "bash startup.sh"
           
           # Set required app settings
+          echo "Updating app settings..."
           az webapp config appsettings set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group nav_hosting \
             --settings \
-              "SCM_DO_BUILD_DURING_DEPLOYMENT=true" \
+              "SCM_DO_BUILD_DURING_DEPLOYMENT=false" \
               "WEBSITE_NODE_DEFAULT_VERSION=${{ env.RUNTIME_NODE_VERSION }}" \
               "NODE_ENV=production" \
               "PORT=3000" \
               "WEBSITES_PORT=3000" \
               "WEBSITES_CONTAINER_START_TIME_LIMIT=300" \
-              "WEBSITE_HTTPLOGGING_RETENTION_DAYS=7"
+              "WEBSITE_HTTPLOGGING_RETENTION_DAYS=7" \
+              "WEBSITE_RUN_FROM_PACKAGE=1"
           
           # Restart the app to apply settings
-          echo "Restarting web app..."
-          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
+          echo "Starting web app..."
+          az webapp start --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
           
           # Wait for the app to be ready
-          sleep 15
+          sleep 10
           
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3

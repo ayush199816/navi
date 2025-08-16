@@ -148,9 +148,8 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-// Get port from environment or use default
-const DEFAULT_PORT = 3000;
-const PORT = process.env.PORT || DEFAULT_PORT;
+// Get port from environment or use a dynamic port
+const DEFAULT_PORT = process.env.PORT || 3000;
 
 // Log environment variables for debugging
 console.log('Environment Variables:');
@@ -158,13 +157,34 @@ console.log(`- PORT: ${process.env.PORT || 'Not set'}`);
 console.log(`- WEBSITES_PORT: ${process.env.WEBSITES_PORT || 'Not set'}`);
 console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'Not set'}`);
 
-// Azure App Service sets the PORT environment variable automatically
-// We'll use that if available, otherwise fall back to our default
-const serverPort = process.env.PORT || DEFAULT_PORT;
+// Function to get a random available port
+const getAvailablePort = (defaultPort) => {
+  return new Promise((resolve) => {
+    const server = require('net').createServer();
+    server.unref();
+    server.on('error', () => {
+      // If port is in use, try the next one
+      resolve(getAvailablePort(defaultPort + 1));
+    });
+    server.listen(defaultPort, () => {
+      const { port } = server.address();
+      server.close(() => resolve(port));
+    });
+  });
+};
+
+// Get an available port
+let serverPort = DEFAULT_PORT;
 
 const startServer = async () => {
   try {
     await connectDB();
+    
+    // Get an available port
+    serverPort = await getAvailablePort(parseInt(serverPort));
+    
+    // Update the PORT environment variable
+    process.env.PORT = serverPort;
     
     // Create HTTP server
     const server = require('http').createServer(app);
@@ -173,14 +193,21 @@ const startServer = async () => {
     server.listen(serverPort, '0.0.0.0', () => {
       console.log(`Server running on port ${serverPort} in ${process.env.NODE_ENV || 'development'} mode`);
       console.log(`Application URL: http://localhost:${serverPort}`);
+      
+      // Log the actual port being used
+      console.log(`Using port: ${serverPort}`);
     });
     
     // Handle server errors
-    server.on('error', (error) => {
+    server.on('error', async (error) => {
       console.error('Server error:', error);
       if (error.code === 'EADDRINUSE') {
-        console.error(`Port ${serverPort} is already in use.`);
-        console.error('This usually means another instance of the app is running.');
+        console.error(`Port ${serverPort} is already in use. Trying next port...`);
+        // Try the next port
+        serverPort++;
+        process.env.PORT = serverPort;
+        await startServer();
+        return;
       }
       process.exit(1);
     });
