@@ -1,2 +1,2 @@
 [config]
-command = bash startup.sh
+command = chmod +x startup.sh && ./startup.sh
