@@ -58,7 +58,10 @@ jobs:
     - name: 'Login to Azure'
       uses: azure/login@v1
       with:
-        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}","subscriptionId":"0b39938f-1439-4596-9e1c-f82b58ebd47e"}'
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     # Create Azure resources
     - name: 'Create Azure Resources'
@@ -89,13 +92,13 @@ jobs:
             echo "Web App already exists, skipping creation."
           fi
 
-    - name: 'Configure Web App'
+    - name: 'Configure Web App Settings'
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          echo "Configuring web app with minimal settings..."
+          echo "Configuring web app with production settings..."
           
-          # Set minimal required settings
+          # Set all required settings at once
           az webapp config appsettings set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group nav_hosting \
@@ -104,15 +107,21 @@ jobs:
               "PORT=3000" \
               "WEBSITES_PORT=3000" \
               "WEBSITE_NODE_DEFAULT_VERSION=${{ env.RUNTIME_NODE_VERSION }}" \
-              "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
+              "SCM_DO_BUILD_DURING_DEPLOYMENT=true" \
+              "MONGODB_URI=${{ secrets.MONGODB_URI }}" \
+              "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
+              "JWT_EXPIRE=30d" \
+              "JWT_COOKIE_EXPIRE=30" \
+              "NPM_CONFIG_PRODUCTION=false"
           
-          # Set startup command
+          # Configure Linux runtime and startup file
           az webapp config set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group nav_hosting \
-            --startup-file "deploy.cmd"
+            --linux-fx-version "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
+            --startup-command "bash startup.sh"
           
-          # Restart the app
+          # Restart the app to apply changes
           az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
           
     - name: 'Deploy to Azure Web App'
@@ -121,29 +130,6 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         slot-name: 'Production'
         package: .
-        
-    - name: 'Configure Web App'
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-          echo "Stopping web app..."
-          az webapp stop --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
-          
-          echo "Updating app settings..."
-          az webapp config appsettings set --resource-group nav_hosting --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --settings \
-              "SCM_SCRIPT_GENERATOR_ARGS=--node" \
-              "PORT=3000" \
-              "WEBSITES_PORT=3000"
-          
-          echo "Updating webapp config..."
-          az webapp config set --resource-group nav_hosting --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --linux-fx-version "NODE|22-lts" \
-            --startup-file "bash startup.sh"
-          
-          echo "Starting web app..."
-          az webapp start --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
-        enable-sync: true
     
     - name: Verify deployment
       run: |

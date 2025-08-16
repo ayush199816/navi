@@ -12,6 +12,9 @@ dotenv.config();
 // Initialize express app
 const app = express();
 
+// Get port from environment or default to 3000
+const PORT = process.env.PORT || 3000;
+
 // Security middleware
 app.use(helmet());
 app.disable('x-powered-by');
@@ -139,79 +142,29 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handling for unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Get port from environment or use a dynamic port
-const DEFAULT_PORT = process.env.PORT || 3000;
-
-// Log environment variables for debugging
-console.log('Environment Variables:');
-console.log(`- PORT: ${process.env.PORT || 'Not set'}`);
-console.log(`- WEBSITES_PORT: ${process.env.WEBSITES_PORT || 'Not set'}`);
-console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'Not set'}`);
-
-// Function to get a random available port
-const getAvailablePort = (defaultPort) => {
-  return new Promise((resolve) => {
-    const server = require('net').createServer();
-    server.unref();
-    server.on('error', () => {
-      // If port is in use, try the next one
-      resolve(getAvailablePort(defaultPort + 1));
-    });
-    server.listen(defaultPort, () => {
-      const { port } = server.address();
-      server.close(() => resolve(port));
-    });
-  });
-};
-
-// Get an available port
-let serverPort = DEFAULT_PORT;
-
+// Connect to MongoDB and start the server
 const startServer = async () => {
   try {
     await connectDB();
     
-    // Get an available port
-    serverPort = await getAvailablePort(parseInt(serverPort));
+    // Get port from environment or use default
+    const port = process.env.PORT || 3000;
     
-    // Update the PORT environment variable
-    process.env.PORT = serverPort;
-    
-    // Create HTTP server
-    const server = require('http').createServer(app);
-    
-    // Start listening on the specified port
-    server.listen(serverPort, '0.0.0.0', () => {
-      console.log(`Server running on port ${serverPort} in ${process.env.NODE_ENV || 'development'} mode`);
-      console.log(`Application URL: http://localhost:${serverPort}`);
-      
-      // Log the actual port being used
-      console.log(`Using port: ${serverPort}`);
+    // Start the server
+    const server = app.listen(port, '0.0.0.0', () => {
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`);
     });
-    
+
     // Handle server errors
-    server.on('error', async (error) => {
-      console.error('Server error:', error);
+    server.on('error', (error) => {
       if (error.code === 'EADDRINUSE') {
-        console.error(`Port ${serverPort} is already in use. Trying next port...`);
-        // Try the next port
-        serverPort++;
-        process.env.PORT = serverPort;
-        await startServer();
-        return;
+        console.error(`Port ${port} is already in use.`);
+      } else {
+        console.error('Server error:', error);
       }
       process.exit(1);
     });
-    
+
     // Handle process termination
     process.on('SIGTERM', () => {
       console.log('SIGTERM received. Shutting down gracefully...');
@@ -220,7 +173,7 @@ const startServer = async () => {
         process.exit(0);
       });
     });
-    
+
     return server;
   } catch (err) {
     console.error('Failed to start server:', err);
@@ -229,28 +182,7 @@ const startServer = async () => {
 };
 
 // Start the server
-const server = startServer();
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.error(err);
+startServer().catch(err => {
+  console.error('Fatal error during server startup:', err);
   process.exit(1);
-});
-
-// Handle SIGTERM (for Heroku, etc.)
-process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
-  server.close(() => {
-    console.log('💥 Process terminated!');
-  });
 });
