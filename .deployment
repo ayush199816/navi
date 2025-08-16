@@ -1,2 +1,3 @@
 [config]
-command = sh -c 'chmod +x startup.sh && ./startup.sh'
+SCM_SCRIPT_GENERATOR_ARGS=--node
+command = deploy.cmd
