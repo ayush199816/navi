@@ -1,0 +1,63 @@
+name: Build and Deploy to Azure Web App with ACR
+
+on:
+  push:
+    branches: [ dev ]
+    paths:
+      - '**'
+      - '!frontend/**'
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: nav_hosting
+  AZURE_WEBAPP_NAME: navi-backend
+  CONTAINER_REGISTRY: naviregistry.azurecr.io
+  CONTAINER_IMAGE: ${{ env.AZURE_WEBAPP_NAME }}
+  RUNTIME_NODE_VERSION: '22-lts'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.x'
+        
+    - name: Install Dependencies
+      run: npm ci
+      
+    - name: Build the application
+      run: npm run build --if-present
+      
+    - name: Login to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.CONTAINER_REGISTRY }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+        
+    - name: Build and push container image
+      run: |
+        docker build -t ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE }}:latest .
+        docker push ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE }}:latest
+        
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE }}:latest
+        
+    - name: Verify deployment
+      run: |
+        echo "Deployment to Azure Web App completed successfully!"
+        echo "URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
