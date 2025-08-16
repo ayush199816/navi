@@ -17,6 +17,9 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     
     steps:
     - name: Checkout repository
@@ -54,14 +57,14 @@ jobs:
         JWT_COOKIE_EXPIRE=30
         EOL
     
-    # Login to Azure with service principal
-    - name: Login to Azure
-      uses: azure/login@v1
+    # Login to Azure with OIDC
+    - name: Azure Login
+      uses: azure/login@v1.6.0
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        enable-AzPSSession: true
 
     # Create Azure resources
     - name: 'Create Azure Resources'
