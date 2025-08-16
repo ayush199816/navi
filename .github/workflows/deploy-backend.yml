@@ -126,6 +126,8 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         slot-name: 'Production'
         package: .
+        enable-oryx-build: true
+        scm-do-build-during-deployment: true
     
     - name: Verify deployment
       run: |
