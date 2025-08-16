@@ -149,13 +149,23 @@ process.on('unhandledRejection', (err) => {
 });
 
 // Start server with error handling for port in use
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000; // Default to 3000 instead of 8080
+
+// Log environment variables for debugging
+console.log('Environment Variables:');
+console.log(`- PORT: ${process.env.PORT}`);
+console.log(`- WEBSITES_PORT: ${process.env.WEBSITES_PORT}`);
+console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
 
 const startServer = async () => {
   try {
     await connectDB();
     
-    const server = app.listen(PORT, '0.0.0.0', () => {
+    // Create HTTP server
+    const server = require('http').createServer(app);
+    
+    // Start listening
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
     });
     
@@ -163,10 +173,22 @@ const startServer = async () => {
     server.on('error', (error) => {
       if (error.code === 'EADDRINUSE') {
         console.error(`Port ${PORT} is already in use. Please try a different port.`);
+        console.error('Trying to find an available port...');
+        // Try to find an available port
+        const net = require('net');
+        const srv = net.createServer();
+        srv.listen(0, () => {
+          const newPort = srv.address().port;
+          srv.close(() => {
+            console.log(`Trying port ${newPort} instead...`);
+            process.env.PORT = newPort;
+            startServer();
+          });
+        });
       } else {
         console.error('Server error:', error);
+        process.exit(1);
       }
-      process.exit(1);
     });
     
     return server;
