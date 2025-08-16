@@ -9,113 +9,80 @@ on:
   workflow_dispatch:
 
 env:
-  BUILD_NODE_VERSION: '22.x'  # For build process
-  RUNTIME_NODE_VERSION: '22-lts'  # For Azure Web App runtime
   AZURE_WEBAPP_NAME: 'navi-backend'
-  AZURE_RESOURCE_GROUP: 'nav_hosting'  # Resource group for Azure resources
-  API_ENTRY_POINT: 'index.js' # Replace with your backend entry point (e.g., app.js, server.js)
+  AZURE_RESOURCE_GROUP: 'nav_hosting'
+  NODE_VERSION: '22.x'
+  RUNTIME_NODE_VERSION: '22-lts'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Setup Node.js
+    - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ env.BUILD_NODE_VERSION }}
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: 'package-lock.json'
     
-    - name: Install dependencies and build
+    - name: Install dependencies
       run: |
-        npm install
+        npm ci
         npm run build --if-present
     
-    - name: Create Azure-compatible startup file
+    - name: Create production .env
       run: |
-        echo "#!/bin/bash" > startup.sh
-        echo "echo 'Starting node application...'" >> startup.sh
-        echo "node ${{ env.API_ENTRY_POINT }}" >> startup.sh
-        chmod +x startup.sh
+        echo "NODE_ENV=production" > .env
+        echo "PORT=3000" >> .env
+        echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        echo "JWT_EXPIRE=30d" >> .env
+        echo "JWT_COOKIE_EXPIRE=30" >> .env
+        
+        # Make startup script executable
+        chmod +x startup-command.sh
     
-    - name: Create production .env file
-      run: |
-        cat > .env << 'EOL'
-        NODE_ENV=production
-        PORT=8080
-        MONGODB_URI=${{ secrets.MONGODB_URI }}
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
-        JWT_EXPIRE=30d
-        JWT_COOKIE_EXPIRE=30
-        EOL
-    
-    # Login to Azure with OIDC
-    - name: Azure Login
-      uses: azure/login@v1.6.0
+    - name: Login to Azure
+      uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-    # Create Azure resources (if they don't exist)
-    - name: 'Create Azure Resources'
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Configure Azure Web App
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          echo "Current active subscription:"
-          az account show --output table
-          
-          if ! az appservice plan show --name navi-plan --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "name" -o tsv; then
-            echo "Creating App Service Plan..."
-            az appservice plan create \
-              --name navi-plan \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --location eastasia \
-              --sku B1 \
-              --is-linux
-          fi
-          
-          if ! az webapp show --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "name" -o tsv; then
-            echo "Creating Azure Web App..."
-            az webapp create \
-              --name ${{ env.AZURE_WEBAPP_NAME }} \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --runtime "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
-              --plan "navi-plan"
-          else
-            echo "Web App already exists, skipping creation."
-          fi
-
-    - name: 'Configure Web App Settings'
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-          echo "Configuring web app with production settings..."
-          
-          # Set the Node.js runtime and startup file
+          # Set Node.js runtime version
           az webapp config set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --linux-fx-version "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
-            --startup-file "bash startup.sh"
+            --linux-fx-version "NODE|${{ env.RUNTIME_NODE_VERSION }}"
           
-          # Restart the app to apply changes
-          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
+          # Configure app settings and startup command
+          az webapp config appsettings set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --settings \
+              NODE_ENV=production \
+              PORT=3000 \
+              WEBSITE_NODE_DEFAULT_VERSION=${{ env.RUNTIME_NODE_VERSION }} \
+              WEBSITE_RUN_FROM_PACKAGE=1 \
+              SCM_DO_BUILD_DURING_DEPLOYMENT=false
+              
+          # Set the startup command
+          az webapp config set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --startup-file "startup-command.sh"
     
-    - name: 'Deploy to Azure Web App'
-      uses: azure/webapps-deploy@v3
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        resource-group-name: ${{ env.AZURE_RESOURCE_GROUP }}
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
         package: .
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
     
     - name: Verify deployment
       run: |
