@@ -89,11 +89,11 @@ jobs:
             echo "Web App already exists, skipping creation."
           fi
 
-    - name: 'Stop Web App'
+    - name: 'Stop Web App Before Deployment'
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          echo "Stopping web app to ensure clean deployment..."
+          echo "Stopping web app to prevent deployment conflicts..."
           az webapp stop --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
           sleep 10  # Wait for the app to fully stop
           
