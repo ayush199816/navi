@@ -89,13 +89,23 @@ jobs:
             echo "Web App already exists, skipping creation."
           fi
 
-    - name: 'Stop Web App Before Deployment'
+    - name: 'Reset Deployment'
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          echo "Stopping web app to prevent deployment conflicts..."
+          echo "Stopping web app and resetting deployment..."
+          # Stop the web app
           az webapp stop --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
-          sleep 10  # Wait for the app to fully stop
+          
+          # Delete deployment history
+          echo "Clearing deployment history..."
+          az webapp deployment source delete \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group nav_hosting \
+            --confirm-with-embedded-yml
+          
+          # Wait for operations to complete
+          sleep 15
           
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
