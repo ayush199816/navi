@@ -93,41 +93,27 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          echo "Configuring web app..."
+          echo "Configuring web app with minimal settings..."
           
-          # Stop the web app first to prevent conflicts
-          echo "Stopping web app..."
-          az webapp stop --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
-          
-          # Set basic configuration
-          echo "Updating web app configuration..."
-          az webapp config set \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group nav_hosting \
-            --linux-fx-version "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
-            --startup-file "bash startup.sh"
-          
-          # Set required app settings
-          echo "Updating app settings..."
+          # Set minimal required settings
           az webapp config appsettings set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group nav_hosting \
             --settings \
-              "SCM_DO_BUILD_DURING_DEPLOYMENT=false" \
-              "WEBSITE_NODE_DEFAULT_VERSION=${{ env.RUNTIME_NODE_VERSION }}" \
               "NODE_ENV=production" \
               "PORT=3000" \
               "WEBSITES_PORT=3000" \
-              "WEBSITES_CONTAINER_START_TIME_LIMIT=300" \
-              "WEBSITE_HTTPLOGGING_RETENTION_DAYS=7" \
-              "WEBSITE_RUN_FROM_PACKAGE=1"
+              "WEBSITE_NODE_DEFAULT_VERSION=${{ env.RUNTIME_NODE_VERSION }}" \
+              "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
           
-          # Restart the app to apply settings
-          echo "Starting web app..."
-          az webapp start --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
+          # Set startup command
+          az webapp config set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group nav_hosting \
+            --startup-file "deploy.cmd"
           
-          # Wait for the app to be ready
-          sleep 10
+          # Restart the app
+          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
           
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
