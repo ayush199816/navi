@@ -1,2 +1,2 @@
 [config]
-command = chmod +x startup.sh && ./startup.sh
+command = sh -c 'chmod +x startup.sh && ./startup.sh'
