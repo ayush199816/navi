@@ -105,7 +105,15 @@ jobs:
             --settings \
               "SCM_SCRIPT_GENERATOR_ARGS=--node" \
               "PORT=3000" \
-              "WEBSITES_PORT=3000"
+              "WEBSITES_PORT=3000" \
+              "WEBSITES_CONTAINER_START_TIME_LIMIT=1800" \
+              "WEBSITES_ENABLE_APP_SERVICE_STORAGE=true"
+          
+          # Set the startup command explicitly
+          az webapp config set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group nav_hosting \
+            --startup-file "bash startup.sh"
           
           # Wait for operations to complete
           sleep 10

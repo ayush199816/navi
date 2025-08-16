@@ -157,6 +157,10 @@ console.log(`- PORT: ${process.env.PORT}`);
 console.log(`- WEBSITES_PORT: ${process.env.WEBSITES_PORT}`);
 console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
 
+// Track number of restart attempts
+let restartAttempts = 0;
+const MAX_RESTART_ATTEMPTS = 3;
+
 const startServer = async () => {
   try {
     await connectDB();
@@ -167,24 +171,37 @@ const startServer = async () => {
     // Start listening
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+      // Reset restart attempts on successful start
+      restartAttempts = 0;
     });
     
     // Handle server errors
     server.on('error', (error) => {
       if (error.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use. Please try a different port.`);
-        console.error('Trying to find an available port...');
-        // Try to find an available port
-        const net = require('net');
-        const srv = net.createServer();
-        srv.listen(0, () => {
-          const newPort = srv.address().port;
-          srv.close(() => {
-            console.log(`Trying port ${newPort} instead...`);
-            process.env.PORT = newPort;
+        restartAttempts++;
+        
+        if (restartAttempts >= MAX_RESTART_ATTEMPTS) {
+          console.error(`Failed to find available port after ${MAX_RESTART_ATTEMPTS} attempts. Exiting.`);
+          process.exit(1);
+        }
+        
+        console.error(`Port ${PORT} is in use (attempt ${restartAttempts}/${MAX_RESTART_ATTEMPTS}).`);
+        
+        // Use sequential port numbers instead of random ones
+        const newPort = parseInt(PORT) + restartAttempts;
+        console.log(`Trying port ${newPort}...`);
+        
+        // Update the PORT environment variable
+        process.env.PORT = newPort.toString();
+        
+        // Close existing server and restart
+        if (server && server.close) {
+          server.close(() => {
             startServer();
           });
-        });
+        } else {
+          startServer();
+        }
       } else {
         console.error('Server error:', error);
         process.exit(1);
