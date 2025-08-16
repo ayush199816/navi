@@ -102,7 +102,7 @@ jobs:
           az webapp deployment source delete \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group nav_hosting \
-            --confirm-with-embedded-yml
+            --yes
           
           # Wait for operations to complete
           sleep 15
