@@ -13,6 +13,7 @@ env:
   RUNTIME_NODE_VERSION: '22-lts'  # For Azure Web App runtime
   AZURE_WEBAPP_NAME: 'navi-backend'
   AZURE_RESOURCE_GROUP: 'nav_hosting'  # Resource group for Azure resources
+  API_ENTRY_POINT: 'index.js' # Replace with your backend entry point (e.g., app.js, server.js)
 
 jobs:
   build-and-deploy:
@@ -37,6 +38,24 @@ jobs:
         npm install
         npm run build --if-present
     
+    - name: Create Azure-compatible startup file
+      run: |
+        echo "#!/bin/bash" > startup.sh
+        echo "echo 'Starting node application...'" >> startup.sh
+        echo "node ${{ env.API_ENTRY_POINT }}" >> startup.sh
+        chmod +x startup.sh
+    
+    - name: Create production .env file
+      run: |
+        cat > .env << 'EOL'
+        NODE_ENV=production
+        PORT=8080
+        MONGODB_URI=${{ secrets.MONGODB_URI }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        JWT_EXPIRE=30d
+        JWT_COOKIE_EXPIRE=30
+        EOL
+    
     # Login to Azure with OIDC
     - name: Azure Login
       uses: azure/login@v1.6.0
@@ -44,16 +63,63 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # Create Azure resources (if they don't exist)
+    - name: 'Create Azure Resources'
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          echo "Current active subscription:"
+          az account show --output table
+          
+          if ! az appservice plan show --name navi-plan --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "name" -o tsv; then
+            echo "Creating App Service Plan..."
+            az appservice plan create \
+              --name navi-plan \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --location eastasia \
+              --sku B1 \
+              --is-linux
+          fi
+          
+          if ! az webapp show --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "name" -o tsv; then
+            echo "Creating Azure Web App..."
+            az webapp create \
+              --name ${{ env.AZURE_WEBAPP_NAME }} \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --runtime "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
+              --plan "navi-plan"
+          else
+            echo "Web App already exists, skipping creation."
+          fi
+
+    - name: 'Configure Web App Settings'
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          echo "Configuring web app with production settings..."
+          
+          # Set the Node.js runtime and startup file
+          az webapp config set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --linux-fx-version "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
+            --startup-file "bash startup.sh"
+          
+          # Restart the app to apply changes
+          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
     
-    # Deploy to Azure Web App
+    - name: 'Create ZIP package'
+      run: |
+        # Create a ZIP file of the current directory, excluding unnecessary files
+        zip -r deployment.zip . -x '*.git*' '*.github*' '*.vscode*' 'node_modules/*' '*.log'
+    
     - name: 'Deploy to Azure Web App'
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-        runtime-version: NODE|${{ env.RUNTIME_NODE_VERSION }}
-        startup-command: 'bash startup.sh'
-        package: '.'  # Deploy the entire current directory
+        resource-group-name: ${{ env.AZURE_RESOURCE_GROUP }}
+        package: deployment.zip
     
     - name: Verify deployment
       run: |
