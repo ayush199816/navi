@@ -148,17 +148,36 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+// Start server with error handling for port in use
+const PORT = process.env.PORT || 8080;
+
+const startServer = async () => {
   try {
     await connectDB();
+    
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+    });
+    
+    // Handle server errors
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Please try a different port.`);
+      } else {
+        console.error('Server error:', error);
+      }
+      process.exit(1);
+    });
+    
+    return server;
   } catch (err) {
-    console.error('Failed to connect to MongoDB:', err);
+    console.error('Failed to start server:', err);
     process.exit(1);
   }
-});
+};
+
+// Start the server
+const server = startServer();
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
