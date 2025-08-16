@@ -97,15 +97,18 @@ jobs:
           # Stop the web app
           az webapp stop --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group nav_hosting
           
-          # Delete deployment history
-          echo "Clearing deployment history..."
-          az webapp deployment source delete \
+          # Reset the web app configuration
+          echo "Resetting web app configuration..."
+          az webapp config appsettings set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group nav_hosting \
-            --yes
+            --settings \
+              "SCM_SCRIPT_GENERATOR_ARGS=--node" \
+              "PORT=3000" \
+              "WEBSITES_PORT=3000"
           
           # Wait for operations to complete
-          sleep 15
+          sleep 10
           
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
