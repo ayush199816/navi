@@ -148,18 +148,19 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-// Start server with error handling for port in use
-const PORT = process.env.PORT || 3000; // Default to 3000 instead of 8080
+// Get port from environment or use default
+const DEFAULT_PORT = 3000;
+const PORT = process.env.PORT || DEFAULT_PORT;
 
 // Log environment variables for debugging
 console.log('Environment Variables:');
-console.log(`- PORT: ${process.env.PORT}`);
-console.log(`- WEBSITES_PORT: ${process.env.WEBSITES_PORT}`);
-console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`- PORT: ${process.env.PORT || 'Not set'}`);
+console.log(`- WEBSITES_PORT: ${process.env.WEBSITES_PORT || 'Not set'}`);
+console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'Not set'}`);
 
-// Track number of restart attempts
-let restartAttempts = 0;
-const MAX_RESTART_ATTEMPTS = 3;
+// Azure App Service sets the PORT environment variable automatically
+// We'll use that if available, otherwise fall back to our default
+const serverPort = process.env.PORT || DEFAULT_PORT;
 
 const startServer = async () => {
   try {
@@ -168,44 +169,29 @@ const startServer = async () => {
     // Create HTTP server
     const server = require('http').createServer(app);
     
-    // Start listening
-    server.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-      // Reset restart attempts on successful start
-      restartAttempts = 0;
+    // Start listening on the specified port
+    server.listen(serverPort, '0.0.0.0', () => {
+      console.log(`Server running on port ${serverPort} in ${process.env.NODE_ENV || 'development'} mode`);
+      console.log(`Application URL: http://localhost:${serverPort}`);
     });
     
     // Handle server errors
     server.on('error', (error) => {
+      console.error('Server error:', error);
       if (error.code === 'EADDRINUSE') {
-        restartAttempts++;
-        
-        if (restartAttempts >= MAX_RESTART_ATTEMPTS) {
-          console.error(`Failed to find available port after ${MAX_RESTART_ATTEMPTS} attempts. Exiting.`);
-          process.exit(1);
-        }
-        
-        console.error(`Port ${PORT} is in use (attempt ${restartAttempts}/${MAX_RESTART_ATTEMPTS}).`);
-        
-        // Use sequential port numbers instead of random ones
-        const newPort = parseInt(PORT) + restartAttempts;
-        console.log(`Trying port ${newPort}...`);
-        
-        // Update the PORT environment variable
-        process.env.PORT = newPort.toString();
-        
-        // Close existing server and restart
-        if (server && server.close) {
-          server.close(() => {
-            startServer();
-          });
-        } else {
-          startServer();
-        }
-      } else {
-        console.error('Server error:', error);
-        process.exit(1);
+        console.error(`Port ${serverPort} is already in use.`);
+        console.error('This usually means another instance of the app is running.');
       }
+      process.exit(1);
+    });
+    
+    // Handle process termination
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received. Shutting down gracefully...');
+      server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+      });
     });
     
     return server;

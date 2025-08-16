@@ -29,10 +29,9 @@ if command -v lsof > /dev/null; then
             if ! lsof -i :$p > /dev/null 2>&1; then
                 echo "[$(date)] Found available port: $p"
                 export PORT=$p
-                export WEBSITES_PORT=$p
                 break
             fi
-done
+        done
     fi
 fi
 
@@ -40,19 +39,16 @@ echo "[$(date)] Using port: $PORT"
 
 # Install dependencies
 echo "[$(date)] Installing dependencies..."
+npm install --production
+
 # Build frontend if needed
 echo "[$(date)] Building frontend..."
 npm run build --if-present || echo "Build step not needed or failed"
 
-# Set default port if not specified
-if [ -z "$PORT" ]; then
-    PORT=3000
-    echo "[$(date)] WARNING: No PORT environment variable set, defaulting to $PORT"
-fi
-
-# Export the port for Node.js
-export PORT
+# Make sure the server.js is executable
+chmod +x server.js
 
 # Start the Node.js application
 echo "[$(date)] Starting Node.js application on port $PORT..."
-node server.js
+# Use exec to replace the shell process with Node.js
+exec node server.js
