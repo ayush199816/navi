@@ -1,0 +1,71 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '**'
+      - '!frontend/**'
+  workflow_dispatch:
+
+env:
+  AZURE_CONTAINER_REGISTRY: 'navicontainerregistry'  # Update with your ACR name
+  CONTAINER_NAME: 'navi-backend'
+  RESOURCE_GROUP: 'nav_hosting'
+  LOCATION: 'eastasia'
+  APP_NAME: 'navi-backend'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.x'
+        cache: 'npm'
+    
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Build and push container to ACR
+      run: |
+        # Build the container image
+        docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:$(git rev-parse --short HEAD) .
+        
+        # Login to ACR
+        echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io \
+          --username ${{ secrets.REGISTRY_USERNAME }} \
+          --password-stdin
+        
+        # Push the image to ACR
+        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:$(git rev-parse --short HEAD)
+    
+    - name: Deploy to Azure Container Apps
+      run: |
+        # Install Azure CLI extension for Container Apps
+        az extension add --name containerapp --upgrade
+        
+        # Set default resource group and location
+        az configure --defaults group=${{ env.RESOURCE_GROUP }} location=${{ env.LOCATION }}
+        
+        # Get ACR credentials
+        ACR_PASSWORD=$(az acr credential show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --query "passwords[0].value" -o tsv)
+        
+        # Create or update the Container App
+        az containerapp update \
+          --name ${{ env.APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:$(git rev-parse --short HEAD) \
+          --registry-server ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io \
+          --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+          --registry-password $ACR_PASSWORD \
+          --target-port 8080 \
+          --ingress external \
+          --query properties.configuration.ingress.fqdn

@@ -109,17 +109,13 @@ jobs:
           # Restart the app to apply changes
           az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
     
-    - name: 'Create ZIP package'
-      run: |
-        # Create a ZIP file of the current directory, excluding unnecessary files
-        zip -r deployment.zip . -x '*.git*' '*.github*' '*.vscode*' 'node_modules/*' '*.log'
-    
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         resource-group-name: ${{ env.AZURE_RESOURCE_GROUP }}
-        package: deployment.zip
+        package: .
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
     
     - name: Verify deployment
       run: |
