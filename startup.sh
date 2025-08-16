@@ -4,26 +4,19 @@
 set -e
 
 # Install dependencies
+echo "Installing dependencies..."
 npm install
 
 # Build the frontend if needed
+echo "Building frontend..."
 npm run build --if-present
 
 # Get the port from environment variable or use default
 PORT=${PORT:-8181}
 
-# Function to check if port is in use
-port_in_use() {
-    netstat -tuln | grep -q ":$1 "
-}
+# In Azure, we don't need to check for port in use
+# as each deployment gets its own isolated environment
 
-# If port is in use, kill the process using it
-if port_in_use $PORT; then
-    echo "Port $PORT is in use. Attempting to free it..."
-    fuser -k $PORT/tcp || true
-    sleep 2
-fi
-
-# Start the Node.js application
 echo "Starting server on port $PORT..."
+# Use 0.0.0.0 to listen on all network interfaces
 node server.js
