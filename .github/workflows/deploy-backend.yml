@@ -103,6 +103,7 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         slot-name: 'Production'
         package: .
+        app-settings: '-PORT 3000'
         
     - name: 'Configure Web App'
       uses: azure/CLI@v1
