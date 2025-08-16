@@ -110,14 +110,12 @@ jobs:
             SCM_DO_BUILD_DURING_DEPLOYMENT=true \
             NPM_CONFIG_PRODUCTION=false
             
-          # Set startup command separately
-          az webapp config set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --startup-file "bash startup.sh"
           # Configure Linux runtime and startup file
           az webapp config set \
             --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --linux-fx-version "NODE|${{ env.RUNTIME_NODE_VERSION }}" \
-            --startup-command "bash startup.sh"
+            --startup-file "bash startup.sh"
           
           # Restart the app to apply changes
           az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
