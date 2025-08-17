@@ -41,14 +41,17 @@ jobs:
     - name: Build (if needed)
       run: npm run build --if-present
     
-    - name: Set App Settings
-      uses: azure/CLI@v1
+    - name: Azure Login
+      uses: azure/login@v1
       with:
-        inlineScript: |
-          az webapp config appsettings set \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Set App Settings
+      run: |
+        az webapp config appsettings set \
+          --name ${{ env.AZURE_WEBAPP_NAME }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
     
     - name: Install production dependencies
       run: npm ci --only=production
