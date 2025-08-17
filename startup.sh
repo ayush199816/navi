@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Navigate to the app directory
+cd /home/site/wwwroot
+
+# Install production dependencies
+npm install --only=production
+
+# Start the Node.js application
+echo "Starting Node.js server..."
+node server.js

@@ -12,6 +12,9 @@ dotenv.config();
 // Initialize express app
 const app = express();
 
+// Get port from environment or default to 3000
+const PORT = process.env.PORT || 3000;
+
 // Security middleware
 app.use(helmet());
 app.disable('x-powered-by');
@@ -139,47 +142,47 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handling for unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Start server
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+// Connect to MongoDB and start the server
+const startServer = async () => {
   try {
     await connectDB();
+    
+    // Get port from environment or use default
+    const port = process.env.PORT || 3000;
+    
+    // Start the server
+    const server = app.listen(port, '0.0.0.0', () => {
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`);
+    });
+
+    // Handle server errors
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${port} is already in use.`);
+      } else {
+        console.error('Server error:', error);
+      }
+      process.exit(1);
+    });
+
+    // Handle process termination
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received. Shutting down gracefully...');
+      server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+      });
+    });
+
+    return server;
   } catch (err) {
-    console.error('Failed to connect to MongoDB:', err);
+    console.error('Failed to start server:', err);
     process.exit(1);
   }
-});
+};
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.error(err);
+// Start the server
+startServer().catch(err => {
+  console.error('Fatal error during server startup:', err);
   process.exit(1);
-});
-
-// Handle SIGTERM (for Heroku, etc.)
-process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
-  server.close(() => {
-    console.log('💥 Process terminated!');
-  });
 });

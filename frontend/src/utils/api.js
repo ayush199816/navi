@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with the backend API URL
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net:5000/api',
   headers: {
     'Content-Type': 'application/json'
   }
