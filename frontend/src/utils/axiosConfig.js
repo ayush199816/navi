@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Set default base URL for all axios requests
-axios.defaults.baseURL = 'http://locanaviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.netlhost:5000';
+axios.defaults.baseURL = 'http://navi-1.onrender.com:5000';
 
 // Add a request interceptor to include the auth token
 axios.interceptors.request.use(

@@ -42,7 +42,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false react-scripts build",
+    "build": "set CI=false && react-scripts build",
+    "build:win": "set CI=false && react-scripts build",
+    "build:unix": "CI=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -69,5 +71,5 @@
     "postcss": "^8.4.28",
     "tailwindcss": "^3.3.3"
   },
-  "proxy": "http://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net:5000"
+  "proxy": "http://navi-1.onrender.com:5000"
 }
