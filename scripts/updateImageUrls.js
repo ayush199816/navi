@@ -2,15 +2,12 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const GuestSightseeing = require('../models/GuestSightseeing');
 
-const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/navigatio';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/navigatio';
 
 async function updateImageUrls() {
   try {
     console.log('Connecting to MongoDB...');
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
     // Find all guest sightseeings with images
