@@ -33,7 +33,7 @@ jobs:
     - name: Build frontend
       working-directory: ./frontend
       env:
-        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://naviweb-a5gwdnhwcjazabdt.centralindia-01.azurewebsites.net/api' }}
+        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://navi-1.onrender.com/api' }}
       run: |
         npm run build
     
