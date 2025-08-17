@@ -42,17 +42,13 @@ jobs:
       run: npm run build --if-present
     
     - name: Set App Settings
-      uses: azure/appservice-settings@v1
+      uses: azure/CLI@v1
       with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        app-settings-json: |
-          [
-            {
-              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
-              "value": "true",
-              "slotSetting": false
-            }
-          ]
+        inlineScript: |
+          az webapp config appsettings set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
     
     - name: Install production dependencies
       run: npm ci --only=production
