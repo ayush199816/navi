@@ -16,10 +16,10 @@ const uploadGuestSightseeingImages = asyncHandler(async (req, res, next) => {
   // Process uploaded files
   const fileUrls = req.files.map(file => {
     // Create a URL that points to the uploaded file
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://navi-1.onrender.com' 
-      : `http://${req.get('host')}`;
-    return `${baseUrl}/uploads/guestsightseeing/${file.filename}`;
+    const host = process.env.NODE_ENV === 'production' 
+      ? 'navi-1.onrender.com' 
+      : req.get('host');
+    return `https://${host}/uploads/guestsightseeing/${file.filename}`;
   });
 
   res.status(200).json({
