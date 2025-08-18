@@ -326,7 +326,7 @@ const LandingPage = () => {
               className="flex flex-col sm:flex-row justify-center gap-4"
             >
               <Link 
-                to="/sightseeing" 
+                to="/tours" 
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300 transform hover:scale-105 inline-flex items-center justify-center"
               >
                 <FiCompass className="mr-2" /> Explore Sightseeings
@@ -334,7 +334,7 @@ const LandingPage = () => {
               
               {currentExperience && (
                 <Link 
-                  to={`/sightseeing/${currentExperience.id}`}
+                  to={`/sightseeing/${currentExperience._id}`}
                   className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300 transform hover:scale-105 inline-flex items-center justify-center backdrop-blur-sm"
                 >
                   <FiMapPin className="mr-2" /> View Experience
@@ -506,7 +506,7 @@ const LandingPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {destinations.map((destination, index) => (
                 <motion.div
-                  key={destination.id}
+                  key={destination._id}
                   className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -550,7 +550,7 @@ const LandingPage = () => {
                       className="block text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                       onClick={(e) => {
                         e.preventDefault();
-                        window.location.href = `/tour/${destination.id}`;
+                        window.location.href = `/sightseeing/${destination._id}`;
                       }}
                     >
                       View Details
