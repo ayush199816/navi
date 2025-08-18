@@ -15,11 +15,8 @@ const uploadGuestSightseeingImages = asyncHandler(async (req, res, next) => {
 
   // Process uploaded files
   const fileUrls = req.files.map(file => {
-    // Use HTTPS and the configured domain for image URLs
-    const domain = process.env.NODE_ENV === 'production' 
-      ? 'https://navi-1.onrender.com' 
-      : 'http://localhost:5000';
-    return `${domain}/uploads/guestsightseeing/${file.filename}`;
+    // Always use production URL for image URLs
+    return `https://navi-1.onrender.com/uploads/guestsightseeing/${file.filename}`;
   });
 
   res.status(200).json({
