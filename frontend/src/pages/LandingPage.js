@@ -546,8 +546,12 @@ const LandingPage = () => {
                     </div>
                     <p className="text-gray-600 mb-4 line-clamp-2">{destination.description}</p>
                     <Link
-                      to={`/tours/${destination.id}`}
+                      to={`/tour/${destination.id}`}
                       className="block text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.location.href = `/tour/${destination.id}`;
+                      }}
                     >
                       View Details
                     </Link>
@@ -565,8 +569,12 @@ const LandingPage = () => {
             <Link
               to="/tours"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/tours';
+              }}
             >
-              View All Destinations
+              Explore Sightseeings
             </Link>
           </div>
         </div>
