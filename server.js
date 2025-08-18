@@ -21,11 +21,9 @@ app.disable('x-powered-by');
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS 
-    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-    : process.env.NODE_ENV === 'production' 
-      ? process.env.FRONTEND_URL || false 
-      : '*',
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL || false 
+    : '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -42,24 +40,15 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Serve uploaded files statically with CORS headers
-const uploadsDir = path.join(__dirname, 'uploads');
-
-// Create a static file server with custom headers
-const staticFileHandler = express.static(uploadsDir, {
-  setHeaders: (res) => {
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.setHeader('Access-Control-Allow-Origin', corsOptions.origin === '*' ? '*' : corsOptions.origin || '*');
-    res.setHeader('Access-Control-Allow-Methods', corsOptions.methods.join(','));
-    res.setHeader('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-  }
-});
-
-// Apply the static file server to the /uploads route
+// Serve uploaded files with CORS headers
 app.use('/uploads', (req, res, next) => {
-  staticFileHandler(req, res, next);
-});
+  // Set CORS headers for all responses from /uploads
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Access-Control-Allow-Origin', corsOptions.origin === '*' ? '*' : corsOptions.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', corsOptions.methods.join(','));
+  res.setHeader('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // Debug middleware
 app.use((req, res, next) => {
