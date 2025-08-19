@@ -2,7 +2,8 @@ import axios from 'axios';
 
 // Create an axios instance with the backend API URL
 const api = axios.create({
-  baseURL: 'https://navi-1.onrender.com/api',
+  baseURL: 'https://navi-1.onrender.com/api', 
+  //baseURL: 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json'
   }

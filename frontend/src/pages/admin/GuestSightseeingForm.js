@@ -139,7 +139,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     
     const formData = new FormData();
     files.forEach(file => {
-      formData.append('sightseeingImages', file);
+      formData.append('images', file);
     });
     
     try {
@@ -149,21 +149,29 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         }
       });
       
-      const newImages = response.data.data.map(url => ({
-        url,
-        name: url.split('/').pop()
-      }));
-      
-      setImagePreviews(prev => [...prev, ...newImages]);
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...newImages.map(img => img.url)]
-      }));
-      
-      toast.success(`${files.length} image(s) uploaded successfully`);
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        const newImageUrls = response.data.data.map(item => 
+          typeof item === 'string' ? item : item.url || item.secure_url
+        );
+        
+        const newImages = newImageUrls.map(url => ({
+          url,
+          name: url.split('/').pop()
+        }));
+        
+        setImagePreviews(prev => [...prev, ...newImages]);
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...newImageUrls]
+        }));
+        
+        toast.success(`${files.length} image(s) uploaded successfully`);
+      } else {
+        throw new Error('Invalid response format from server');
+      }
     } catch (error) {
       console.error('Error uploading images:', error);
-      toast.error('Failed to upload images');
+      toast.error(error.response?.data?.message || 'Failed to upload images');
     }
   };
 
