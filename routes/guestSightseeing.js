@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const GuestSightseeing = require('../models/GuestSightseeing');
 const { protect, authorize } = require('../middleware/auth');
 const advancedResults = require('../middleware/advancedResults');
-const upload = require('../middleware/upload');
+const { upload } = require('../config/cloudinary');
 
 const {
   getGuestSightseeings,
@@ -12,8 +12,23 @@ const {
   createGuestSightseeing,
   updateGuestSightseeing,
   deleteGuestSightseeing,
-  uploadGuestSightseeingImages
+  uploadGuestSightseeingImages,
+  handleFileUploads
 } = require('../controllers/guestSightseeingController');
+
+// Create a custom middleware for handling file uploads
+const uploadMiddleware = (req, res, next) => {
+  upload.array('images', 10)(req, res, (err) => {
+    if (err) {
+      console.error('File upload error:', err);
+      return res.status(400).json({
+        success: false,
+        error: err.message || 'Error uploading files'
+      });
+    }
+    next();
+  });
+};
 
 // Create a new router for public routes
 const publicRouter = express.Router();
@@ -74,14 +89,19 @@ router.use(publicRouter);
 // Protected routes
 router.route('/')
   .get(advancedResults(GuestSightseeing), getGuestSightseeings)
-  .post(protect, authorize('admin'), createGuestSightseeing);
+  .post(
+    protect, 
+    authorize('admin'),
+    uploadMiddleware,
+    createGuestSightseeing
+  );
 
-// Upload images route
+// Upload image route with Cloudinary
 router.post(
   '/upload',
   protect,
-  authorize('admin'),
-  upload.array('sightseeingImages', 10), // 'sightseeingImages' is the field name, max 10 files
+  authorize('admin', 'publisher'),
+  uploadMiddleware,
   uploadGuestSightseeingImages
 );
 

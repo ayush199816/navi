@@ -120,6 +120,25 @@ const guestSightseeingSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  images: {
+    type: [String],
+    default: [],
+    validate: {
+      validator: function(images) {
+        // Validate that each image is a valid URL
+        if (!Array.isArray(images)) return false;
+        return images.every(image => {
+          try {
+            new URL(image);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        });
+      },
+      message: 'Images must be an array of valid URLs'
+    }
   }
 }, {
   timestamps: true,
