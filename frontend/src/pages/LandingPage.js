@@ -439,9 +439,6 @@ const LandingPage = () => {
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900">{feature.title}</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">{feature.description}</p>
-              <div className="bg-blue-50 text-blue-600 text-sm font-medium px-4 py-2 rounded-full inline-block">
-                Learn more →
-              </div>
             </motion.div>
           ))}
         </div>
@@ -453,9 +450,11 @@ const LandingPage = () => {
               Join thousands of satisfied travelers who have trusted us with their journeys. 
               Experience the Navigatio difference today with our best price guarantee.
             </p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
-              Start Planning Your Trip
-            </button>
+            <Link to="/tours">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
+                Start Planning Your Trip
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -694,9 +693,11 @@ const LandingPage = () => {
                 Begin planning your dream trip today with our easy-to-use tools and expert guidance.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <button className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105">
-                  Explore Destinations
-                </button>
+                <Link to="/tours">
+                  <button className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    Explore Destinations
+                  </button>
+                </Link>
                 <button className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-lg transition-all duration-300">
                   Contact Our Experts
                 </button>
@@ -712,56 +713,56 @@ const LandingPage = () => {
   const TestimonialsSection = () => {
     const testimonialData = [
       {
-        quote: "Our trip to Bali was absolutely perfect! The attention to detail and personalized recommendations made it the best vacation we've ever had. The local guides were incredibly knowledgeable.",
-        author: "Sarah Johnson",
+        quote: "Thanks a lot for planning such a wonderful trip for us. Hotels were awesome, the planning was as per our customised requirements . Once again thanks for everything you planned.",
+        author: "Kalpesh",
         role: "Adventure Traveler",
         rating: 5,
-        location: "New York, USA",
+        location: "India",
         image: 32,
         featured: true
       },
       {
-        quote: "The cultural tour of Japan was beyond our expectations. Every detail was taken care of, and we experienced parts of the country we would have never found on our own. Highly recommended!",
-        author: "Michael Chen",
+        quote: "Loved the experience & hospitality of the team. Their availability was much appreciated. All arrangements were properly made. They booked amazing hotels under budget & we got VIP treatment for Airport pick & drop services. All drivers were punctual & we didn't face any issues. Thank you soo much for making our first international trip more memorable!",
+        author: "Shreya Gupta",
         role: "Photography Enthusiast",
         rating: 5,
-        location: "Vancouver, Canada",
+        location: "India",
         image: 15,
         featured: true
       },
       {
-        quote: "As a solo female traveler, safety is my top priority. The team made me feel completely secure throughout my European tour. I'll definitely be booking with them again!",
+        quote: "I recently returned from a solo trip to Thailand, and I can’t thank Navigatio Asia - Parul, Tarun, Ankit and Ayush enough for making it truly unforgettable! From the moment I landed, everything was perfectly organized – the accommodations in Phuket, Pattaya, and Bangkok were absolutely the best, with comfortable stays and prime locations that made exploring so convenient.",
         author: "Emma Rodriguez",
-        role: "Solo Traveler",
+        role: "Maanshika Bohra",
         rating: 5,
-        location: "London, UK",
+        location: "India",
         image: 43,
         featured: true
       },
       {
-        quote: "The family vacation package to Costa Rica was perfect for our multi-generational family. Activities for all ages, comfortable accommodations, and seamless transportation.",
-        author: "The Williams Family",
-        role: "Family of Five",
+        quote: "I recently booked a trip to Thailand - Krabi and Phuket with Navigatio, specifically Parul. The trip planning and execution went smoothly with no hiccups. Parul was incredibly friendly and helpful, she provided suggestions but took our wants seriously into consideration to create a perfect experience tailored for us. The entire team will assist on WhatsApp and ontrip app so one can be worry free while on vacation. Pricewise, they gave us a great deal after negotiation. I would definitely recommend Navigatio for your trip planning needs.",
+        author: "Nachammai Nagappan",
+        role: "Travel Lover",
         rating: 5,
-        location: "Chicago, USA",
+        location: "India",
         image: 28,
         featured: false
       },
       {
-        quote: "I've traveled to over 50 countries, and the safari experience arranged by Navigatio was hands down the most well-organized trip I've ever been on. The wildlife encounters were breathtaking!",
-        author: "David Kim",
-        role: "World Traveler",
+        quote: "We have booked our trip with Navigatio and it was well organised trip by the team Ms. Parul and Mr. Tarun. Overall we have enjoyed a lot as it was timely and well managed memorable trip. Thanks to Navigatio and Team for their valuable service.",
+        author: "THAKKAR SANJAY",
+        role: "Travel Lover",
         rating: 5,
-        location: "Seoul, South Korea",
+        location: "India",
         image: 12,
         featured: false
       },
       {
-        quote: "The culinary tour of Italy was a dream come true. From cooking classes with local chefs to exclusive vineyard visits, every meal was an experience to remember.",
-        author: "Sophia Martinez",
+        quote: "An unforgettable journey! Thailand dazzled with its stunning beaches, vibrant street markets, rich culture, and warm hospitality. From exploring ancient temples in Chiang Mai to enjoying island hopping in Krabi and savoring authentic Thai cuisine in Bangkok, every moment was magical. Thank You Navigatio Asia for such for great service and make our thailand trip memorable. Highly recommend choosing Navigatio Asia for Trip booking. 👌👌",
+        author: "Himanshu gokulpure",
         role: "Food Blogger",
         rating: 5,
-        location: "Barcelona, Spain",
+        location: "India",
         image: 37,
         featured: false
       }
@@ -833,7 +834,7 @@ const LandingPage = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">50K+</div>
+                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">5K+</div>
                 <p className="text-gray-600">Happy Travelers</p>
               </motion.div>
               <motion.div
@@ -842,8 +843,8 @@ const LandingPage = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">100+</div>
-                <p className="text-gray-600">Destinations</p>
+                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">500+</div>
+                <p className="text-gray-600">Trips</p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -852,7 +853,7 @@ const LandingPage = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">4.9/5</div>
-                <p className="text-gray-600">Average Rating</p>
+                <p className="text-gray-600">Google Rating</p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -914,9 +915,14 @@ const LandingPage = () => {
           </div>
 
           <div className="text-center mt-16">
-            <button className="bg-white hover:bg-gray-50 text-blue-600 font-semibold px-8 py-3 rounded-lg border-2 border-blue-600 transition-all duration-300 hover:shadow-lg">
+            <a 
+              href="https://www.google.com/search?sca_esv=1c2c48b035966a68&sxsrf=AE3TifP9SxIBtHLACoQjv_M6NeYFgfQBDw:1755696053983&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E-8MLiu9knu7KkiSzfgpZjoKrlaApOlm0kTxIBDiw6pWzF-dwn79R59QzJYtPMQmM9PMWYjgBHDLLb5cmiXQlhx1k3EX&q=Navigatio+ASIA+Reviews&sa=X&ved=2ahUKEwioi4a9vZmPAxVe4TgGHWGOCjwQ0bkNegQILBAE&biw=1536&bih=703&dpr=1.25"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-white hover:bg-gray-50 text-blue-600 font-semibold px-8 py-3 rounded-lg border-2 border-blue-600 transition-all duration-300 hover:shadow-lg"
+            >
               Read More Stories
-            </button>
+            </a>
           </div>
         </div>
       </section>
