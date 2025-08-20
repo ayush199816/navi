@@ -51,7 +51,7 @@ const SightseeingNav = ({ sightseeing }) => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link
-              to="/tours"
+              to="/"
               className="text-gray-600 hover:text-gray-900 mr-6 flex items-center"
             >
               <FiArrowLeft className="h-5 w-5 mr-1" />

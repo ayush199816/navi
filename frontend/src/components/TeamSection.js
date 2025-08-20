@@ -4,11 +4,11 @@ import { motion } from 'framer-motion';
 
 const teamMembers = [
   {
-    name: 'Alex Johnson',
+    name: 'Anitya',
     role: 'CEO & Founder',
     image: 'https://randomuser.me/api/portraits/men/32.jpg',
     bio: 'Travel enthusiast with over 15 years of experience in the tourism industry. Alex founded Navigatio with a vision to make travel planning seamless and enjoyable for everyone.',
-    email: 'alex@navigatio.com',
+    email: 'anitya.india@gmail.com',
     social: {
       twitter: 'https://twitter.com',
       linkedin: 'https://linkedin.com',
@@ -16,11 +16,11 @@ const teamMembers = [
     }
   },
   {
-    name: 'Sarah Williams',
-    role: 'Travel Expert',
+    name: 'Parul',
+    role: 'Destination Expert',
     image: 'https://randomuser.me/api/portraits/women/44.jpg',
     bio: 'With a passion for discovering hidden gems, Sarah curates unique travel experiences that go beyond the typical tourist paths.',
-    email: 'sarah@navigatio.com',
+    email: 'navigatio.asia@gmail.com',
     social: {
       twitter: 'https://twitter.com',
       linkedin: 'https://linkedin.com',
@@ -28,11 +28,11 @@ const teamMembers = [
     }
   },
   {
-    name: 'Michael Chen',
-    role: 'Operations Manager',
+    name: 'Aditya',
+    role: 'COO',
     image: 'https://randomuser.me/api/portraits/men/75.jpg',
     bio: 'Michael ensures every aspect of your journey runs smoothly, from booking to return, with meticulous attention to detail.',
-    email: 'michael@navigatio.com',
+    email: 'info@navigatioasia.com',
     social: {
       twitter: 'https://twitter.com',
       linkedin: 'https://linkedin.com',
@@ -40,11 +40,11 @@ const teamMembers = [
     }
   },
   {
-    name: 'Emma Davis',
-    role: 'Customer Success',
+    name: 'Shri Nikita',
+    role: 'Destination expert',
     image: 'https://randomuser.me/api/portraits/women/68.jpg',
     bio: 'Emma is dedicated to ensuring every traveler receives personalized attention and support throughout their journey with us.',
-    email: 'emma@navigatio.com',
+    email: 'navigatio.asia@gmail.com',
     social: {
       twitter: 'https://twitter.com',
       linkedin: 'https://linkedin.com',
