@@ -24,8 +24,8 @@ const AIItineraryGenerator = ({
     setError(null);
     setItinerary(null);
     try {
-      const res = await axios.post('https://navi-1.onrender.com/api/ai/itinerary',{
-      //const res = await axios.post('http://localhost:5000/api/ai/itinerary', {
+      //const res = await axios.post('https://navi-1.onrender.com/api/ai/itinerary',{
+      const res = await axios.post('http://localhost:5000/api/ai/itinerary', {
         destination,
         dates,
         preferences,
