@@ -69,6 +69,7 @@ const routes = [
   { path: '/api/quotes', route: require('./routes/quote') },
   { path: '/api/leads', route: require('./routes/lead') },
   { path: '/api/bookings', route: require('./routes/booking') },
+  { path: '/api/guest-sightseeing-bookings', route: require('./routes/guestSightseeingBooking') },
   { path: '/api/packages', route: require('./routes/package') },
   { path: '/api/itineraries', route: require('./routes/itinerary') },
   { path: '/api/booking-status', route: require('./routes/bookingStatus') },

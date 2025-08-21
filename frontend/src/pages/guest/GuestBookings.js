@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { FaCalendarAlt, FaMapMarkerAlt, FaUsers } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt, FaFilePdf, FaDownload, FaUsers } from 'react-icons/fa';
 import { FiDollarSign, FiCheckCircle, FiXCircle, FiClock } from 'react-icons/fi';
 import axios from 'axios';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const GuestBookings = () => {
   const navigate = useNavigate();
@@ -25,11 +27,23 @@ const GuestBookings = () => {
 
   const fetchBookings = async () => {
     try {
+      setLoadingBookings(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/bookings/guest/my-bookings', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setBookings(response.data.data || []);
+      const [bookingsRes, sightseeingRes] = await Promise.all([
+        axios.get('/api/bookings/guest/my-bookings', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get('/api/guest-sightseeing-bookings/my-bookings', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+      
+      const allBookings = [
+        ...(bookingsRes.data.data || []).map(b => ({ ...b, type: 'package' })),
+        ...(sightseeingRes.data.data || []).map(b => ({ ...b, type: 'sightseeing' }))
+      ];
+      
+      setBookings(allBookings);
     } catch (err) {
       console.error('Error fetching bookings:', err);
     } finally {
@@ -56,7 +70,87 @@ const GuestBookings = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const generatePdf = (booking) => {
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(20);
+    doc.setTextColor(40, 62, 80);
+    doc.text('Booking Confirmation', 20, 25);
+    
+    // Booking details
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    let yPos = 40;
+    
+    // Booking Info
+    doc.setFont(undefined, 'bold');
+    doc.text('Booking ID:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(booking.bookingReference || booking.bookingId, 60, yPos);
+    
+    yPos += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('Booking Date:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(formatDate(booking.createdAt), 60, yPos);
+    
+    yPos += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('Status:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text((booking.status || booking.bookingStatus || 'pending').toUpperCase(), 60, yPos);
+    
+    yPos += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('Payment Status:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text((booking.paymentStatus || 'pending').toUpperCase(), 60, yPos);
+    
+    // Guest Details
+    yPos += 15;
+    doc.setFont(undefined, 'bold');
+    doc.text('Guest Details', 20, yPos);
+    
+    yPos += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('Lead Guest:', 25, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${booking.leadGuest?.name || 'N/A'}`, 60, yPos);
+    
+    // Sightseeing Details
+    yPos += 15;
+    doc.setFont(undefined, 'bold');
+    doc.text('Sightseeing Details', 20, yPos);
+    
+    yPos += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('Tour:', 25, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(booking.sightseeingName || 'N/A', 60, yPos);
+    
+    yPos += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('Date of Travel:', 25, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(formatDate(booking.dateOfTravel), 60, yPos);
+    
+    yPos += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text('Number of Pax:', 25, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(String(booking.numberOfPax || 1), 60, yPos);
+    
+    // Save the PDF
+    doc.save(`booking-${booking.bookingReference || booking.bookingId}.pdf`);
   };
 
   if (loading || loadingBookings) {
@@ -90,35 +184,67 @@ const GuestBookings = () => {
           ) : (
             <ul className="divide-y divide-gray-200">
               {bookings.map((booking) => (
-                <li key={booking._id} className="p-4 hover:bg-gray-50">
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-blue-600">{booking.bookingId}</p>
-                      <p className="text-sm text-gray-900">
-                        {booking.package?.name || 'Custom Package'}
-                      </p>
-                      <div className="mt-2">
-                        <p className="flex items-center text-sm text-gray-500">
-                          <FaMapMarkerAlt className="mr-1.5 h-4 w-4 text-gray-400" />
-                          {booking.package?.destination || 'Multiple Destinations'}
+                <li key={booking._id} className="p-4 hover:bg-gray-50 border-b border-gray-200">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm font-medium text-blue-600">
+                            {booking.bookingReference || booking.bookingId}
+                            {booking.type === 'sightseeing' && (
+                              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">
+                                Sightseeing
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-sm text-gray-900 font-medium mt-1">
+                            {booking.sightseeingName || booking.package?.name || 'Custom Package'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => generatePdf(booking)}
+                          className="text-gray-500 hover:text-blue-600 ml-2"
+                          title="Download Booking Confirmation"
+                        >
+                          <FaFilePdf className="h-5 w-5" />
+                        </button>
+                      </div>
+                      
+                      <div className="mt-2 space-y-1">
+                        <p className="flex items-center text-sm text-gray-600">
+                          <FaUsers className="mr-2 h-3.5 w-3.5 text-gray-400" />
+                          {booking.numberOfPax || 1} {booking.numberOfPax === 1 ? 'Person' : 'People'}
                         </p>
-                        {booking.travelDates?.startDate && (
-                          <p className="flex items-center text-sm text-gray-500 mt-1">
-                            <FaCalendarAlt className="mr-1.5 h-4 w-4 text-gray-400" />
-                            {formatDate(booking.travelDates.startDate)}
-                            {booking.travelDates.endDate && ` - ${formatDate(booking.travelDates.endDate)}`}
+                        <p className="flex items-center text-sm text-gray-600">
+                          <FaCalendarAlt className="mr-2 h-3.5 w-3.5 text-gray-400" />
+                          {formatDate(booking.dateOfTravel || booking.travelDates?.startDate)}
+                          {booking.travelDates?.endDate && ` - ${formatDate(booking.travelDates.endDate)}`}
+                        </p>
+                        {booking.leadGuest?.name && (
+                          <p className="flex items-center text-sm text-gray-600">
+                            <span className="mr-2">👤</span>
+                            {booking.leadGuest.name}
                           </p>
                         )}
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="mb-2">
-                        {getStatusBadge(booking.bookingStatus || 'pending')}
+                      
+                      <div className="mt-2 flex justify-between items-center">
+                        <div>
+                          {getStatusBadge(booking.status || booking.bookingStatus || 'pending')}
+                          {booking.paymentStatus && (
+                            <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              booking.paymentStatus === 'paid' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {booking.paymentStatus.toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium text-gray-900">
+                          ${booking.totalAmount?.toLocaleString() || '0'}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-500">
-                        <FiDollarSign className="inline mr-1" />
-                        ₹{booking.totalAmount?.toLocaleString() || '0'}
-                      </p>
                     </div>
                   </div>
                 </li>

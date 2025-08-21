@@ -48,6 +48,7 @@ import UserManagement from './pages/admin/UserManagement';
 import AgentApprovals from './pages/admin/AgentApprovals';
 import QuotesAdmin from './pages/admin/QuotesAdmin';
 import Claims from './pages/admin/Claims';
+import GuestSightseeingBookings from './pages/admin/GuestSightseeingBookings';
 import SightseeingListAdmin from './pages/admin/SightseeingList';
 import GuestSightseeings from './pages/admin/GuestSightseeings';
 
@@ -333,9 +334,14 @@ function App() {
           } />
 
           {/* Admin Routes */}
-          <Route path="admin" element={
-            <ProtectedRoute roles={['admin']}>
+          <Route path="admin/dashboard" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="admin/guest-bookings" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <GuestSightseeingBookings />
             </ProtectedRoute>
           } />
           <Route path="admin/users" element={
@@ -376,38 +382,6 @@ function App() {
           <Route path="admin/guest-sightseeings/:id/edit" element={
             <ProtectedRoute roles={['admin']}>
               {React.createElement(require('./pages/admin/GuestSightseeingForm').default)}
-            </ProtectedRoute>
-          } />
-
-          {/* Operations Routes */}
-          <Route path="operations/quotes" element={
-            <ProtectedRoute roles={['operations']}>
-              <QuotesAdmin />
-            </ProtectedRoute>
-          } />
-          <Route path="operations/bookings" element={
-            <ProtectedRoute roles={['operations']}>
-              <BookingsAdmin />
-            </ProtectedRoute>
-          } />
-          <Route path="operations/wallet-transactions" element={
-            <ProtectedRoute roles={['operations', 'admin']}>
-              <WalletTransactions />
-            </ProtectedRoute>
-          } />
-          <Route path="operations/packages" element={
-            <ProtectedRoute roles={['operations', 'admin']}>
-              <PackageList />
-            </ProtectedRoute>
-          } />
-          <Route path="operations/add-seller" element={
-            <ProtectedRoute roles={['operations', 'admin']}>
-              <AddSeller />
-            </ProtectedRoute>
-          } />
-          <Route path="operations/sightseeing" element={
-            <ProtectedRoute roles={['operations']}>
-              <SightseeingListOps />
             </ProtectedRoute>
           } />
 

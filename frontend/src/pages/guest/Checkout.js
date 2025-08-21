@@ -226,26 +226,32 @@ const Checkout = () => {
         const itemPrice = hasOffer ? item.offerPrice : item.price;
         const totalAmount = itemPrice * itemPax;
         
+        // Ensure all required fields are present
+        const leadGuest = {
+          name: values.leadPax.name || 'Not Provided',
+          email: values.leadPax.email || `${Date.now()}@temp.com`, // Fallback email if not provided
+          phone: values.leadPax.phone || '0000000000', // Fallback phone if not provided
+          passportNumber: values.leadPax.passportNumber || 'NOT_PROVIDED',
+          panNumber: values.leadPax.panNumber || 'NOT_PROVIDED'
+        };
+
         const bookingData = {
           sightseeingId: item.originalId || item.id,
-          userId: user?._id,
-          leadPax: values.leadPax,
-          additionalPax: itemAdditionalPax,
-          bookingDate: itemBookingDate,
+          sightseeingName: item.name, // Add sightseeing name
+          dateOfTravel: new Date(itemBookingDate).toISOString().split('T')[0],
+          numberOfPax: itemPax,
+          leadGuest,
+          additionalGuests: itemAdditionalPax.map(pax => ({
+            name: pax.name || 'Additional Guest',
+            passportNumber: pax.passportNumber || 'NOT_PROVIDED'
+          })),
+          notes: values.notes || '',
           totalAmount: totalAmount,
-          paxCount: itemPax,
-          itemDetails: {
-            name: item.name,
-            price: itemPrice,
-            originalPrice: item.price,
-            hasOffer: hasOffer,
-            offerPrice: item.offerPrice,
-            date: item.date,
-            pax: itemPax
-          }
+          status: 'pending',
+          paymentStatus: 'pending'
         };
         
-        return axios.post('/api/bookings/guest', bookingData);
+        return axios.post('/api/guest-sightseeing-bookings', bookingData);
       });
       
       // Create all bookings in parallel
