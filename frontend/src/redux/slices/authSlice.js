@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axiosConfig';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 
 // Helper function to set auth token in headers
@@ -17,7 +17,7 @@ const isTokenExpired = (token) => {
   if (!token) return true;
   
   try {
-    const decoded = jwt_decode(token);
+    const decoded = jwtDecode(token);
     return decoded.exp < Date.now() / 1000;
   } catch (error) {
     return true;
