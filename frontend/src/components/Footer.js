@@ -74,7 +74,7 @@ const Footer = () => {
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
                   <FaPhone className="text-white" />
                 </div>
-                <a href="tel:+1234567890" className="text-blue-100 hover:text-white transition-colors">+1 (234) 567-890</a>
+                <a href="tel:+1234567890" className="text-blue-100 hover:text-white transition-colors">+91 9628912345<br></ br>+91 929755463</a>
               </li>
               <li className="flex items-center">
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
@@ -126,11 +126,6 @@ const Footer = () => {
           <p className="text-blue-100 text-sm mb-4 md:mb-0">
             &copy; {new Date().getFullYear()} Navigatio. All rights reserved.
           </p>
-          <div className="flex space-x-6">
-            <a href="frontend\src\pages\TermsAndConditions.js" className="text-blue-100 hover:text-white text-sm transition-colors">Privacy Policy</a>
-            <a href="frontend\src\pages\TermsAndConditions.js" className="text-blue-100 hover:text-white text-sm transition-colors">Terms of Service</a>
-
-          </div>
         </div>
       </div>
     </footer>
