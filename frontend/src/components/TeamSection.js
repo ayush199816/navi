@@ -6,8 +6,8 @@ const teamMembers = [
   {
     name: 'Anitya',
     role: 'CEO & Founder',
-    image: 'https://randomuser.me/api/portraits/men/32.jpg',
-    bio: 'Travel enthusiast with over 15 years of experience in the tourism industry. Alex founded Navigatio with a vision to make travel planning seamless and enjoyable for everyone.',
+    image: 'https://res.cloudinary.com/dqlcup2s7/image/upload/v1756216485/Tarun_wxdza0.jpg',
+    bio: 'Travel enthusiast with over 15 years of experience in the tourism industry. Anitya founded Navigatio with a vision to make travel planning seamless and enjoyable for everyone.',
     email: 'anitya.india@gmail.com',
     social: {
       twitter: 'https://twitter.com',
@@ -28,10 +28,10 @@ const teamMembers = [
     }
   },
   {
-    name: 'Aditya',
+    name: 'Ayush',
     role: 'COO',
-    image: 'https://randomuser.me/api/portraits/men/75.jpg',
-    bio: 'Michael ensures every aspect of your journey runs smoothly, from booking to return, with meticulous attention to detail.',
+    image: 'https://res.cloudinary.com/dqlcup2s7/image/upload/v1756216485/ayush_q9foqq.jpg',
+    bio: 'Ayush ensures every aspect of your journey runs smoothly, from booking to return, with meticulous attention to detail.',
     email: 'info@navigatioasia.com',
     social: {
       twitter: 'https://twitter.com',
@@ -43,7 +43,7 @@ const teamMembers = [
     name: 'Shri Nikita',
     role: 'Destination expert',
     image: 'https://randomuser.me/api/portraits/women/68.jpg',
-    bio: 'Emma is dedicated to ensuring every traveler receives personalized attention and support throughout their journey with us.',
+    bio: 'Nikita is dedicated to ensuring every traveler receives personalized attention and support throughout their journey with us.',
     email: 'navigatio.asia@gmail.com',
     social: {
       twitter: 'https://twitter.com',

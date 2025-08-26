@@ -47,6 +47,9 @@ const Footer = () => {
               <li><a href="#about" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> About Us
               </a></li>
+              <li><a href="/terms" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Terms & Conditions
+              </a></li>
             </ul>
           </div>
 
@@ -58,7 +61,14 @@ const Footer = () => {
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
                   <FaMapMarkerAlt className="text-white" />
                 </div>
-                <span className="text-blue-100">123 Travel Street, Tour City, TC 12345</span>
+                <p>Reg. Address: Rustampur, Gorakhpur,<br />
+                Gorakhpur, Uttar Pradesh- 273001</p>
+              </li>
+              <li className="flex items-start">
+                <div className="bg-white/10 p-2 rounded-lg mr-3">
+                  <FaMapMarkerAlt className="text-white" />
+                </div>
+                <p>Branch: 4th Floor, Halwasiya Court, Hazratganj, Lucknow, Uttar Pradesh 226001</p>
               </li>
               <li className="flex items-center">
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
