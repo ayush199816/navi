@@ -47,6 +47,9 @@ const Footer = () => {
               <li><a href="#about" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> About Us
               </a></li>
+              <li><a href="/terms" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Terms & Conditions
+              </a></li>
             </ul>
           </div>
 
@@ -58,7 +61,14 @@ const Footer = () => {
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
                   <FaMapMarkerAlt className="text-white" />
                 </div>
-                <span className="text-blue-100">123 Travel Street, Tour City, TC 12345</span>
+                <p>Reg. Address: Rustampur, Gorakhpur,<br />
+                Gorakhpur, Uttar Pradesh- 273001</p>
+              </li>
+              <li className="flex items-start">
+                <div className="bg-white/10 p-2 rounded-lg mr-3">
+                  <FaMapMarkerAlt className="text-white" />
+                </div>
+                <p>Branch: 4th Floor, Halwasiya Court, Hazratganj, Lucknow, Uttar Pradesh 226001</p>
               </li>
               <li className="flex items-center">
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
@@ -117,9 +127,9 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} Navigatio. All rights reserved.
           </p>
           <div className="flex space-x-6">
-            <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors">Privacy Policy</a>
-            <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors">Terms of Service</a>
-            <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors">Sitemap</a>
+            <a href="frontend\src\pages\TermsAndConditions.js" className="text-blue-100 hover:text-white text-sm transition-colors">Privacy Policy</a>
+            <a href="frontend\src\pages\TermsAndConditions.js" className="text-blue-100 hover:text-white text-sm transition-colors">Terms of Service</a>
+
           </div>
         </div>
       </div>

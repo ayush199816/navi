@@ -27,6 +27,7 @@ import Onboarding from './pages/auth/Onboarding';
 import PendingApproval from './pages/auth/PendingApproval';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 // Agent Pages
 import AgentDashboard from './pages/agent/Dashboard';
@@ -224,6 +225,7 @@ function App() {
         <Route path="/tours" element={<ToursPage />} />
         <Route path="/sightseeing/:id" element={<SightseeingDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
         
         {/* Agent Onboarding Flow */}
         <Route path="/onboarding" element={

@@ -732,8 +732,8 @@ const LandingPage = () => {
       },
       {
         quote: "I recently returned from a solo trip to Thailand, and I can’t thank Navigatio Asia - Parul, Tarun, Ankit and Ayush enough for making it truly unforgettable! From the moment I landed, everything was perfectly organized – the accommodations in Phuket, Pattaya, and Bangkok were absolutely the best, with comfortable stays and prime locations that made exploring so convenient.",
-        author: "Emma Rodriguez",
-        role: "Maanshika Bohra",
+        author: "Maanshika Bohra",
+        role: "Solo Traveler",
         rating: 5,
         location: "India",
         image: 43,
@@ -953,48 +953,7 @@ const LandingPage = () => {
     </section>
   );
 
-  // Newsletter Section Component
-  const NewsletterSection = () => (
-    <section className="py-16 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="md:flex">
-            <div className="md:flex-shrink-0 bg-blue-600 p-8 flex items-center justify-center">
-              <FiMail className="w-16 h-16 text-white" />
-            </div>
-            <div className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Stay Updated</h2>
-              <p className="text-gray-600 mb-6">Subscribe to our newsletter for travel inspiration, exclusive deals, and more.</p>
-              
-              {isSubscribed ? (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                  Thank you for subscribing! We'll keep you updated with our latest offers.
-                </div>
-              ) : (
-                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                  <button 
-                    type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2"
-                  >
-                    Subscribe <FiArrowRight />
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-
+ 
   // Main component return
   return (
     <div className="overflow-x-hidden">
@@ -1037,9 +996,6 @@ const LandingPage = () => {
       
       {/* 8. CTA Section */}
       <CTASection />
-      
-      {/* 8. Newsletter Section */}
-      <NewsletterSection />
       
       {/* 9. Footer */}
       <Footer />
