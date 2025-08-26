@@ -126,11 +126,6 @@ const Footer = () => {
           <p className="text-blue-100 text-sm mb-4 md:mb-0">
             &copy; {new Date().getFullYear()} Navigatio. All rights reserved.
           </p>
-          <div className="flex space-x-6">
-            <a href="frontend\src\pages\TermsAndConditions.js" className="text-blue-100 hover:text-white text-sm transition-colors">Privacy Policy</a>
-            <a href="frontend\src\pages\TermsAndConditions.js" className="text-blue-100 hover:text-white text-sm transition-colors">Terms of Service</a>
-
-          </div>
         </div>
       </div>
     </footer>
