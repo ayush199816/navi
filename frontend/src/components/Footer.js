@@ -98,16 +98,10 @@ const Footer = () => {
             <div className="mt-8">
               <h4 className="text-lg font-semibold mb-4 text-white border-b border-white/20 pb-2">Follow Us</h4>
               <div className="flex space-x-3">
-                <a href="#" className="bg-white/10 hover:bg-white/20 p-3 rounded-lg transition-all duration-300 flex items-center">
-                  <FaFacebook className="w-5 h-5 text-white" />
-                </a>
-                <a href="#" className="bg-white/10 hover:bg-white/20 p-3 rounded-lg transition-all duration-300 flex items-center">
-                  <FaTwitter className="w-5 h-5 text-white" />
-                </a>
-                <a href="#" className="bg-white/10 hover:bg-white/20 p-3 rounded-lg transition-all duration-300 flex items-center">
+                <a href="https://www.instagram.com/navigatio.asia" className="bg-white/10 hover:bg-white/20 p-3 rounded-lg transition-all duration-300 flex items-center">
                   <FaInstagram className="w-5 h-5 text-white" />
                 </a>
-                <a href="#" className="bg-white/10 hover:bg-white/20 p-3 rounded-lg transition-all duration-300 flex items-center">
+                <a href="https://r.search.yahoo.com/_ylt=Awr1QafZAbBoAwIAb.q7HAx.;_ylu=Y29sbwNzZzMEcG9zAzEEdnRpZAMEc2VjA3Ny/RV=2/RE=1757574873/RO=10/RU=https%3a%2f%2fin.linkedin.com%2fcompany%2fnavigatioasiadmc/RK=2/RS=APqsqLqqTplXP75ytLdILiaK028-" className="bg-white/10 hover:bg-white/20 p-3 rounded-lg transition-all duration-300 flex items-center">
                   <FaLinkedin className="w-5 h-5 text-white" />
                 </a>
               </div>
