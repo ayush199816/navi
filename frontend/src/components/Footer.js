@@ -13,16 +13,10 @@ const Footer = () => {
               Your trusted travel companion for discovering the world's most amazing destinations and experiences.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all duration-300">
-                <FaFacebook className="w-5 h-5 text-white" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all duration-300">
-                <FaTwitter className="w-5 h-5 text-white" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all duration-300">
+              <a href="https://www.instagram.com/navigatio.asia" className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all duration-300">
                 <FaInstagram className="w-5 h-5 text-white" />
               </a>
-              <a href="#" className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all duration-300">
+              <a href="https://r.search.yahoo.com/_ylt=Awr1QafZAbBoAwIAb.q7HAx.;_ylu=Y29sbwNzZzMEcG9zAzEEdnRpZAMEc2VjA3Ny/RV=2/RE=1757574873/RO=10/RU=https%3a%2f%2fin.linkedin.com%2fcompany%2fnavigatioasiadmc/RK=2/RS=APqsqLqqTplXP75ytLdILiaK028-" className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all duration-300">
                 <FaLinkedin className="w-5 h-5 text-white" />
               </a>
             </div>
