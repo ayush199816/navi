@@ -17,8 +17,8 @@ const teamMembers = [
   {
     name: 'Parul',
     role: 'Destination Expert',
-    image: 'https://randomuser.me/api/portraits/women/44.jpg',
-    bio: 'With a passion for discovering hidden gems, Sarah curates unique travel experiences that go beyond the typical tourist paths.',
+    image: 'https://res.cloudinary.com/dqlcup2s7/image/upload/v1756371197/1bda7afe-2435-430f-9713-78cf3373af14_kjxwmq.png',
+    bio: 'With a passion for discovering hidden gems, Parul curates unique travel experiences that go beyond the typical tourist paths.',
     email: 'navigatio.asia@gmail.com',
     social: {
       linkedin: 'https://www.linkedin.com/in/',
