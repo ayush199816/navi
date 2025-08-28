@@ -9,11 +9,6 @@ const teamMembers = [
     image: 'https://res.cloudinary.com/dqlcup2s7/image/upload/v1756216485/Tarun_wxdza0.jpg',
     bio: 'Travel enthusiast with over 15 years of experience in the tourism industry. Anitya founded Navigatio with a vision to make travel planning seamless and enjoyable for everyone.',
     email: 'anitya.india@gmail.com',
-    social: {
-      twitter: 'https://twitter.com',
-      linkedin: 'https://linkedin.com',
-      instagram: 'https://instagram.com'
-    }
   },
   {
     name: 'Parul',
@@ -21,11 +16,6 @@ const teamMembers = [
     image: 'https://randomuser.me/api/portraits/women/44.jpg',
     bio: 'With a passion for discovering hidden gems, Sarah curates unique travel experiences that go beyond the typical tourist paths.',
     email: 'navigatio.asia@gmail.com',
-    social: {
-      twitter: 'https://twitter.com',
-      linkedin: 'https://linkedin.com',
-      instagram: 'https://instagram.com'
-    }
   },
   {
     name: 'Ayush',
@@ -34,23 +24,10 @@ const teamMembers = [
     bio: 'Ayush ensures every aspect of your journey runs smoothly, from booking to return, with meticulous attention to detail.',
     email: 'info@navigatioasia.com',
     social: {
-      twitter: 'https://twitter.com',
-      linkedin: 'https://linkedin.com',
-      instagram: 'https://instagram.com'
+      linkedin: 'https://www.linkedin.com/in/ayush-gupta-3419791a3',
+      instagram: 'https://www.instagram.com/life.lineage'
     }
   },
-  {
-    name: 'Shri Nikita',
-    role: 'Destination expert',
-    image: 'https://randomuser.me/api/portraits/women/68.jpg',
-    bio: 'Nikita is dedicated to ensuring every traveler receives personalized attention and support throughout their journey with us.',
-    email: 'navigatio.asia@gmail.com',
-    social: {
-      twitter: 'https://twitter.com',
-      linkedin: 'https://linkedin.com',
-      instagram: 'https://instagram.com'
-    }
-  }
 ];
 
 const TeamSection = () => {
