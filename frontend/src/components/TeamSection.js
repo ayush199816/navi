@@ -9,6 +9,10 @@ const teamMembers = [
     image: 'https://res.cloudinary.com/dqlcup2s7/image/upload/v1756216485/Tarun_wxdza0.jpg',
     bio: 'Travel enthusiast with over 15 years of experience in the tourism industry. Anitya founded Navigatio with a vision to make travel planning seamless and enjoyable for everyone.',
     email: 'anitya.india@gmail.com',
+    social: {
+      linkedin: 'https://www.linkedin.com/in/',
+      instagram: 'https://www.instagram.com/'
+    }
   },
   {
     name: 'Parul',
@@ -16,6 +20,10 @@ const teamMembers = [
     image: 'https://randomuser.me/api/portraits/women/44.jpg',
     bio: 'With a passion for discovering hidden gems, Sarah curates unique travel experiences that go beyond the typical tourist paths.',
     email: 'navigatio.asia@gmail.com',
+    social: {
+      linkedin: 'https://www.linkedin.com/in/',
+      instagram: 'https://www.instagram.com/'
+    }
   },
   {
     name: 'Ayush',
