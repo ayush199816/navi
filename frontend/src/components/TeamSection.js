@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiTwitter, FiLinkedin, FiInstagram, FiMail } from 'react-icons/fi';
+import { FiLinkedin, FiInstagram, FiMail } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 const teamMembers = [
@@ -93,15 +93,6 @@ const TeamSection = () => {
                   <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     <p className="text-sm text-gray-200 mb-4">{member.bio}</p>
                     <div className="flex justify-center space-x-4 mt-4">
-                      <a 
-                        href={member.social.twitter} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-blue-500 text-white transition-colors duration-300"
-                        aria-label={`${member.name}'s Twitter`}
-                      >
-                        <FiTwitter className="w-5 h-5" />
-                      </a>
                       <a 
                         href={member.social.linkedin} 
                         target="_blank" 
