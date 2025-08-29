@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FiMapPin, 
@@ -234,8 +234,8 @@ const LandingPage = () => {
     setTimeout(() => setIsSubscribed(false), 5000);
   };
 
-  // Hero Section with Sightseeing Carousel
-  const HeroSection = () => {
+  // Memoized HeroSection component to prevent unnecessary re-renders
+  const HeroSection = React.memo(({ destinations, currentSlide, loading, setCurrentSlide }) => {
     // If still loading, show a simple hero
     if (loading) {
       return (
@@ -249,20 +249,20 @@ const LandingPage = () => {
       );
     }
 
-    // Get current sightseeing experience
-    const currentExperience = destinations[currentSlide];
+    // Get current experience
+    const currentExperience = destinations[currentSlide] || {};
     const experienceType = currentExperience?.type || 'Sightseeing';
     const experienceLocation = currentExperience?.location ? `in ${currentExperience.location}` : '';
 
     return (
       <section className="relative h-screen overflow-hidden">
         {/* Background Carousel */}
-        <div className="absolute inset-0">
+        <div key="background-carousel" className="absolute inset-0 will-change-transform">
           {destinations.length > 0 ? (
             <div className="relative w-full h-full">
               {destinations.map((experience, index) => (
                 <div 
-                  key={experience.id}
+                  key={`bg-${experience.id}-${index}`}
                   className={`absolute inset-0 transition-opacity duration-1000 ${
                     index === currentSlide ? 'opacity-100' : 'opacity-0'
                   }`}
@@ -270,7 +270,8 @@ const LandingPage = () => {
                     backgroundImage: `url(${experience.images[0] || 'https://source.unsplash.com/1920x1080/?sightseeing,landmark'})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
+                    backgroundRepeat: 'no-repeat',
+                    willChange: 'transform, opacity'
                   }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30"></div>
@@ -292,37 +293,27 @@ const LandingPage = () => {
         {/* Hero content */}
         <div className="relative h-full flex items-center justify-center">
           <div className="container mx-auto px-4 z-10 text-center text-white">
-            <motion.div 
+            <div 
+              key={`type-${currentSlide}`}
               className="inline-block bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
             >
               <span className="text-sm font-medium tracking-wider">{experienceType} Experience {experienceLocation}</span>
-            </motion.div>
+            </div>
             
-            <motion.h1 
+            <h1 
+              key={`title-${currentSlide}`}
               className="text-4xl md:text-6xl font-bold mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
             >
               {currentExperience?.name || "Unforgettable Sightseeing Adventures"}
-            </motion.h1>
+            </h1>
             
-            <motion.p 
+            <p 
               className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
             >
               {currentExperience?.description || "Discover the world's most iconic landmarks and hidden gems with our expert-guided sightseeing experiences."}
-            </motion.p>
+            </p>
             
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+            <div
               className="flex flex-col sm:flex-row justify-center gap-4"
             >
               <Link 
@@ -340,16 +331,11 @@ const LandingPage = () => {
                   <FiMapPin className="mr-2" /> View Experience
                 </Link>
               )}
-            </motion.div>
+            </div>
             
             {/* Experience Highlights */}
             {currentExperience && (
-              <motion.div 
-                className="mt-8 flex flex-wrap justify-center gap-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-              >
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
                 {currentExperience.duration && (
                   <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full flex items-center">
                     <FiClock className="mr-2" /> {currentExperience.duration}
@@ -365,7 +351,7 @@ const LandingPage = () => {
                     From ${currentExperience.offerPrice || currentExperience.price}
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
           </div>
 
@@ -408,7 +394,7 @@ const LandingPage = () => {
         )}
       </section>
     );
-  };
+  });
 
   // Features Section Component
   const FeaturesSection = () => (
@@ -418,7 +404,7 @@ const LandingPage = () => {
           <span className="text-blue-600 font-semibold mb-4 inline-block">WHY CHOOSE NAVIGATIO</span>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Your Journey, Our Expertise</h2>
           <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
-          <p className="text-xl text-gray-600 mb-12">
+          <p className="text-xl text-gray-600">
             We combine local knowledge with global expertise to create unforgettable travel experiences tailored just for you.
             Discover the difference that sets us apart.
           </p>
@@ -426,20 +412,16 @@ const LandingPage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {features.slice(0, 3).map((feature, index) => (
-            <motion.div
+            <div
               key={index}
               className="bg-white p-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-center border border-gray-100"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
             >
               <div className="bg-blue-50 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 {React.cloneElement(feature.icon, { className: 'w-10 h-10 text-blue-600' })}
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900">{feature.title}</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">{feature.description}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
         
@@ -503,14 +485,10 @@ const LandingPage = () => {
 
           {destinations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {destinations.map((destination, index) => (
-                <motion.div
+              {destinations.map((destination) => (
+                <div
                   key={destination._id}
                   className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
                   <div className="relative h-64 overflow-hidden">
                     <img
@@ -555,7 +533,7 @@ const LandingPage = () => {
                       View Details
                     </Link>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           ) : (
@@ -633,12 +611,8 @@ const LandingPage = () => {
             
             {steps.map((step, index) => (
               <div key={index} className="relative z-10 mb-16 md:mb-24 last:mb-0">
-                <motion.div
+                <div
                   className={`flex flex-col md:flex-row items-center ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
                 >
                   {/* Step content */}
                   <div className={`w-full md:w-1/2 p-6 md:p-8 ${index % 2 === 0 ? 'md:pl-16' : 'md:pr-16'}`}>
@@ -673,18 +647,14 @@ const LandingPage = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </div>
             ))}
           </div>
 
           {/* CTA Box */}
-          <motion.div 
+          <div 
             className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 md:p-12 text-white text-center max-w-5xl mx-auto mt-16 shadow-xl"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
           >
             <div className="max-w-3xl mx-auto">
               <h3 className="text-2xl md:text-3xl font-bold mb-4">Ready to Start Your Journey?</h3>
@@ -703,7 +673,7 @@ const LandingPage = () => {
                 </button>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
     );
@@ -785,13 +755,9 @@ const LandingPage = () => {
             {testimonialData
               .filter(testimonial => testimonial.featured)
               .map((testimonial, index) => (
-                <motion.div 
+                <div 
                   key={index}
                   className="bg-white p-8 rounded-2xl shadow-xl relative border border-gray-100"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
                 >
                   <div className="absolute top-8 left-8 text-blue-100 text-5xl -z-0">
                     <FaQuoteLeft />
@@ -821,49 +787,29 @@ const LandingPage = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
           </div>
 
           {/* Stats Section */}
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-20">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
+              <div>
                 <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">5K+</div>
                 <p className="text-gray-600">Happy Travelers</p>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
+              </div>
+              <div>
                 <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">500+</div>
                 <p className="text-gray-600">Trips</p>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
+              </div>
+              <div>
                 <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">4.9/5</div>
                 <p className="text-gray-600">Google Rating</p>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
+              </div>
+              <div>
                 <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">24/7</div>
                 <p className="text-gray-600">Support</p>
-              </motion.div>
+              </div>
             </div>
           </div>
 
@@ -877,13 +823,9 @@ const LandingPage = () => {
             {testimonialData
               .filter(testimonial => !testimonial.featured)
               .map((testimonial, index) => (
-                <motion.div 
+                <div 
                   key={index}
                   className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 rounded-full bg-gray-200 mr-4 overflow-hidden">
@@ -910,7 +852,7 @@ const LandingPage = () => {
                     <FiMapPin className="w-3.5 h-3.5 mr-1" />
                     <span>{testimonial.location}</span>
                   </div>
-                </motion.div>
+                </div>
               ))}
           </div>
 
@@ -956,9 +898,14 @@ const LandingPage = () => {
  
   // Main component return
   return (
-    <div className="overflow-x-hidden">
+    <div key="landing-page" className="overflow-x-hidden">
       {/* 1. Hero Section */}
-      <HeroSection />
+      <HeroSection 
+        destinations={destinations}
+        currentSlide={currentSlide}
+        loading={loading}
+        setCurrentSlide={setCurrentSlide}
+      />
       
       {/* 2. Popular Sightseeing Section */}
       <DestinationsSection />

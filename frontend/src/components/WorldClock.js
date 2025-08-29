@@ -8,11 +8,7 @@ const timeZones = [
   { id: 'bali', name: 'Bali', timeZone: 'Asia/Makassar' },
   { id: 'dubai', name: 'Dubai', timeZone: 'Asia/Dubai' },
   { id: 'vietnam', name: 'Vietnam', timeZone: 'Asia/Ho_Chi_Minh' },
-  { id: 'maldives', name: 'Maldives', timeZone: 'Indian/Maldives' },
   { id: 'malaysia', name: 'Malaysia/Singapore', timeZone: 'Asia/Kuala_Lumpur' },
-
-  { id: 'uzbekistan', name: 'Uzbekistan', timeZone: 'Asia/Tashkent' },
-  { id: 'almaty', name: 'Almaty', timeZone: 'Asia/Almaty' },
 ];
 
 const WorldClock = () => {
@@ -67,17 +63,17 @@ const WorldClock = () => {
           </div>
         </div>
 
-        <div className="w-full px-4 py-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-8 gap-4 w-full">
+        <div className="w-full px-4 py-6 flex justify-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-5 gap-6 w-full max-w-6xl">
             {timeZones
               .filter((tz) => regions[activeTab].includes(tz.id))
               .slice(0, 16) // Limit to 16 cities per region
               .map((tz) => (
                 <div
                   key={tz.id}
-                  className="flex flex-col items-center justify-center w-full p-4"
+                  className="flex flex-col items-center justify-center w-full"
                 >
-                  <div className="bg-gray-50 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-200 w-full max-w-[160px] border border-gray-100 flex-shrink-0">
+                  <div className="bg-gray-50 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-200 w-full max-w-[180px] border border-gray-100 flex-shrink-0">
                     <div className="mb 2">
                       <AnalogClock timeZone={tz.timeZone} city={tz.name} />
                     </div>
