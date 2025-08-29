@@ -208,11 +208,11 @@ const CurrencyConverter = () => {
                   {amount} {fromCurrency} =
                 </p>
                 <p className="mt-1 text-3xl font-semibold text-blue-600">
-                  {isLoading ? '...' : convertedAmount.toFixed(4)} {toCurrency}
+                  {isLoading ? '...' : convertedAmount.toFixed(2)} {toCurrency}
                 </p>
                 {exchangeRate && !isLoading && (
                   <p className="mt-2 text-sm text-gray-500">
-                    1 {fromCurrency} = {exchangeRate.toFixed(6)} {toCurrency}
+                    1 {fromCurrency} = {exchangeRate.toFixed(2)} {toCurrency}
                   </p>
                 )}
               </div>
