@@ -475,7 +475,7 @@ const LandingPage = () => {
     }
 
     return (
-      <section className="py-16 bg-white">
+      <section id="popular-sightseeings" className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Popular Sightseeings</h2>
@@ -911,8 +911,7 @@ const LandingPage = () => {
       <DestinationsSection />
       
       {/* 3. World Clock Section */}
-      {/* World Clock Section */}
-      <section className="py-12">
+      <section id="world-clock" className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
             <WorldClock />
@@ -921,7 +920,7 @@ const LandingPage = () => {
       </section>
       
       {/* Currency Converter Section */}
-      <section className="py-12">
+      <section id="currency-converter" className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
             <CurrencyConverter />
