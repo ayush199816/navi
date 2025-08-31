@@ -55,7 +55,7 @@ const TeamSection = () => {
   };
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
+    <section id="team" className="relative py-20 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIxIiBmaWxsPSIjMDA3OGQ3IiBvcGFjaXR5PSIwLjIiLz4KPC9zdmc+')]" />

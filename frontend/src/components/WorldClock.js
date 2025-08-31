@@ -44,8 +44,7 @@ const WorldClock = () => {
           </p>
           <div className="w-20 h-1 bg-blue-200 mx-auto mt-4"></div>
         </div>
-
-        <div className="mb-8 flex justify-center overflow-x-auto pb-2">
+        {/* <div className="mb-8 flex justify-center overflow-x-auto pb-2">
           <div className="inline-flex space-x-2">
             {Object.keys(regions).map((region) => (
               <button
@@ -61,7 +60,7 @@ const WorldClock = () => {
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
 
         <div className="w-full px-4 py-6 flex justify-center">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-5 gap-6 w-full max-w-6xl">

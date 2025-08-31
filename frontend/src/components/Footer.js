@@ -29,8 +29,8 @@ const Footer = () => {
               <li><a href="#" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Home
               </a></li>
-              <li><a href="#destinations" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Destinations
+              <li><a href="#popular-sightseeings" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Popular Sightseeings
               </a></li>
               <li><a href="#world-clock" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> World Clock
@@ -38,8 +38,8 @@ const Footer = () => {
               <li><a href="#currency-converter" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Currency Converter
               </a></li>
-              <li><a href="#about" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> About Us
+              <li><a href="#team" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Our Team
               </a></li>
               <li><a href="/terms" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Terms & Conditions
@@ -55,14 +55,36 @@ const Footer = () => {
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
                   <FaMapMarkerAlt className="text-white" />
                 </div>
-                <p>Reg. Address: Rustampur, Gorakhpur,<br />
-                Gorakhpur, Uttar Pradesh- 273001</p>
+                <div>
+                  <p className="font-medium">Reg. Address:</p>
+                  <a 
+                    href="https://www.google.com/maps/place/Rustampur,+Gorakhpur,+Uttar+Pradesh+273001" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-100 hover:text-white transition-colors hover:underline"
+                  >
+                    Rustampur, Gorakhpur,<br />
+                    Gorakhpur, Uttar Pradesh- 273001
+                  </a>
+                </div>
               </li>
               <li className="flex items-start">
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
                   <FaMapMarkerAlt className="text-white" />
                 </div>
-                <p>Branch: 4th Floor, Halwasiya Court, Hazratganj, Lucknow, Uttar Pradesh 226001</p>
+                <div>
+                  <p className="font-medium">Branch:</p>
+                  <a 
+                    href="https://www.google.com/maps/place/Halwasiya+Court,+Hazratganj,+Lucknow,+Uttar+Pradesh+226001" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-100 hover:text-white transition-colors hover:underline"
+                  >
+                    4th Floor, Halwasiya Court,<br />
+                    Hazratganj, Lucknow,<br />
+                    Uttar Pradesh 226001
+                  </a>
+                </div>
               </li>
               <li className="flex items-center">
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
@@ -70,11 +92,36 @@ const Footer = () => {
                 </div>
                 <a href="tel:+1234567890" className="text-blue-100 hover:text-white transition-colors">+91 9628912345<br></ br>+91 929755463</a>
               </li>
-              <li className="flex items-center">
-                <div className="bg-white/10 p-2 rounded-lg mr-3">
+              <li className="flex items-start">
+                <div className="bg-white/10 p-2 rounded-lg mr-3 mt-1">
                   <FaEnvelope className="text-white" />
                 </div>
-                <a href="mailto:info@navigatio.com" className="text-blue-100 hover:text-white transition-colors">info@navigatio.com</a>
+                <div>
+                  <p>Email:</p>
+                  <div className="flex space-x-2 mt-1">
+                    <a 
+                      href="https://mail.google.com/mail/?view=cm&fs=1&to=info@navigatio.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-100 hover:text-white transition-colors hover:underline text-sm flex items-center"
+                      title="Compose in Gmail"
+                    >
+                      <img src="https://www.google.com/gmail/about/static/images/logo-gmail.png" alt="Gmail" className="h-4 w-4 mr-1" />
+                      Gmail
+                    </a>
+                    <span className="text-gray-400">|</span>
+                    <a 
+                      href="https://outlook.office.com/mail/deeplink/compose?to=info@navigatio.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-100 hover:text-white transition-colors hover:underline text-sm flex items-center"
+                      title="Compose in Outlook"
+                    >
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg/1200px-Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg.png" alt="Outlook" className="h-4 w-4 mr-1" />
+                      Outlook
+                    </a>
+                  </div>
+                </div>
               </li>
             </ul>
           </div>
