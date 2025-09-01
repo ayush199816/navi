@@ -5,6 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { FiUser, FiCalendar, FiCreditCard, FiMapPin } from 'react-icons/fi';
 import { addToCart, removeFromCart, updateQuantity, clearCart } from '../../redux/slices/cartSlice';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import axios from '../../utils/axiosConfig';
 import { toast } from 'react-toastify';
 
@@ -16,6 +17,7 @@ const Checkout = () => {
   const user = useSelector(state => state.auth.user);
   const [sightseeings, setSightseeings] = useState({});
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
   
   // Calculate pax counts based on the new requirements
   const calculatePaxCounts = () => {
@@ -352,11 +354,11 @@ const Checkout = () => {
                             <div className="mt-1">
                               {hasOffer ? (
                                 <div>
-                                  <span className="text-gray-500 line-through mr-2">${(item.price * itemPax).toFixed(2)}</span>
-                                  <span className="text-green-600 font-medium">${itemTotal.toFixed(2)}</span>
+                                  <span className="text-gray-500 line-through mr-2">{formatPrice(item.price * itemPax)}</span>
+                                  <span className="text-green-600 font-medium">{formatPrice(itemTotal)}</span>
                                 </div>
                               ) : (
-                                <span>${itemTotal.toFixed(2)}</span>
+                                <span>{formatPrice(itemTotal)}</span>
                               )}
                             </div>
                           </div>
@@ -376,7 +378,7 @@ const Checkout = () => {
                 <div className="border-t pt-4 mt-4">
                   <div className="flex justify-between text-lg font-medium text-gray-900">
                     <span>Total</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>{formatPrice(totalPrice)}</span>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
                     {totalPax} {totalPax === 1 ? 'person' : 'people'} in total

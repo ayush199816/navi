@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
-import { FiCalendar, FiUsers, FiPlus, FiMinus, FiShoppingCart, FiCreditCard, FiMapPin, FiClock, FiInfo, FiStar, FiPackage, FiTag } from 'react-icons/fi';
+import { FiCalendar, FiUsers, FiPlus, FiMinus, FiShoppingCart, FiCreditCard, FiMapPin, FiClock, FiInfo, FiStar, FiPackage, FiTag, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { useCurrency } from '../contexts/CurrencyContext';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
 import { getGuestSightseeingById, clearCurrentSightseeing, fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
@@ -16,6 +17,17 @@ const SightseeingDetailPage = () => {
   const dispatch = useDispatch();
   const [pax, setPax] = useState(1);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const currencyDropdownRef = useRef(null);
+  
+  // Get currency context
+  const {
+    selectedCurrency,
+    setSelectedCurrency,
+    CURRENCY_SYMBOLS,
+    formatPrice,
+    isLoadingRates
+  } = useCurrency();
   
   const { 
     currentSightseeing, 
@@ -28,6 +40,20 @@ const SightseeingDetailPage = () => {
   }));
   
   const sightseeing = currentSightseeing || {};
+
+  // Handle click outside to close currency dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target)) {
+        setShowCurrencyDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [currencyDropdownRef]);
 
   useEffect(() => {
     if (!id) {
@@ -79,18 +105,28 @@ const SightseeingDetailPage = () => {
       ? sightseeing.offerPrice 
       : sightseeing.price;
       
+    // Ensure we're storing prices in USD
+    const priceInUSD = sightseeing.priceCurrency === 'USD' 
+      ? sightseeing.price 
+      : sightseeing.price / (sightseeing.exchangeRate || 1);
+      
+    const offerPriceInUSD = sightseeing.offerPrice && sightseeing.priceCurrency === 'USD'
+      ? sightseeing.offerPrice
+      : sightseeing.offerPrice / (sightseeing.exchangeRate || 1);
+      
     const cartItem = {
       id: uniqueId,
       originalId: sightseeing._id, // Keep reference to the original sightseeing ID
       name: sightseeing.name,
-      price: sightseeing.price, // Store original price
-      offerPrice: sightseeing.offerPrice, // Store offer price separately
+      price: priceInUSD, // Store price in USD
+      priceCurrency: 'USD', // Explicitly set to USD
+      offerPrice: sightseeing.offerPrice ? offerPriceInUSD : undefined, // Store offer price in USD if available
       quantity: 1, // Each selection is a separate entry
       pax: pax, // Store pax separately
       date: selectedDate,
       image: sightseeing.images?.[0],
       type: 'sightseeing',
-      totalPrice: price * pax, // Calculate total using the appropriate price
+      totalPrice: (sightseeing.offerPrice ? offerPriceInUSD : priceInUSD) * pax, // Calculate total in USD
       hasOffer: sightseeing.offerPrice !== null && sightseeing.offerPrice !== undefined
     };
     
@@ -127,10 +163,48 @@ const SightseeingDetailPage = () => {
     );
   }
 
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <SightseeingNav sightseeing={sightseeing} />
+      <SightseeingNav sightseeing={sightseeing}>
+        <div className="flex items-center">
+          {/* Currency Selector */}
+          <div className="relative" ref={currencyDropdownRef}>
+            <button 
+              onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors focus:outline-none"
+            >
+              <FiGlobe className="w-5 h-5" />
+              <span className="font-medium">{selectedCurrency}</span>
+              {showCurrencyDropdown ? (
+                <FiChevronUp className="w-4 h-4" />
+              ) : (
+                <FiChevronDown className="w-4 h-4" />
+              )}
+            </button>
+            
+            {showCurrencyDropdown && (
+              <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg overflow-hidden z-50 border border-gray-200">
+                <div className="py-1">
+                  {Object.entries(CURRENCY_SYMBOLS).map(([code, symbol]) => (
+                    <button
+                      key={code}
+                      onClick={() => {
+                        setSelectedCurrency(code);
+                        setShowCurrencyDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                    >
+                      {code} ({symbol})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </SightseeingNav>
       
       <div className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
@@ -207,13 +281,13 @@ const SightseeingDetailPage = () => {
                       <div className="text-3xl font-bold text-gray-900 mb-1">
                         {sightseeing.offerPrice ? (
                           <>
-                            {sightseeing.offerPriceCurrency || 'USD'} {sightseeing.offerPrice.toFixed(2)}
+                            {formatPrice(sightseeing.offerPrice)}
                             <span className="ml-2 text-sm text-gray-500 line-through">
-                              {sightseeing.priceCurrency || 'USD'} {sightseeing.price?.toFixed(2)}
+                              {formatPrice(sightseeing.price)}
                             </span>
                           </>
                         ) : (
-                          `${sightseeing.priceCurrency || 'USD'} ${sightseeing.price?.toFixed(2) || '0.00'}`
+                          formatPrice(sightseeing.price || 0)
                         )}
                       </div>
                       <p className="text-sm text-gray-600">per person</p>
@@ -265,13 +339,13 @@ const SightseeingDetailPage = () => {
                         <div className="flex justify-between mb-2">
                           <span className="text-sm text-gray-600">Price per person</span>
                           <span className="text-sm font-medium">
-                            ${sightseeing.offerPrice ? sightseeing.offerPrice.toFixed(2) : sightseeing.price?.toFixed(2) || '0.00'}
+                            {formatPrice(sightseeing.offerPrice || sightseeing.price || 0)}
                           </span>
                         </div>
                         <div className="flex justify-between text-lg font-semibold">
                           <span>Total</span>
                           <span className="text-blue-600">
-                            ${((sightseeing.offerPrice || sightseeing.price || 0) * pax).toFixed(2)}
+                            {formatPrice((sightseeing.offerPrice || sightseeing.price || 0) * pax)}
                           </span>
                         </div>
                       </div>
