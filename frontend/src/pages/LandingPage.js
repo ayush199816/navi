@@ -216,7 +216,9 @@ const LandingPage = () => {
             description: 'Experience the island of gods with its lush jungles, ancient temples, and pristine beaches that will take your breath away.',
             rating: 4.8,
             price: 1299,
-            duration: '7 Days / 6 Nights'
+            priceCurrency: 'USD',
+            duration: '7 Days / 6 Nights',
+            highlights: ['Private guided tours', 'Luxury accommodations', 'Cultural experiences']
           },
           {
             id: 'fallback-2',
@@ -226,7 +228,9 @@ const LandingPage = () => {
             description: 'Discover the pearl of the Andaman with its crystal-clear waters, vibrant nightlife, and rich cultural heritage.',
             rating: 4.7,
             price: 1599,
-            duration: '8 Days / 7 Nights'
+            priceCurrency: 'USD',
+            duration: '8 Days / 7 Nights',
+            highlights: ['Island hopping', 'Beachfront resorts', 'Local cuisine tours']
           }
         ]);
       } finally {
@@ -272,15 +276,8 @@ const LandingPage = () => {
     setTimeout(() => setIsSubscribed(false), 5000);
   };
 
-  // Navigation Bar Component
+  // Minimal Navigation Bar Component
   const NavigationBar = React.memo(() => {
-    // Get currency context
-    const {
-      selectedCurrency,
-      setSelectedCurrency,
-      CURRENCY_SYMBOLS
-    } = useCurrency();
-
     const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
     const currencyDropdownRef = useRef(null);
 
@@ -309,50 +306,35 @@ const LandingPage = () => {
               </span>
             </Link>
 
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Home</Link>
-              <Link to="/tours" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Tours</Link>
-              <Link to="/destinations" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Destinations</Link>
-              <Link to="/about" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>About</Link>
-              <Link to="/contact" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Contact</Link>
+            {/* Currency Selector */}
+            <div className="relative" ref={currencyDropdownRef}>
+              <button 
+                onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                className="flex items-center space-x-2 px-3 py-1.5 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all"
+              >
+                <FiGlobe className="w-4 h-4" />
+                <span className="font-medium">{selectedCurrency}</span>
+                <FiChevronDown className={`w-4 h-4 transition-transform ${showCurrencyDropdown ? 'transform rotate-180' : ''}`} />
+              </button>
               
-              {/* Currency Selector */}
-              <div className="relative ml-4" ref={currencyDropdownRef}>
-                <button 
-                  onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'} transition-colors focus:outline-none`}
-                >
-                  <FiGlobe className="w-5 h-5" />
-                  <span className="font-medium">{selectedCurrency}</span>
-                  <FiChevronDown className={`w-4 h-4 transition-transform ${showCurrencyDropdown ? 'transform rotate-180' : ''}`} />
-                </button>
-                
-                {showCurrencyDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg overflow-hidden z-50 border border-gray-200">
-                    <div className="py-1">
-                      {Object.entries(CURRENCY_SYMBOLS).map(([code, symbol]) => (
-                        <button
-                          key={code}
-                          onClick={() => {
-                            setSelectedCurrency(code);
-                            setShowCurrencyDropdown(false);
-                          }}
-                          className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
-                        >
-                          {code} ({symbol})
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </nav>
-
-            {/* Mobile menu button */}
-            <button className="md:hidden text-white focus:outline-none">
-              <FiMenu className="w-6 h-6" />
-            </button>
+              {showCurrencyDropdown && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-1 z-50">
+                  {Object.entries(CURRENCY_SYMBOLS).map(([code, symbol]) => (
+                    <button
+                      key={code}
+                      onClick={() => {
+                        setSelectedCurrency(code);
+                        setShowCurrencyDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm flex items-center ${selectedCurrency === code ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                    >
+                      <span className="mr-2">{symbol}</span>
+                      {code}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -360,7 +342,7 @@ const LandingPage = () => {
   });
 
   // Memoized HeroSection component to prevent unnecessary re-renders
-  const HeroSection = React.memo(({ destinations, currentSlide, loading, setCurrentSlide }) => {
+  const HeroSection = React.memo(({ destinations, currentSlide, loading, setCurrentSlide, formatPrice }) => {
     // If still loading, show a simple hero
     if (loading) {
       return (
@@ -472,8 +454,8 @@ const LandingPage = () => {
                   </div>
                 )}
                 {currentExperience.price && (
-                  <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                    From ${currentExperience.offerPrice || currentExperience.price}
+                  <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full flex items-center">
+                    <span className="font-medium">From {formatPrice(currentExperience.price)}</span>
                   </div>
                 )}
               </div>
@@ -642,7 +624,7 @@ const LandingPage = () => {
                     <div className="flex justify-between items-center mb-4">
                       <div>
                         <span className="text-gray-500 text-sm">From</span>
-                        <p className="text-2xl font-bold text-blue-600">{formatPrice(destination.price)}</p>
+                        <p className="text-2xl font-bold text-blue-600">{formatPrice(destination.price, selectedCurrency)}</p>
                       </div>
                       <span className="text-gray-500 text-sm">{destination.duration}</span>
                     </div>
@@ -1033,6 +1015,7 @@ const LandingPage = () => {
         currentSlide={currentSlide}
         loading={loading}
         setCurrentSlide={setCurrentSlide}
+        formatPrice={formatPrice}
       />
       
       {/* 2. Popular Sightseeing Section */}
