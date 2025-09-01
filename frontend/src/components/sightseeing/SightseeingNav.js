@@ -4,7 +4,7 @@ import { FiMapPin, FiInfo, FiImage, FiStar, FiArrowLeft, FiShoppingCart, FiUser 
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 
-const SightseeingNav = ({ sightseeing }) => {
+const SightseeingNav = ({ sightseeing, children }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const location = useLocation();
@@ -50,14 +50,17 @@ const SightseeingNav = ({ sightseeing }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link
-              to="/"
-              className="text-gray-600 hover:text-gray-900 mr-6 flex items-center"
-            >
-              <FiArrowLeft className="h-5 w-5 mr-1" />
-              Back to Home
+            <Link to="/tours" className="flex items-center">
+              <FiArrowLeft className="h-6 w-6 text-gray-600 mr-2" />
+              <span className="text-xl font-semibold text-gray-800">Back to Tours</span>
             </Link>
           </div>
+          
+          {children && (
+            <div className="flex items-center space-x-4">
+              {children}
+            </div>
+          )}
           
           <div className="hidden md:flex items-center space-x-8">
             <div className="flex items-center space-x-4">

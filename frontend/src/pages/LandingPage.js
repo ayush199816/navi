@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useContext } from 'react';
+import { useCurrency } from '../contexts/CurrencyContext';
 import { Link } from 'react-router-dom';
 import { 
   FiMapPin, 
@@ -147,6 +148,19 @@ const howItWorks = [
   }
 ];
 
+// Currency symbols mapping
+const CURRENCY_SYMBOLS = {
+  'USD': '$',
+  'INR': '₹',
+  'SGD': 'S$',
+  'THB': '฿',
+  'AED': 'د.إ',
+  'IDR': 'Rp',
+  'MYR': 'RM',
+  'CAD': 'C$',
+  'VND': '₫'
+};
+
 const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -155,8 +169,32 @@ const LandingPage = () => {
   const [error, setError] = useState(null);
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const carouselRef = useRef(null);
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const currencyDropdownRef = useRef(null);
   
+  // Get currency context
+  const {
+    selectedCurrency,
+    setSelectedCurrency,
+    formatPrice,
+    CURRENCY_SYMBOLS,
+    isLoadingRates
+  } = useCurrency();
+  
+  // Handle click outside to close currency dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target)) {
+        setShowCurrencyDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [currencyDropdownRef]);
+
   // Fetch guest sightseeing data
   useEffect(() => {
     const fetchDestinations = async () => {
@@ -233,6 +271,93 @@ const LandingPage = () => {
     // Reset subscription message after 5 seconds
     setTimeout(() => setIsSubscribed(false), 5000);
   };
+
+  // Navigation Bar Component
+  const NavigationBar = React.memo(() => {
+    // Get currency context
+    const {
+      selectedCurrency,
+      setSelectedCurrency,
+      CURRENCY_SYMBOLS
+    } = useCurrency();
+
+    const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+    const currencyDropdownRef = useRef(null);
+
+    // Handle click outside to close currency dropdown
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target)) {
+          setShowCurrencyDropdown(false);
+        }
+      };
+      
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, []);
+
+    return (
+      <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center">
+            {/* Logo */}
+            <Link to="/" className="flex items-center">
+              <span className={`text-2xl font-bold ${isScrolled ? 'text-gray-800' : 'text-white'}`}>
+                NAVIGATIO
+              </span>
+            </Link>
+
+            {/* Navigation Links */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Home</Link>
+              <Link to="/tours" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Tours</Link>
+              <Link to="/destinations" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Destinations</Link>
+              <Link to="/about" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>About</Link>
+              <Link to="/contact" className={`${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'}`}>Contact</Link>
+              
+              {/* Currency Selector */}
+              <div className="relative ml-4" ref={currencyDropdownRef}>
+                <button 
+                  onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-200'} transition-colors focus:outline-none`}
+                >
+                  <FiGlobe className="w-5 h-5" />
+                  <span className="font-medium">{selectedCurrency}</span>
+                  <FiChevronDown className={`w-4 h-4 transition-transform ${showCurrencyDropdown ? 'transform rotate-180' : ''}`} />
+                </button>
+                
+                {showCurrencyDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg overflow-hidden z-50 border border-gray-200">
+                    <div className="py-1">
+                      {Object.entries(CURRENCY_SYMBOLS).map(([code, symbol]) => (
+                        <button
+                          key={code}
+                          onClick={() => {
+                            setSelectedCurrency(code);
+                            setShowCurrencyDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                        >
+                          {code} ({symbol})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </nav>
+
+            {/* Mobile menu button */}
+            <button className="md:hidden text-white focus:outline-none">
+              <FiMenu className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      </header>
+    );
+  });
 
   // Memoized HeroSection component to prevent unnecessary re-renders
   const HeroSection = React.memo(({ destinations, currentSlide, loading, setCurrentSlide }) => {
@@ -517,7 +642,7 @@ const LandingPage = () => {
                     <div className="flex justify-between items-center mb-4">
                       <div>
                         <span className="text-gray-500 text-sm">From</span>
-                        <p className="text-2xl font-bold text-gray-900">${destination.price}</p>
+                        <p className="text-2xl font-bold text-blue-600">{formatPrice(destination.price)}</p>
                       </div>
                       <span className="text-gray-500 text-sm">{destination.duration}</span>
                     </div>
@@ -899,6 +1024,9 @@ const LandingPage = () => {
   // Main component return
   return (
     <div key="landing-page" className="overflow-x-hidden">
+      {/* Navigation Bar */}
+      <NavigationBar />
+      
       {/* 1. Hero Section */}
       <HeroSection 
         destinations={destinations}

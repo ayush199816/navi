@@ -4,11 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
 import { removeFromCart, updateQuantity } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 export default function CartPage() {
   const { items, total, count } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { formatPrice } = useCurrency();
 
   const handleRemove = (id) => {
     dispatch(removeFromCart(id));
@@ -67,7 +69,7 @@ export default function CartPage() {
                         {item.name}
                       </h4>
                       <p className="ml-4 text-sm font-medium text-gray-900">
-                        ${item.price.toFixed(2)}
+                        {formatPrice(item.price)}
                       </p>
                     </div>
                     <div className="flex items-center mt-2">
@@ -100,7 +102,7 @@ export default function CartPage() {
           <div className="px-4 py-4 sm:px-6 border-t border-gray-200">
             <div className="flex justify-between text-base font-medium text-gray-900">
               <p>Subtotal</p>
-              <p>${total.toFixed(2)}</p>
+              <p>{formatPrice(total)}</p>
             </div>
             <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
             <div className="mt-6">

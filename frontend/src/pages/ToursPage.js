@@ -1,22 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiMapPin, FiStar } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 const ToursPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const currencyDropdownRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // Get currency context
+  const {
+    selectedCurrency,
+    setSelectedCurrency,
+    formatPrice,
+    CURRENCY_SYMBOLS,
+    isLoadingRates
+  } = useCurrency();
   
   const { sightseeings, loading, error } = useSelector((state) => state.guestSightseeings);
   
   useEffect(() => {
     dispatch(fetchGuestSightseeings({ isActive: true }));
-  }, [dispatch]);
+    
+    // Handle click outside to close currency dropdown
+    const handleClickOutside = (event) => {
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target)) {
+        setShowCurrencyDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dispatch, currencyDropdownRef]);
   
   const handleSearch = (e) => {
     e.preventDefault();
@@ -43,7 +67,44 @@ const ToursPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <SightseeingNav />
+      <SightseeingNav>
+        <div className="flex items-center">
+        {/* Currency Selector */}
+        <div className="relative ml-4" ref={currencyDropdownRef}>
+          <button 
+            onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+            className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors focus:outline-none"
+          >
+            <FiGlobe className="w-5 h-5" />
+            <span className="font-medium">{selectedCurrency}</span>
+            {showCurrencyDropdown ? (
+              <FiChevronUp className="w-4 h-4" />
+            ) : (
+              <FiChevronDown className="w-4 h-4" />
+            )}
+          </button>
+          
+          {showCurrencyDropdown && (
+            <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg overflow-hidden z-50 border border-gray-200">
+              <div className="py-1">
+                {Object.entries(CURRENCY_SYMBOLS).map(([code, symbol]) => (
+                  <button
+                    key={code}
+                    onClick={() => {
+                      setSelectedCurrency(code);
+                      setShowCurrencyDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                  >
+                    {code} ({symbol})
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        </div>
+      </SightseeingNav>
       
       <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -155,15 +216,15 @@ const ToursPage = () => {
                         {sightseeing.offerPrice && sightseeing.offerPrice < sightseeing.price ? (
                           <div>
                             <span className="text-lg font-bold text-gray-900">
-                              {sightseeing.offerPriceCurrency || 'USD'} {sightseeing.offerPrice.toFixed(2)}
+                              {formatPrice(sightseeing.offerPrice)}
                             </span>
                             <span className="ml-2 text-sm text-gray-500 line-through">
-                              {sightseeing.priceCurrency || 'USD'} {sightseeing.price.toFixed(2)}
+                              {formatPrice(sightseeing.price)}
                             </span>
                           </div>
                         ) : (
                           <span className="text-lg font-bold text-gray-900">
-                            {sightseeing.price ? `${sightseeing.priceCurrency || 'USD'} ${sightseeing.price.toFixed(2)}` : 'Price on request'}
+                            {sightseeing.price ? formatPrice(sightseeing.price) : 'Price on request'}
                           </span>
                         )}
                       </div>

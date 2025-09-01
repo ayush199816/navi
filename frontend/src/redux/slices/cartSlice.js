@@ -37,9 +37,11 @@ const cartSlice = createSlice({
       state.total = state.items.reduce((total, item) => {
         if (item.type === 'sightseeing') {
           // Use offerPrice if available, otherwise use regular price
-          const itemPrice = item.hasOffer ? item.offerPrice : item.price;
+          // Both prices should be in USD at this point
+          const itemPrice = item.hasOffer ? (item.offerPrice || item.price) : item.price;
           return total + (item.totalPrice || (itemPrice * (item.pax || 1)));
         }
+        // For non-sightseeing items, ensure we're using USD prices
         return total + (item.price * item.quantity);
       }, 0);
     },

@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './redux/slices/authSlice';
@@ -207,13 +208,25 @@ const AgentAuthWrapper = ({ children }) => {
 
 function App() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
+  const cart = useSelector((state) => state.cart);
+  const [showCart, setShowCart] = useState(false);
   
   useEffect(() => {
+    console.log('ProtectedRoute - Checking access:', {
+      isAuthenticated,
+      user: user ? { role: user.role, user_type: user.user_type } : null,
+      currentPath: location.pathname,
+      loading
+    });
+    
     dispatch(loadUser());
   }, [dispatch]);
   
   return (
-    <>
+    <CurrencyProvider>
       <Modal />
       <Routes>
         {/* Public Routes */}
@@ -414,7 +427,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </>
+    </CurrencyProvider>
   );
 }
 
