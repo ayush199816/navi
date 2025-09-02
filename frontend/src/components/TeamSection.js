@@ -7,7 +7,7 @@ const teamMembers = [
     name: 'Anitya',
     role: 'CEO & Founder',
     image: 'https://res.cloudinary.com/dqlcup2s7/image/upload/v1756216485/Tarun_wxdza0.jpg',
-    bio: 'Travel enthusiast with over 15 years of experience in the tourism industry. Anitya founded Navigatio with a vision to make travel planning seamless and enjoyable for everyone.',
+    bio: 'Travel enthusiast with over 15 years of experience in the tourism industry. Anitya founded BookMySight.com with a vision to make travel planning seamless and enjoyable for everyone.',
     email: 'anitya.india@gmail.com',
     social: {
       linkedin: 'https://www.linkedin.com/in/',
@@ -70,10 +70,10 @@ const TeamSection = () => {
           className="text-center mb-16"
         >
           <span className="inline-block text-blue-600 bg-blue-100 px-4 py-1 rounded-full text-sm font-medium mb-4">Our Team</span>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Meet the Navigatio Team</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Meet the BookMySight.com Team</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-cyan-400 mx-auto mb-6 rounded-full"></div>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            The passionate individuals behind Navigatio who work tirelessly to make your travel dreams a reality.
+            The passionate individuals behind BookMySight.com who work tirelessly to make your travel dreams a reality.
           </p>
         </motion.div>
 

@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* About Section */}
           <div className="mb-8 md:mb-0">
-            <h3 className="text-2xl font-bold mb-6 text-white">Navigatio</h3>
+            <h3 className="text-2xl font-bold mb-6 text-white">BookMySight.com</h3>
             <p className="text-blue-100 mb-6 leading-relaxed">
               Your trusted travel companion for discovering the world's most amazing destinations and experiences.
             </p>
@@ -159,7 +159,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-blue-100 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} Navigatio. All rights reserved.
+            &copy; {new Date().getFullYear()} BookMySight.com. All rights reserved.
           </p>
         </div>
       </div>
