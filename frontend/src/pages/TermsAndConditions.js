@@ -10,12 +10,12 @@ const TermsAndConditions = () => {
           Last Updated: 25th August 2025
         </Typography>
         <Typography variant="subtitle1" gutterBottom>
-          Company: Navigatio Asia DMC
+          Company: BookMySight.com
         </Typography>
         
         <Box mt={4}>
           <Typography paragraph>
-            At Navigatio Asia DMC (“Company,” “we,” “our,” or “us”), we are committed to safeguarding the privacy of our guests (B2C customers) and agents/partners (B2B). This Privacy Policy explains how we collect, use, disclose, and protect your personal information when you use our sightseeing and travel portal.
+            At BookMySight.com (“Company,” “we,” “our,” or “us”), we are committed to safeguarding the privacy of our guests (B2C customers) and agents/partners (B2B). This Privacy Policy explains how we collect, use, disclose, and protect your personal information when you use our sightseeing and travel portal.
           </Typography>
 
           <Typography variant="h6" mt={3} mb={2}>
@@ -103,7 +103,7 @@ const TermsAndConditions = () => {
           Last Updated: 25th August 2025
         </Typography>
         <Typography variant="subtitle1" gutterBottom>
-          Company: Navigatio Asia DMC
+          Company: BookMySight.com
         </Typography>
         
         <Box mt={4}>
@@ -168,12 +168,12 @@ const TermsAndConditions = () => {
           Last Updated: 25th August 2025
         </Typography>
         <Typography variant="subtitle1" gutterBottom>
-          Company: Navigatio Asia DMC
+          Company: BookMySight.com
         </Typography>
         
         <Box mt={4}>
           <Typography paragraph>
-            Welcome to Navigatio Asia DMC. By using our portal, you agree to the following terms:
+            Welcome to BookMySight.com. By using our portal, you agree to the following terms:
           </Typography>
 
           <Typography variant="h6" mt={3} mb={2}>
@@ -225,7 +225,7 @@ const TermsAndConditions = () => {
             6. Responsibilities
           </Typography>
           <Typography paragraph>
-            Navigatio Asia DMC acts as an aggregator and facilitator of services provided by third-party vendors.
+            BookMySight.com acts as an aggregator and facilitator of services provided by third-party vendors.
             We are not liable for acts, delays, or errors of third-party suppliers but will provide support in dispute resolution.
           </Typography>
 

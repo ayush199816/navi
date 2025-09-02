@@ -302,7 +302,7 @@ const LandingPage = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <span className={`text-2xl font-bold ${isScrolled ? 'text-gray-800' : 'text-white'}`}>
-                NAVIGATIOASIA 
+                BookMySight.com 
               </span>
             </Link>
 
@@ -511,7 +511,7 @@ const LandingPage = () => {
     <section className="py-20 bg-gradient-to-b from-white to-blue-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-20 max-w-4xl mx-auto">
-          <span className="text-blue-600 font-semibold mb-4 inline-block">WHY CHOOSE NAVIGATIO</span>
+          <span className="text-blue-600 font-semibold mb-4 inline-block">WHY CHOOSE BookMySight.com</span>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Your Journey, Our Expertise</h2>
           <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
           <p className="text-xl text-gray-600">
@@ -540,7 +540,7 @@ const LandingPage = () => {
             <h3 className="text-2xl font-bold mb-4">Still Not Convinced?</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
               Join thousands of satisfied travelers who have trusted us with their journeys. 
-              Experience the Navigatio difference today with our best price guarantee.
+              Experience the BookMySight.com difference today with our best price guarantee.
             </p>
             <Link to="/tours">
               <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
