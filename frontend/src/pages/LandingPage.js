@@ -302,7 +302,7 @@ const LandingPage = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <span className={`text-2xl font-bold ${isScrolled ? 'text-gray-800' : 'text-white'}`}>
-                NAVIGATIO
+                NAVIGATIOASIA 
               </span>
             </Link>
 
@@ -453,9 +453,12 @@ const LandingPage = () => {
                     <FaStar className="text-yellow-400 mr-1" /> {currentExperience.rating.toFixed(1)}
                   </div>
                 )}
-                {currentExperience.price && (
+                {(currentExperience.offerPrice || currentExperience.price) && (
                   <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full flex items-center">
-                    <span className="font-medium">From {formatPrice(currentExperience.price)}</span>
+                    <span className="font-medium">From {formatPrice(currentExperience.offerPrice || currentExperience.price)}</span>
+                    {currentExperience.offerPrice && currentExperience.price > currentExperience.offerPrice && (
+                      <span className="ml-2 text-sm line-through text-white/70">{formatPrice(currentExperience.price)}</span>
+                    )}
                   </div>
                 )}
               </div>
@@ -623,8 +626,17 @@ const LandingPage = () => {
                   <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <div>
-                        <span className="text-gray-500 text-sm">From</span>
-                        <p className="text-2xl font-bold text-blue-600">{formatPrice(destination.price, selectedCurrency)}</p>
+                        <div>
+                          <span className="text-gray-500 text-sm">From</span>
+                          <p className="text-2xl font-bold text-blue-600">
+                            {formatPrice(destination.offerPrice || destination.price, selectedCurrency)}
+                            {destination.offerPrice && destination.price > destination.offerPrice && (
+                              <span className="ml-2 text-sm font-normal text-gray-500 line-through">
+                                {formatPrice(destination.price, selectedCurrency)}
+                              </span>
+                            )}
+                          </p>
+                        </div>
                       </div>
                       <span className="text-gray-500 text-sm">{destination.duration}</span>
                     </div>
