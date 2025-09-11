@@ -30,8 +30,9 @@ export const loadUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     const token = localStorage.getItem('token');
     
+    // Don't reject if there's no token or it's expired, just return null
     if (!token || isTokenExpired(token)) {
-      return rejectWithValue('No token or token expired');
+      return null;
     }
     
     try {
@@ -40,7 +41,11 @@ export const loadUser = createAsyncThunk(
       return res.data;
     } catch (err) {
       localStorage.removeItem('token');
-      return rejectWithValue(err.response?.data?.message || 'Failed to load user');
+      // Only return error if it's not a 401 (Unauthorized) error
+      if (err.response?.status !== 401) {
+        return rejectWithValue(err.response?.data?.message || 'Failed to load user');
+      }
+      return null;
     }
   }
 );
@@ -190,6 +195,13 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    clearAuthState: (state) => {
+      state.loading = false;
+      state.error = null;
+      state.isAuthenticated = false;
+      state.user = null;
+      state.token = null;
     }
   },
   extraReducers: (builder) => {
@@ -199,9 +211,14 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(loadUser.fulfilled, (state, action) => {
-        state.isAuthenticated = true;
+        if (action.payload) {
+          state.isAuthenticated = true;
+          state.user = action.payload.data || action.payload;
+        } else {
+          state.isAuthenticated = false;
+          state.user = null;
+        }
         state.loading = false;
-        state.user = action.payload.data;
       })
       .addCase(loadUser.rejected, (state, action) => {
         state.token = null;
@@ -287,5 +304,5 @@ const authSlice = createSlice({
   }
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, clearAuthState } = authSlice.actions;
 export default authSlice.reducer;

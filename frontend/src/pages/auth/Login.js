@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { login } from '../../redux/slices/authSlice';
+import { login, clearAuthState } from '../../redux/slices/authSlice';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -11,6 +11,9 @@ const Login = () => {
   const { isAuthenticated, loading, error, user } = useSelector(state => state.auth);
 
   useEffect(() => {
+    // Clear any previous auth state when component mounts
+    dispatch(clearAuthState());
+
     // Redirect if already authenticated
     if (isAuthenticated && user) {
       // Redirect based on user role
@@ -32,7 +35,7 @@ const Login = () => {
         navigate('/dashboard');
       }
     }
-  }, [isAuthenticated, navigate, user]);
+  }, [isAuthenticated, navigate, user, dispatch]);
 
   // Validation schema
   const validationSchema = Yup.object({
@@ -60,7 +63,7 @@ const Login = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
-          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link to="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
             create a new account
           </Link>
         </p>

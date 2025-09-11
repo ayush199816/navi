@@ -29,6 +29,7 @@ import PendingApproval from './pages/auth/PendingApproval';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import TermsAndConditions from './pages/TermsAndConditions';
+import ContactUs from './pages/ContactUs';
 
 // Agent Pages
 import AgentDashboard from './pages/agent/Dashboard';
@@ -239,6 +240,8 @@ function App() {
         <Route path="/sightseeing/:id" element={<SightseeingDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="*" element={<NotFound />} />
         
         {/* Agent Onboarding Flow */}
         <Route path="/onboarding" element={
