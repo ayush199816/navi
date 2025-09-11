@@ -83,7 +83,6 @@ import api from '../utils/api';
 import { motion } from 'framer-motion';
 import WorldClock from '../components/WorldClock';
 import CurrencyConverter from '../components/CurrencyConverter';
-import TeamSection from '../components/TeamSection';
 import Footer from '../components/Footer';
 
 // Feature cards data - Three key features for Why Choose Us
@@ -787,9 +786,6 @@ const LandingPage = () => {
                     Explore Destinations
                   </button>
                 </Link>
-                <button className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-lg transition-all duration-300">
-                  Contact Our Experts
-                </button>
               </div>
             </div>
           </div>
@@ -1059,9 +1055,6 @@ const LandingPage = () => {
       
       {/* 6. Testimonials Section */}
       <TestimonialsSection />
-      
-      {/* 7. Team Section */}
-      <TeamSection />
       
       {/* 8. CTA Section */}
       <CTASection />

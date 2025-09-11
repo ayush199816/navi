@@ -38,9 +38,6 @@ const Footer = () => {
               <li><a href="#currency-converter" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Currency Converter
               </a></li>
-              <li><a href="#team" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Our Team
-              </a></li>
               <li><a href="/terms" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Terms & Conditions
               </a></li>
