@@ -41,7 +41,7 @@ const PostLoginRedirect = () => {
       case 'sales':
         navigate('/sales/dashboard', { replace: true });
         break;
-      case 'operation':
+      case 'operations':
         navigate('/operations/dashboard', { replace: true });
         break;
       default:
