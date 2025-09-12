@@ -49,30 +49,55 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   // Initialize form data when propSightseeing changes
   useEffect(() => {
     if (propSightseeing) {
-      setFormData({
-        name: propSightseeing.name || '',
-        country: propSightseeing.country || '',
-        description: propSightseeing.description || '',
-        price: propSightseeing.price || '',
-        priceCurrency: propSightseeing.priceCurrency || 'USD',
-        offerPrice: propSightseeing.offerPrice || '',
-        offerPriceCurrency: propSightseeing.offerPriceCurrency || 'USD',
-        duration: propSightseeing.duration || 'Not specified',
-        inclusions: Array.isArray(propSightseeing.inclusions) && propSightseeing.inclusions.length > 0 
-          ? propSightseeing.inclusions 
-          : ['No inclusions specified'],
-        isActive: propSightseeing.isActive !== undefined ? propSightseeing.isActive : true,
-        images: propSightseeing.images || [],
-        keywords: Array.isArray(propSightseeing.keywords) ? propSightseeing.keywords : [],
-        aboutTour: propSightseeing.aboutTour || 'No detailed description available.',
-        highlights: Array.isArray(propSightseeing.highlights) && propSightseeing.highlights.length > 0 
-          ? propSightseeing.highlights 
-          : ['No highlights available'],
-        meetingPoint: propSightseeing.meetingPoint || 'To be advised upon booking',
-        whatToBring: Array.isArray(propSightseeing.whatToBring) && propSightseeing.whatToBring.length > 0
-          ? propSightseeing.whatToBring
-          : ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+      console.log('Raw propSightseeing in form:', JSON.parse(JSON.stringify(propSightseeing)));
+      
+      // Create a new form data object with all fields from propSightseeing
+      const newFormData = { ...propSightseeing };
+      
+      // Only set defaults for fields that are actually undefined or null
+      const defaultValues = {
+        name: '',
+        country: '',
+        description: '',
+        price: '',
+        priceCurrency: 'USD',
+        offerPrice: '',
+        offerPriceCurrency: 'USD',
+        duration: 'Not specified',
+        inclusions: ['No inclusions specified'],
+        isActive: true,
+        images: [],
+        keywords: [],
+        aboutTour: 'No detailed description available.',
+        highlights: ['No highlights available'],
+        meetingPoint: 'To be advised upon booking',
+        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+      };
+      
+      // Apply defaults only to undefined fields
+      Object.keys(defaultValues).forEach(key => {
+        if (newFormData[key] === undefined || newFormData[key] === null) {
+          newFormData[key] = defaultValues[key];
+        }
       });
+      
+      // Handle array fields
+      if (!Array.isArray(newFormData.inclusions) || newFormData.inclusions.length === 0) {
+        newFormData.inclusions = ['No inclusions specified'];
+      }
+      if (!Array.isArray(newFormData.keywords)) {
+        newFormData.keywords = [];
+      }
+      if (!Array.isArray(newFormData.highlights) || newFormData.highlights.length === 0) {
+        newFormData.highlights = ['No highlights available'];
+      }
+      if (!Array.isArray(newFormData.whatToBring) || newFormData.whatToBring.length === 0) {
+        newFormData.whatToBring = ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'];
+      }
+      
+      console.log('Setting form data:', newFormData);
+      
+      setFormData(newFormData);
       setImagePreviews(propSightseeing.images || []);
     } else {
       // Reset form if no sightseeing is provided
@@ -398,13 +423,27 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                     type="text"
                     value={formData.keywords.join(', ')}
                     onChange={(e) => {
-                      const keywords = e.target.value
+                      const inputValue = e.target.value;
+                      // Only split on commas that aren't inside quotes and trim whitespace
+                      const keywords = inputValue
                         .split(',')
                         .map(k => k.trim())
                         .filter(k => k.length > 0);
                       setFormData(prev => ({
                         ...prev,
-                        keywords
+                        keywords: [...new Set(keywords)] // Remove duplicates
+                      }));
+                    }}
+                    onBlur={(e) => {
+                      // Clean up the input when it loses focus
+                      const inputValue = e.target.value;
+                      const keywords = inputValue
+                        .split(',')
+                        .map(k => k.trim())
+                        .filter(k => k.length > 0);
+                      setFormData(prev => ({
+                        ...prev,
+                        keywords: [...new Set(keywords)] // Remove duplicates
                       }));
                     }}
                     className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"

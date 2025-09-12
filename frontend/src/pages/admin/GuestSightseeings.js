@@ -8,6 +8,7 @@ import {
   getGuestSightseeingById
 } from '../../redux/slices/guestSightseeingSlice';
 import { toast } from 'react-toastify';
+import api from '../../utils/api';
 import { PencilIcon, TrashIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import ConfirmModal from '../../components/modals/ConfirmModal';
@@ -95,17 +96,52 @@ const GuestSightseeings = () => {
     setCurrentPage(1);
   };
 
-  const handleEditClick = (sightseeing) => {
+  const handleEditClick = async (sightseeing) => {
     try {
-      // Use the sightseeing data we already have instead of making a new request
-      setEditingSightseeing({
-        ...sightseeing,
-        // Ensure these fields exist
-        duration: sightseeing.duration || 'Not specified',
-        inclusions: Array.isArray(sightseeing.inclusions) && sightseeing.inclusions.length > 0 
-          ? sightseeing.inclusions 
-          : ['No inclusions specified']
-      });
+      // First, fetch the full sightseeing details
+      const response = await api.get(`/guest-sightseeing/${sightseeing._id}`);
+      const fullSightseeing = response.data.data;
+      
+      // Log the full data for debugging
+      console.log('Full sightseeing data:', fullSightseeing);
+      
+      // Create a clean copy of the full sightseeing data
+      const sightseeingData = { ...fullSightseeing };
+      
+      // Only set defaults for fields that are actually undefined or null
+      const editingData = {
+        ...sightseeingData,
+        // Only set default if the field is not present at all
+        ...(sightseeingData.duration === undefined && { duration: 'Not specified' }),
+        ...(sightseeingData.inclusions === undefined || 
+           !Array.isArray(sightseeingData.inclusions) || 
+           sightseeingData.inclusions.length === 0 ? { 
+             inclusions: ['No inclusions specified'] 
+           } : { inclusions: sightseeingData.inclusions }),
+        ...(sightseeingData.keywords === undefined || !Array.isArray(sightseeingData.keywords) ? { 
+          keywords: [] 
+        } : { keywords: sightseeingData.keywords }),
+        // Use the aboutTour field from the full data
+        ...(sightseeingData.highlights === undefined || 
+           !Array.isArray(sightseeingData.highlights) || 
+           sightseeingData.highlights.length === 0 ? {
+             highlights: ['No highlights available']
+           } : { highlights: sightseeingData.highlights }),
+        ...(sightseeingData.meetingPoint === undefined && { 
+          meetingPoint: 'To be advised upon booking' 
+        }),
+        ...(sightseeingData.whatToBring === undefined || 
+           !Array.isArray(sightseeingData.whatToBring) || 
+           sightseeingData.whatToBring.length === 0 ? {
+             whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+           } : { whatToBring: sightseeingData.whatToBring }),
+        ...(sightseeingData.priceCurrency === undefined && { priceCurrency: 'USD' }),
+        ...(sightseeingData.offerPriceCurrency === undefined && { offerPriceCurrency: 'USD' }),
+        ...(sightseeingData.isActive === undefined && { isActive: true })
+      };
+      
+      console.log('Setting editing sightseeing data:', editingData);
+      setEditingSightseeing(editingData);
       setShowEditModal(true);
     } catch (error) {
       console.error('Error preparing edit form:', error);

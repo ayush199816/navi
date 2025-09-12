@@ -352,6 +352,9 @@ function App() {
           } />
 
           {/* Admin Routes */}
+          <Route path="admin" element={
+            <Navigate to="/admin/dashboard" replace />
+          } />
           <Route path="admin/dashboard" element={
             <ProtectedRoute roles={['admin', 'operations']}>
               <AdminDashboard />
@@ -400,6 +403,43 @@ function App() {
           <Route path="admin/guest-sightseeings/:id/edit" element={
             <ProtectedRoute roles={['admin']}>
               {React.createElement(require('./pages/admin/GuestSightseeingForm').default)}
+            </ProtectedRoute>
+          } />
+
+          {/* Operations Routes */}
+          <Route path="operations/dashboard" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <BookingsAdmin />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/bookings" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <BookingsAdmin />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/wallet-transactions" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <WalletTransactions />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/packages" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <PackageList />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/sightseeing" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <SightseeingListOps />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/add-seller" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <AddSeller />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/quotes" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <QuotesAdmin />
             </ProtectedRoute>
           } />
 
