@@ -36,8 +36,11 @@ const ContactUs = () => {
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">Call Us</h3>
                   <div className="mt-1 text-lg text-gray-600">
-                    <a href="tel:+1234567890" className="hover:text-blue-600 transition-colors">
-                      +1 (234) 567-890
+                    <a href="tel:+919628912345" className="hover:text-blue-600 transition-colors">
+                      +91 (962) 891 2345
+                    </a>
+                    <a href="tel:+917409726481" className="hover:text-blue-600 transition-colors">
+                      +91 (740) 972 6481
                     </a>
                   </div>
                   <p className="mt-1 text-sm text-gray-500">Monday to Friday, 9am to 6pm</p>
@@ -51,8 +54,8 @@ const ContactUs = () => {
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">Email Us</h3>
                   <div className="mt-1 text-lg text-gray-600">
-                    <a href="mailto:support@navitravel.com" className="hover:text-blue-600 transition-colors">
-                      support@navitravel.com
+                    <a href="mailto:info@navigatio.com" className="hover:text-blue-600 transition-colors">
+                      info@navigatio.com
                     </a>
                   </div>
                   <p className="mt-1 text-sm text-gray-500">We'll respond within 24 hours</p>
@@ -66,8 +69,14 @@ const ContactUs = () => {
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">Visit Us</h3>
                   <div className="mt-1 text-lg text-gray-600">
-                    123 Travel Street<br />
-                    New York, NY 10001
+                  Reg. Address:<br />
+                  Rustampur, Gorakhpur,<br />
+                  Gorakhpur, Uttar Pradesh- 273001<br /><br />
+                  
+                  Branch:<br />
+                  4th Floor, Halwasiya Court,<br />
+                  Hazratganj, Lucknow,<br />
+                  Uttar Pradesh 226001
                   </div>
                   <p className="mt-1 text-sm text-gray-500">Open in Google Maps</p>
                 </div>
@@ -78,8 +87,8 @@ const ContactUs = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4 text-center">Business Hours</h3>
               <div className="space-y-2 max-w-sm mx-auto">
                 {[
-                  { day: 'Monday - Friday', hours: '9:00 AM - 6:00 PM' },
-                  { day: 'Saturday', hours: '10:00 AM - 4:00 PM' },
+                  { day: 'Monday - Friday', hours: '9:00 AM - 9:00 PM' },
+                  { day: 'Saturday', hours: '10:00 AM - 8:00 PM' },
                   { day: 'Sunday', hours: 'Closed' },
                 ].map((item, index) => (
                   <div key={index} className="flex justify-between">
@@ -98,7 +107,9 @@ const ContactUs = () => {
             <div className="text-center">
               <FiMapPin className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-lg font-medium text-gray-900">Our Location</h3>
-              <p className="mt-1 text-gray-500">123 Travel Street, New York, NY 10001</p>
+              <p className="mt-1 text-gray-500">Reg. Address:<br />
+                  Rustampur, Gorakhpur,<br />
+                  Gorakhpur, Uttar Pradesh- 273001<br /><br /></p>
             </div>
           </div>
         </div>
