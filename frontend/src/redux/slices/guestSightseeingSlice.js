@@ -29,12 +29,16 @@ export const fetchGuestSightseeings = createAsyncThunk(
   'guestSightseeings/fetchAll',
   async (params = {}, { rejectWithValue }) => {
     try {
-      // Extract excludeId from params if it exists
-      const { excludeId, ...queryParams } = params;
+      // Set default query params with high limit to get all records
+      const queryParams = {
+        ...params,
+        limit: params.limit || 1000,  // Default to 1000 if not specified
+        isActive: true
+      };
       
       // If excludeId is provided, add it to the query params
-      if (excludeId) {
-        queryParams.excludeId = excludeId;
+      if (params.excludeId) {
+        queryParams.excludeId = params.excludeId;
       }
       
       console.log('Fetching guest sightseeings with params:', queryParams);
@@ -48,16 +52,16 @@ export const fetchGuestSightseeings = createAsyncThunk(
         data: Array.isArray(data) ? data : [], 
         count: count || 0, 
         total: total || count || 0,
-        page: parseInt(page, 10) || 1, 
-        pages: parseInt(pages, 10) || 1 
+        page: parseInt(page, 10000) || 1, 
+        pages: parseInt(pages, 10000) || 1 
       });
       
       return {
         data: Array.isArray(data) ? data : [],
         count: count || 0,
         total: total || count || 0,
-        page: parseInt(page, 10) || 1,
-        pages: parseInt(pages, 10) || 1
+        page: parseInt(page, 10000) || 1,
+        pages: parseInt(pages, 10000) || 1
       };
     } catch (err) {
       console.error('Error fetching guest sightseeings:', err);
