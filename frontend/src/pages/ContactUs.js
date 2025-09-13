@@ -39,11 +39,11 @@ const ContactUs = () => {
                     <a href="tel:+919628912345" className="hover:text-blue-600 transition-colors">
                       +91 (962) 891 2345
                     </a>
-                    <a href="tel:+917409726481" className="hover:text-blue-600 transition-colors">
-                      +91 (740) 972 6481
+                    <a href="tel:+919219755463" className="hover:text-blue-600 transition-colors">
+                      +91 (921) 97 55463
                     </a>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">Monday to Friday, 9am to 6pm</p>
+                  <p className="mt-1 text-sm text-gray-500">Monday to Friday, 9am to 9pm</p>
                 </div>
               </div>
 
@@ -69,11 +69,8 @@ const ContactUs = () => {
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">Visit Us</h3>
                   <div className="mt-1 text-lg text-gray-600">
-                  Reg. Address:<br />
-                  Rustampur, Gorakhpur,<br />
-                  Gorakhpur, Uttar Pradesh- 273001<br /><br />
-                  
-                  Branch:<br />
+                  Reg. Address:<br /><br />
+
                   4th Floor, Halwasiya Court,<br />
                   Hazratganj, Lucknow,<br />
                   Uttar Pradesh 226001
@@ -108,8 +105,10 @@ const ContactUs = () => {
               <FiMapPin className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-lg font-medium text-gray-900">Our Location</h3>
               <p className="mt-1 text-gray-500">Reg. Address:<br />
-                  Rustampur, Gorakhpur,<br />
-                  Gorakhpur, Uttar Pradesh- 273001<br /><br /></p>
+                  
+              4th Floor, Halwasiya Court,<br />
+              Hazratganj, Lucknow,<br />
+              Uttar Pradesh 226001</p>
             </div>
           </div>
         </div>
