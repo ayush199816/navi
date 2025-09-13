@@ -156,7 +156,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-blue-100 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} BookMySight.com. All rights reserved.
+            &copy; {new Date().getFullYear()} BookMySight.com. All rights reserved. <br></br>Powered by <a>Navigatio</a>
           </p>
         </div>
       </div>

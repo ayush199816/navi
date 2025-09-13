@@ -247,9 +247,12 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex flex-col items-start">
               <span className={`text-2xl font-bold ${isScrolled ? 'text-gray-800' : 'text-white'}`}>
                 BookMySight.com 
+              </span>
+              <span className={`text-xs ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
+                Powered by Navigation
               </span>
             </Link>
 
