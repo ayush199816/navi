@@ -26,7 +26,7 @@ const Footer = () => {
           <div className="mb-8 md:mb-0">
             <h4 className="text-lg font-semibold mb-6 text-white border-b border-white/20 pb-2">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-blue-100 hover:text-white transition-colors flex items-center">
+              <li><a href="#home" className="text-blue-100 hover:text-white transition-colors flex items-center">
                 <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Home
               </a></li>
               <li><a href="#popular-sightseeings" className="text-blue-100 hover:text-white transition-colors flex items-center">

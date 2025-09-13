@@ -3,7 +3,6 @@ import { CurrencyProvider } from './contexts/CurrencyContext';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './redux/slices/authSlice';
-import { removeFromCart, updateQuantity } from './redux/slices/cartSlice';
 import Modal from './components/modals/Modal';
 import CartPage from './pages/CartPage';
 

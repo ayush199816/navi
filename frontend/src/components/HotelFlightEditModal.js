@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon as XIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon as XIcon, PlusIcon as Plus, TrashIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
 const HotelFlightEditModal = ({ open, onClose, booking, onUpdate }) => {
@@ -179,7 +179,7 @@ const HotelFlightEditModal = ({ open, onClose, booking, onUpdate }) => {
                   onClick={addHotel}
                   className="flex items-center text-primary-600 hover:text-primary-800"
                 >
-                  <PlusIcon className="h-4 w-4 mr-1" /> Add Hotel
+                  <Plus className="h-4 w-4 mr-1" /> Add Hotel
                 </button>
               </div>
               
@@ -258,7 +258,7 @@ const HotelFlightEditModal = ({ open, onClose, booking, onUpdate }) => {
                   onClick={addFlight}
                   className="flex items-center text-primary-600 hover:text-primary-800"
                 >
-                  <PlusIcon className="h-4 w-4 mr-1" /> Add Flight
+                  <Plus className="h-4 w-4 mr-1" /> Add Flight
                 </button>
               </div>
               
