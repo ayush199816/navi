@@ -256,34 +256,44 @@ const LandingPage = () => {
               </span>
             </Link>
 
-            {/* Currency Selector */}
-            <div className="relative" ref={currencyDropdownRef}>
-              <button 
-                onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-                className="flex items-center space-x-2 px-3 py-1.5 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all"
+            <div className="flex items-center space-x-4">
+              {/* Login Button */}
+              <Link 
+                to="/login" 
+                className={`px-4 py-2 rounded-full font-medium transition-all ${isScrolled ? 'text-blue-600 hover:bg-blue-50' : 'text-white hover:bg-white/20'}`}
               >
-                <FiGlobe className="w-4 h-4" />
-                <span className="font-medium">{selectedCurrency}</span>
-                <FiChevronDown className={`w-4 h-4 transition-transform ${showCurrencyDropdown ? 'transform rotate-180' : ''}`} />
-              </button>
+                Login
+              </Link>
               
-              {showCurrencyDropdown && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-1 z-50">
-                  {Object.entries(CURRENCY_SYMBOLS).map(([code, symbol]) => (
-                    <button
-                      key={code}
-                      onClick={() => {
-                        setSelectedCurrency(code);
-                        setShowCurrencyDropdown(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-sm flex items-center ${selectedCurrency === code ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-                    >
-                      <span className="mr-2">{symbol}</span>
-                      {code}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Currency Selector */}
+              <div className="relative" ref={currencyDropdownRef}>
+                <button 
+                  onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                  className="flex items-center space-x-2 px-3 py-1.5 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all"
+                >
+                  <FiGlobe className="w-4 h-4" />
+                  <span className="font-medium">{selectedCurrency}</span>
+                  <FiChevronDown className={`w-4 h-4 transition-transform ${showCurrencyDropdown ? 'transform rotate-180' : ''}`} />
+                </button>
+                
+                {showCurrencyDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-1 z-50">
+                    {Object.entries(CURRENCY_SYMBOLS).map(([code, symbol]) => (
+                      <button
+                        key={code}
+                        onClick={() => {
+                          setSelectedCurrency(code);
+                          setShowCurrencyDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm flex items-center ${selectedCurrency === code ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                      >
+                        <span className="mr-2">{symbol}</span>
+                        {code}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
