@@ -106,7 +106,7 @@ const BookingUpdateModal = ({ open, onClose, booking }) => {
   };
 
   const handleSubmit = async (e) => {
-    console.log('Booking update form submitted'); // DEBUG
+    //console.log('Booking update form submitted'); // DEBUG
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -294,7 +294,7 @@ const BookingUpdateModal = ({ open, onClose, booking }) => {
           <div className="flex justify-end space-x-2 mt-6">
             <button
               type="button"
-              onClick={() => { console.log('Cancel button clicked'); onClose(); }}
+              onClick={() => { //console.log('Cancel button clicked'); onClose(); }}
               className="btn-outline"
               disabled={loading}
             >
@@ -304,7 +304,7 @@ const BookingUpdateModal = ({ open, onClose, booking }) => {
               type="submit"
               className="btn-primary"
               disabled={loading}
-              onClick={() => console.log('Save button clicked')}
+              onClick={() => //console.log('Save button clicked')}
             >
               {loading ? 'Updating...' : 'Update Booking'}
             </button>
@@ -315,5 +315,5 @@ const BookingUpdateModal = ({ open, onClose, booking }) => {
   );
 };
 
-console.log('BookingUpdateModal mounted'); // DEBUG
+//console.log('BookingUpdateModal mounted'); // DEBUG
 export default BookingUpdateModal;

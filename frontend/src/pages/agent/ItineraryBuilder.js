@@ -349,7 +349,7 @@ const ItineraryBuilder = () => {
         requirements: formData.specialRequirements || 'No special requirements specified'
       };
       
-      console.log('Final payload before sending:', JSON.stringify({
+      //console.log('Final payload before sending:', JSON.stringify({
         ...finalPayload,
         __types: {
           customerName: typeof finalPayload.customerName,
@@ -476,20 +476,20 @@ const ItineraryBuilder = () => {
       });
       
       // Log the form data being sent
-      console.log('Sending form data:');
+      //console.log('Sending form data:');
       for (let [key, value] of formDataObj.entries()) {
-        console.log(key, value);
+        //console.log(key, value);
       }
       
       // Send the request
-      console.log('Sending request to /api/quotes');
+      //console.log('Sending request to /api/quotes');
       const response = await api.post('/quotes', formDataObj, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       
-      console.log('Response received:', response.data);
+      //console.log('Response received:', response.data);
       
       // Handle successful response
       if (response.data && response.data.data && response.data.data._id) {

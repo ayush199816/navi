@@ -5,14 +5,14 @@ const Itinerary = require('../models/Itinerary');
 // @access  Public (temporarily for testing)
 exports.createItinerary = async (req, res) => {
   try {
-    console.log('Creating itinerary with data:', req.body);
+    //console.log('Creating itinerary with data:', req.body);
     
     const itinerary = await Itinerary.create({
       ...req.body,
       createdBy: req.user?.id || 'test-user-id'
     });
 
-    console.log('Itinerary created successfully:', itinerary);
+    //console.log('Itinerary created successfully:', itinerary);
     
     return res.status(201).json({
       success: true,

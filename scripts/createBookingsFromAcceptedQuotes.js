@@ -15,7 +15,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('MongoDB connected successfully'))
+.then(() => //console.log('MongoDB connected successfully'))
 .catch(err => {
   console.error('MongoDB connection error:', err);
   process.exit(1);
@@ -23,11 +23,11 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 const createBookingsFromAcceptedQuotes = async () => {
   try {
-    console.log('Starting to process accepted quotes without bookings...');
+    //console.log('Starting to process accepted quotes without bookings...');
     
     // Find all quotes with 'accepted' status
     const acceptedQuotes = await Quote.find({ status: 'accepted' }).populate('agent');
-    console.log(`Found ${acceptedQuotes.length} accepted quotes`);
+    //console.log(`Found ${acceptedQuotes.length} accepted quotes`);
     
     let bookingsCreated = 0;
     let alreadyHasBooking = 0;
@@ -40,7 +40,7 @@ const createBookingsFromAcceptedQuotes = async () => {
         const existingBooking = await Booking.findOne({ quote: quote._id });
         
         if (existingBooking) {
-          console.log(`Quote ${quote.quoteId} already has booking ${existingBooking.bookingId}`);
+          //console.log(`Quote ${quote.quoteId} already has booking ${existingBooking.bookingId}`);
           alreadyHasBooking++;
           continue;
         }
@@ -73,7 +73,7 @@ const createBookingsFromAcceptedQuotes = async () => {
         
         // Create booking
         const booking = await Booking.create(bookingData);
-        console.log(`Created booking ${booking.bookingId} from quote ${quote.quoteId}`);
+        //console.log(`Created booking ${booking.bookingId} from quote ${quote.quoteId}`);
         bookingsCreated++;
         
         // Add a note to the quote discussion about booking creation
@@ -95,18 +95,18 @@ const createBookingsFromAcceptedQuotes = async () => {
       }
     }
     
-    console.log('\nSummary:');
-    console.log(`Total accepted quotes: ${acceptedQuotes.length}`);
-    console.log(`Bookings created: ${bookingsCreated}`);
-    console.log(`Quotes that already had bookings: ${alreadyHasBooking}`);
-    console.log(`Errors encountered: ${errors}`);
+    //console.log('\nSummary:');
+    //console.log(`Total accepted quotes: ${acceptedQuotes.length}`);
+    //console.log(`Bookings created: ${bookingsCreated}`);
+    //console.log(`Quotes that already had bookings: ${alreadyHasBooking}`);
+    //console.log(`Errors encountered: ${errors}`);
     
   } catch (err) {
     console.error('Error in main process:', err);
   } finally {
     // Close the MongoDB connection
     mongoose.connection.close();
-    console.log('MongoDB connection closed');
+    //console.log('MongoDB connection closed');
   }
 };
 

@@ -8,7 +8,7 @@ async function createTestBooking() {
   try {
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    //console.log('Connected to MongoDB');
 
     // Explicitly register all required models to avoid MissingSchemaError
     require('./models/User');
@@ -24,12 +24,12 @@ async function createTestBooking() {
     const quote = await Quote.findOne({ status: 'accepted' }).populate('agent');
     
     if (!quote) {
-      console.log('No accepted quotes found');
+      //console.log('No accepted quotes found');
       process.exit(0);
     }
     
-    console.log('Found accepted quote:', quote._id);
-    console.log('Quote details:', {
+    //console.log('Found accepted quote:', quote._id);
+    //console.log('Quote details:', {
       agent: quote.agent ? quote.agent._id : 'No agent',
       customerName: quote.customerName,
       destination: quote.destination,
@@ -61,17 +61,17 @@ async function createTestBooking() {
       destination: quote.destination
     };
     
-    console.log('Creating booking with data:', JSON.stringify(bookingData, null, 2));
+    //console.log('Creating booking with data:', JSON.stringify(bookingData, null, 2));
     
     // Create booking
     const booking = await Booking.create(bookingData);
     
-    console.log('Successfully created booking:', booking._id);
-    console.log('Booking details:', booking);
+    //console.log('Successfully created booking:', booking._id);
+    //console.log('Booking details:', booking);
     
     // Disconnect from MongoDB
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    //console.log('Disconnected from MongoDB');
   } catch (error) {
     console.error('Error creating test booking:', error);
     process.exit(1);

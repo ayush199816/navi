@@ -9,7 +9,7 @@ import { PencilIcon, XMarkIcon as XIcon, ArrowDownTrayIcon as SaveIcon, Currency
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-console.log('BookingDetailModal mounted'); // DEBUG
+//console.log('BookingDetailModal mounted'); // DEBUG
 
 const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
   const dispatch = useDispatch();
@@ -63,13 +63,13 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
       .map(s => typeof s.seller === 'string' ? s.seller : (s.seller && s.seller._id))
       .filter(id => id && !sellers.some(sel => sel._id === id));
     if (missingIds.length === 0) return;
-    console.log('[BookingDetailModal] Missing supplier IDs:', missingIds);
+    //console.log('[BookingDetailModal] Missing supplier IDs:', missingIds);
     // Fetch missing suppliers in parallel
     Promise.all(missingIds.map(id =>
       fetch(`/api/sellers/${id}`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
-          console.log(`[BookingDetailModal] Fetched seller for ID ${id}:`, data);
+          //console.log(`[BookingDetailModal] Fetched seller for ID ${id}:`, data);
           return data && (data.data || data);
         })
         .catch((err) => {
@@ -84,8 +84,8 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
 
   // Initialize itinerary text and statuses when booking changes
   useEffect(() => {
-    console.log('Booking data in useEffect:', booking);
-    console.log('Is admin?', isAdmin);
+    //console.log('Booking data in useEffect:', booking);
+    //console.log('Is admin?', isAdmin);
 
     if (booking && booking.finalItinerary) {
       setItineraryText(booking.finalItinerary);
@@ -105,15 +105,15 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
 
     // Debug seller information
     if (booking) {
-      console.log('Seller information in booking:', booking.seller);
+      //console.log('Seller information in booking:', booking.seller);
     }
 
     // If booking has a seller assigned, set the selectedSellerId
     if (booking && booking.seller && booking.seller._id) {
-      console.log('Setting selectedSellerId to:', booking.seller._id);
+      //console.log('Setting selectedSellerId to:', booking.seller._id);
       setSelectedSellerId(booking.seller._id);
     } else {
-      console.log('No seller found in booking, clearing selectedSellerId');
+      //console.log('No seller found in booking, clearing selectedSellerId');
       setSelectedSellerId('');
     }
   }, [booking]);
@@ -127,11 +127,11 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
 
   // Function to fetch sellers
   const fetchSellers = async () => {
-    console.log('Fetching sellers...');
+    //console.log('Fetching sellers...');
     setLoadingSellers(true);
     try {
       const response = await axios.get('/api/sellers');
-      console.log('Fetched sellers:', response.data);
+      //console.log('Fetched sellers:', response.data);
 
       if (response.data && response.data.data) {
         setSellers(response.data.data);
@@ -249,8 +249,8 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     setStatusUpdateError(null);
     setStatusUpdateSuccess(false);
 
-    console.log('Updating booking status to:', selectedStatus);
-    console.log('Booking ID:', booking._id);
+    //console.log('Updating booking status to:', selectedStatus);
+    //console.log('Booking ID:', booking._id);
 
     // Validate seller selection when status is 'booked'
     if (selectedStatus === 'booked' && selectedSellers.length === 0) {
@@ -261,9 +261,9 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
 
     try {
       // Use the original endpoint with a simpler approach
-      console.log('Making API call to update status');
+      //console.log('Making API call to update status');
       const url = `/api/bookings/${booking._id}/status`;
-      console.log('Request URL:', url);
+      //console.log('Request URL:', url);
 
       // Prepare payload with status and sellers if status is 'booked'
       const payload = { status: selectedStatus };
@@ -276,27 +276,27 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
         }));
 
         payload.sellers = sellersData;
-        console.log('Adding sellers to payload:', sellersData);
+        //console.log('Adding sellers to payload:', sellersData);
 
         // Also include the first seller as the primary seller for backward compatibility
         if (selectedSellers.length > 0) {
           payload.sellerId = selectedSellers[0];
-          console.log('Adding primary sellerId to payload:', selectedSellers[0]);
+          //console.log('Adding primary sellerId to payload:', selectedSellers[0]);
         }
       }
-      console.log('Request payload:', payload);
+      //console.log('Request payload:', payload);
 
       // Make a PUT request to the original endpoint
       const response = await axios.put(url, payload);
-      console.log('Response status:', response.status);
-      console.log('API response:', response.data);
-      console.log('Seller in response:', response.data.data.seller);
+      //console.log('Response status:', response.status);
+      //console.log('API response:', response.data);
+      //console.log('Seller in response:', response.data.data.seller);
 
       // Process the successful response from axios
       if (response.data && response.data.success) {
         // Get the updated booking from the response
         const updatedBooking = response.data.data;
-        console.log('Updated booking from server:', updatedBooking);
+        //console.log('Updated booking from server:', updatedBooking);
 
         // Force update the booking object with the new status and seller if applicable
         if (booking) {
@@ -315,14 +315,14 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
           sellerAssignedAt: selectedStatus === 'booked' ? updatedBooking.sellerAssignedAt : booking.sellerAssignedAt
         };
 
-        console.log('Updated booking object to pass to parent:', updatedBookingWithStatus);
+        //console.log('Updated booking object to pass to parent:', updatedBookingWithStatus);
 
         // Notify parent component about the update
         if (onUpdate) {
-          console.log('Calling onUpdate with updated booking');
+          //console.log('Calling onUpdate with updated booking');
           onUpdate(updatedBookingWithStatus);
         } else {
-          console.log('onUpdate callback not provided');
+          //console.log('onUpdate callback not provided');
         }
 
         // Show success message
@@ -373,8 +373,8 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     setPaymentStatusUpdateError(null);
     setPaymentStatusUpdateSuccess(false);
 
-    console.log('Updating payment status to:', selectedPaymentStatus);
-    console.log('Booking ID:', booking._id);
+    //console.log('Updating payment status to:', selectedPaymentStatus);
+    //console.log('Booking ID:', booking._id);
 
     try {
       // Make a direct API call with only the paymentStatus field
@@ -382,12 +382,12 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
         paymentStatus: selectedPaymentStatus
       });
 
-      console.log('API Response:', response.data);
+      //console.log('API Response:', response.data);
 
       if (response.data.success) {
         // Get the updated booking from the response
         const updatedBooking = response.data.data;
-        console.log('Updated booking from server:', updatedBooking);
+        //console.log('Updated booking from server:', updatedBooking);
 
         // Force update the booking object with the new status
         if (booking) {
@@ -400,14 +400,14 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
           paymentStatus: selectedPaymentStatus
         };
 
-        console.log('Updated booking object to pass to parent:', updatedBookingWithStatus);
+        //console.log('Updated booking object to pass to parent:', updatedBookingWithStatus);
 
         // Notify parent component about the update
         if (onUpdate) {
-          console.log('Calling onUpdate with updated booking');
+          //console.log('Calling onUpdate with updated booking');
           onUpdate(updatedBookingWithStatus);
         } else {
-          console.log('onUpdate callback not provided');
+          //console.log('onUpdate callback not provided');
         }
 
         setPaymentStatusUpdateSuccess(true);
@@ -484,7 +484,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                 <button
                   className="ml-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex items-center"
                   onClick={() => {
-                    console.log('Update Status clicked, isAdmin:', isAdmin);
+                    //console.log('Update Status clicked, isAdmin:', isAdmin);
                     setEditingStatus(true);
                     // Fetch sellers when edit button is clicked
                     fetchSellers();
@@ -682,7 +682,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                     <button
                       className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700 flex items-center"
                       onClick={() => {
-                        console.log('Edit status clicked, isAdmin:', isAdmin);
+                        //console.log('Edit status clicked, isAdmin:', isAdmin);
                         setEditingStatus(true);
                         // Fetch sellers when edit button is clicked
                         if (!sellers.length) {
@@ -719,7 +719,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                                   const found = sellers.find(s => s._id === sellerObj);
                                   if (found) sellerObj = found;
                                 }
-                                console.log('[BookingDetailModal] Rendering assigned supplier:', sellerObj);
+                                //console.log('[BookingDetailModal] Rendering assigned supplier:', sellerObj);
                                 if (sellerObj && (sellerObj.name || sellerObj.pocName || sellerObj._id)) {
                                   return <>
                                     {sellerObj.name ? sellerObj.name : 'Unknown Supplier'}

@@ -239,8 +239,8 @@ exports.getQuote = async (req, res) => {
 // @access  Private/Agent
 exports.createQuote = async (req, res) => {
   try {
-    console.log('Request body:', req.body);
-    console.log('Request files:', req.files);
+    //console.log('Request body:', req.body);
+    //console.log('Request files:', req.files);
     
     if (!req.user || !req.user.id) {
       console.error('No agent user found in request');
@@ -387,7 +387,7 @@ exports.createQuote = async (req, res) => {
     quoteData.expiryDate = expiryDate;
     
     // Log the processed quote data for debugging
-    console.log('Processed quote data:', JSON.stringify(quoteData, null, 2));
+    //console.log('Processed quote data:', JSON.stringify(quoteData, null, 2));
 
     // Create quote
     const quote = await Quote.create(quoteData);
@@ -451,7 +451,7 @@ exports.updateQuote = async (req, res) => {
     // Handle response from admin/operations
     if (req.body.response) {
       updateData.response = req.body.response;
-      console.log('Adding response:', req.body.response);
+      //console.log('Adding response:', req.body.response);
       
       // Add response to discussion history
       if (!updateData.discussion) {
@@ -468,7 +468,7 @@ exports.updateQuote = async (req, res) => {
     // Handle itinerary attachment
     if (req.body.itinerary) {
       updateData.itinerary = req.body.itinerary;
-      console.log('Adding itinerary');
+      //console.log('Adding itinerary');
     }
     
     // Handle discussion history updates
@@ -491,14 +491,14 @@ exports.updateQuote = async (req, res) => {
     // Also track when the quote was responded to
     updateData.respondedAt = Date.now();
     
-    console.log('Update data:', updateData);
+    //console.log('Update data:', updateData);
     
     const updatedQuote = await Quote.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     }).populate('agent', 'name email companyName').populate('handledBy', 'name role');
     
-    console.log('Updated quote:', JSON.stringify(updatedQuote, null, 2));
+    //console.log('Updated quote:', JSON.stringify(updatedQuote, null, 2));
     
     // If status changed to 'quoted', update the related lead if exists
     if (status === 'quoted') {
@@ -514,38 +514,38 @@ exports.updateQuote = async (req, res) => {
     if (status === 'accepted') {
       // First, ensure the quote is saved with the updated status
       await updatedQuote.save();
-      console.log('Updated quote status to accepted');
+      //console.log('Updated quote status to accepted');
       
       try {
-        console.log('=== START: Creating booking from accepted quote (via update) ===');
-        console.log(`Quote ID: ${quote._id}, Agent: ${quote.agent}, Status: ${updatedQuote.status}`);
+        //console.log('=== START: Creating booking from accepted quote (via update) ===');
+        //console.log(`Quote ID: ${quote._id}, Agent: ${quote.agent}, Status: ${updatedQuote.status}`);
         
         // Check if a booking already exists for this quote
-        console.log('Checking for existing booking...');
+        //console.log('Checking for existing booking...');
         const existingBooking = await Booking.findOne({ 
           $or: [
             { quote: quote._id },
             { quoteId: quote.quoteId }
           ]
         });
-        console.log('Existing booking check complete');
+        //console.log('Existing booking check complete');
         
         if (existingBooking) {
-          console.log('Booking already exists for this quote:', existingBooking._id);
+          //console.log('Booking already exists for this quote:', existingBooking._id);
           
           // Update the existing booking status if needed
           if (existingBooking.bookingStatus !== 'confirmed') {
             existingBooking.bookingStatus = 'confirmed';
             existingBooking.updatedBy = req.user.id;
             await existingBooking.save();
-            console.log('Updated existing booking status to confirmed');
+            //console.log('Updated existing booking status to confirmed');
           }
           
           // Ensure the quote has the booking reference
           if (!updatedQuote.booking || !updatedQuote.booking.equals(existingBooking._id)) {
             updatedQuote.booking = existingBooking._id;
             await updatedQuote.save();
-            console.log('Updated quote with existing booking reference');
+            //console.log('Updated quote with existing booking reference');
           }
         } else {
           // Prepare base booking data with all required fields
@@ -606,13 +606,13 @@ exports.updateQuote = async (req, res) => {
           };
           
           // Create the booking
-          console.log('Creating new booking with data:', JSON.stringify(bookingData, null, 2));
+          //console.log('Creating new booking with data:', JSON.stringify(bookingData, null, 2));
           const booking = new Booking(bookingData);
           await booking.save();
-          console.log('Successfully created new booking:', booking._id);
+          //console.log('Successfully created new booking:', booking._id);
           
           // Update the quote with the booking reference
-          console.log('Updating quote with booking reference...');
+          //console.log('Updating quote with booking reference...');
           const updatedQuoteWithBooking = await Quote.findByIdAndUpdate(
             quote._id,
             { 
@@ -624,7 +624,7 @@ exports.updateQuote = async (req, res) => {
             { new: true }
           );
           updatedQuote.booking = booking._id; // Update the local reference
-          console.log('Successfully updated quote with booking reference:', updatedQuoteWithBooking.booking);
+          //console.log('Successfully updated quote with booking reference:', updatedQuoteWithBooking.booking);
         }
         
         // Update related lead if exists
@@ -633,7 +633,7 @@ exports.updateQuote = async (req, res) => {
           lead.status = 'won';
           lead.lastContactDate = Date.now();
           await lead.save();
-          console.log('Updated lead status to won');
+          //console.log('Updated lead status to won');
         }
         
       } catch (err) {
@@ -650,7 +650,7 @@ exports.updateQuote = async (req, res) => {
         // Don't fail the request if booking creation fails
         // The quote status is still updated, but we should log the error
       } finally {
-        console.log('=== END: Booking creation attempt ===');
+        //console.log('=== END: Booking creation attempt ===');
       }
     }
     
@@ -672,9 +672,9 @@ exports.updateQuote = async (req, res) => {
 // @access  Private/Agent
 exports.respondToQuote = async (req, res) => {
   try {
-    console.log('Responding to quote:', req.params.id);
-    console.log('Request user:', req.user);
-    console.log('Request body:', req.body);
+    //console.log('Responding to quote:', req.params.id);
+    //console.log('Request user:', req.user);
+    //console.log('Request body:', req.body);
     
     // Find quote and populate agent
     const quote = await Quote.findById(req.params.id).populate('agent', '_id name email');
@@ -687,8 +687,8 @@ exports.respondToQuote = async (req, res) => {
       });
     }
     
-    console.log('Quote agent ID:', quote.agent?._id?.toString());
-    console.log('Request user ID:', req.user.id);
+    //console.log('Quote agent ID:', quote.agent?._id?.toString());
+    //console.log('Request user ID:', req.user.id);
     
     // Check if user is authorized to respond to this quote
     if (req.user.role === 'agent' && quote.agent?._id?.toString() !== req.user.id) {
@@ -787,19 +787,19 @@ exports.respondToQuote = async (req, res) => {
         
         // Create booking from accepted quote
         try {
-          console.log('Creating booking from accepted quote...');
+          //console.log('Creating booking from accepted quote...');
           
           // Check if a booking already exists for this quote
           const existingBooking = await Booking.findOne({ quote: quote._id });
           
           if (existingBooking) {
-            console.log('Booking already exists for this quote:', existingBooking._id);
+            //console.log('Booking already exists for this quote:', existingBooking._id);
             
             // Update the existing booking status if needed
             if (existingBooking.bookingStatus !== 'pending') {
               existingBooking.bookingStatus = 'pending';
               await existingBooking.save();
-              console.log('Updated existing booking status to pending');
+              //console.log('Updated existing booking status to pending');
             }
           } else {
             // Prepare base booking data with all required fields
@@ -941,7 +941,7 @@ exports.respondToQuote = async (req, res) => {
             
             // Create booking
             const booking = await Booking.create(bookingData);
-            console.log('Successfully created booking from accepted quote:', booking._id);
+            //console.log('Successfully created booking from accepted quote:', booking._id);
             
             // Add a note to the quote discussion about booking creation
             quote.discussion.push({

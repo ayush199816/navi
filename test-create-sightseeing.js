@@ -62,9 +62,9 @@ async function runTest() {
       ...formData.getHeaders()
     };
 
-    console.log('Sending request to create sightseeing with image...');
-    console.log('Headers:', JSON.stringify(headers, null, 2));
-    console.log('Image size:', fs.statSync(TEST_IMAGE_PATH).size, 'bytes');
+    //console.log('Sending request to create sightseeing with image...');
+    //console.log('Headers:', JSON.stringify(headers, null, 2));
+    //console.log('Image size:', fs.statSync(TEST_IMAGE_PATH).size, 'bytes');
 
     // Make the request
     const response = await axios.post(API_URL, formData, {
@@ -77,15 +77,15 @@ async function runTest() {
       timeout: 30000 // 30 seconds
     });
 
-    console.log('Success! Response:', JSON.stringify(response.data, null, 2));
-    console.log('Check your Cloudinary dashboard for the uploaded image in the navi/guestsightseeing folder');
+    //console.log('Success! Response:', JSON.stringify(response.data, null, 2));
+    //console.log('Check your Cloudinary dashboard for the uploaded image in the navi/guestsightseeing folder');
   } catch (error) {
     console.error('Test failed:');
     
     if (error.response) {
-      console.log('Status:', error.response.status);
-      console.log('Headers:', error.response.headers);
-      console.log('Data:', error.response.data);
+      //console.log('Status:', error.response.status);
+      //console.log('Headers:', error.response.headers);
+      //console.log('Data:', error.response.data);
     } else {
       console.error('Error:', error.message);
     }

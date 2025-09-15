@@ -16,7 +16,6 @@ async function createAdmin() {
   // Check if user already exists
   const exists = await User.findOne({ email });
   if (exists) {
-    console.log('Admin user already exists:', email);
     mongoose.disconnect();
     return;
   }
@@ -29,7 +28,6 @@ async function createAdmin() {
     isApproved: true,
   });
   await user.save();
-  console.log('Admin user created:', email);
   mongoose.disconnect();
 }
 

@@ -64,7 +64,7 @@ const NotificationDropdown = () => {
     // Navigate to the related entity if needed
     if (notification.relatedEntity) {
       // You can add navigation logic here based on notification type
-      console.log('Navigate to:', notification.relatedEntity);
+      //console.log('Navigate to:', notification.relatedEntity);
     }
     
     setIsOpen(false);

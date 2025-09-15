@@ -40,7 +40,7 @@ const MyBookings = () => {
   // Debug: Log bookings data when it changes
   useEffect(() => {
     if (bookings && bookings.length > 0) {
-      console.log('Bookings data:', bookings.map(b => ({
+      //console.log('Bookings data:', bookings.map(b => ({
         id: b._id,
         bookingId: b.bookingId,
         status: b.status,
@@ -169,7 +169,7 @@ const MyBookings = () => {
   // Refresh bookings when refreshTrigger changes
   useEffect(() => {
     if (refreshTrigger > 0) {
-      console.log('Refreshing bookings due to refresh trigger');
+      //console.log('Refreshing bookings due to refresh trigger');
       fetchBookings();
     }
   }, [refreshTrigger, fetchBookings]);
@@ -187,7 +187,7 @@ const MyBookings = () => {
         booking={selectedBooking}
         isAdmin={false}
         onUpdate={(updatedBooking) => {
-          console.log('Booking updated in modal, refreshing list:', updatedBooking);
+          //console.log('Booking updated in modal, refreshing list:', updatedBooking);
           setSelectedBooking(updatedBooking);
           setRefreshTrigger(prev => prev + 1);
         }}

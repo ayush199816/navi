@@ -5,8 +5,8 @@ const Booking = require('../models/Booking');
 // Test route to check if status update works directly
 router.post('/update-status', async (req, res) => {
   try {
-    console.log('Test update status request received');
-    console.log('Request body:', req.body);
+    //console.log('Test update status request received');
+    //console.log('Request body:', req.body);
     
     const { bookingId, status } = req.body;
     
@@ -17,7 +17,7 @@ router.post('/update-status', async (req, res) => {
       });
     }
     
-    console.log(`Attempting to update booking ${bookingId} to status: ${status}`);
+    //console.log(`Attempting to update booking ${bookingId} to status: ${status}`);
     
     // Find the booking
     const booking = await Booking.findById(bookingId);
@@ -28,7 +28,7 @@ router.post('/update-status', async (req, res) => {
       });
     }
     
-    console.log('Current booking status:', booking.bookingStatus);
+    //console.log('Current booking status:', booking.bookingStatus);
     
     // Update the status
     booking.bookingStatus = status;
@@ -37,7 +37,7 @@ router.post('/update-status', async (req, res) => {
     // Save the booking
     await booking.save();
     
-    console.log('Booking status updated successfully to:', status);
+    //console.log('Booking status updated successfully to:', status);
     
     res.status(200).json({
       success: true,

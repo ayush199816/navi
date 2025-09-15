@@ -24,4 +24,4 @@ const out = fs.createWriteStream('test-image.jpg');
 const stream = canvas.createJPEGStream({ quality: 0.95 });
 stream.pipe(out);
 
-out.on('finish', () => console.log('Test image created: test-image.jpg'));
+

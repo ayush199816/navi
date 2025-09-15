@@ -216,7 +216,7 @@ const LandingPage = () => {
   const handleSubscribe = (e) => {
     e.preventDefault();
     // In a real app, you would send this to your backend
-    console.log('Subscribing with email:', email);
+    //console.log('Subscribing with email:', email);
     setIsSubscribed(true);
     setEmail('');
     // Reset subscription message after 5 seconds

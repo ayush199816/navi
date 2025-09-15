@@ -5,7 +5,7 @@ const Quote = require('../models/Quote');
 // @route   GET /api/sales-leads
 // @access  Private
 const getSalesLeads = async (req, res) => {
-  console.log('getSalesLeads called with query:', req.query);
+  //console.log('getSalesLeads called with query:', req.query);
   try {
     const { status, assignedTo, priority, source } = req.query;
     const query = {};

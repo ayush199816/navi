@@ -15,7 +15,7 @@ const sendNotification = async (userId, title, message, type = 'quote_response',
     
     // Here you can add real-time notification logic (e.g., WebSocket, Socket.io)
     // For now, we'll just log it
-    console.log(`Notification sent to user ${userId}: ${title}`);
+    //console.log(`Notification sent to user ${userId}: ${title}`);
     
     return notification;
   } catch (error) {

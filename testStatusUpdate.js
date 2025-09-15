@@ -10,7 +10,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('MongoDB Connected'))
+.then(() => //console.log('MongoDB Connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Import the Booking model
@@ -19,7 +19,7 @@ const Booking = require('./models/Booking');
 // Test function to update a booking status
 const updateBookingStatus = async (bookingId, newStatus) => {
   try {
-    console.log(`Attempting to update booking ${bookingId} to status: ${newStatus}`);
+    //console.log(`Attempting to update booking ${bookingId} to status: ${newStatus}`);
     
     // Find the booking
     const booking = await Booking.findById(bookingId);
@@ -28,7 +28,7 @@ const updateBookingStatus = async (bookingId, newStatus) => {
       return;
     }
     
-    console.log('Current booking status:', booking.bookingStatus);
+    //console.log('Current booking status:', booking.bookingStatus);
     
     // Update the status
     booking.bookingStatus = newStatus;
@@ -37,8 +37,8 @@ const updateBookingStatus = async (bookingId, newStatus) => {
     // Save the booking
     await booking.save();
     
-    console.log('Booking status updated successfully to:', newStatus);
-    console.log('Updated booking:', booking);
+    //console.log('Booking status updated successfully to:', newStatus);
+    //console.log('Updated booking:', booking);
   } catch (err) {
     console.error('Error updating booking status:', err);
   } finally {

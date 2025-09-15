@@ -41,7 +41,7 @@ const MyItineraries = () => {
       try {
         setLoading(true);
         setError('');
-        console.log('Fetching agent itineraries...');
+        //console.log('Fetching agent itineraries...');
         
         // Get the auth token from localStorage
         const token = localStorage.getItem('token');
@@ -56,7 +56,7 @@ const MyItineraries = () => {
           }
         });
         
-        console.log('Agent itineraries response:', response.data);
+        //console.log('Agent itineraries response:', response.data);
         setItineraries(response.data.data || []);
       } catch (err) {
         setError('Failed to load itineraries. Please try again later.');
@@ -266,7 +266,7 @@ const MyItineraries = () => {
                             className="d-flex align-items-center shadow-sm"
                             style={{ minWidth: '80px' }}
                             onClick={() => {
-                              console.log('View button clicked', itinerary);
+                              //console.log('View button clicked', itinerary);
                               setSelectedItinerary(itinerary);
                               setShowViewModal(true);
                             }}

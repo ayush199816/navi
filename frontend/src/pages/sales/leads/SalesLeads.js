@@ -23,14 +23,14 @@ const SalesLeads = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const leadsState = useSelector((state) => state.salesLeads);
-  console.log('Redux salesLeads state:', leadsState);
+  //console.log('Redux salesLeads state:', leadsState);
   
   const leads = leadsState?.leads || [];
   const loading = leadsState?.loading || false;
   const error = leadsState?.error;
   const currentLead = leadsState?.currentLead;
   
-  console.log('Leads data:', leads);
+  //console.log('Leads data:', leads);
   const [filters, setFilters] = useState({
     status: '',
     source: '',
@@ -49,9 +49,9 @@ const SalesLeads = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Dispatching fetchSalesLeads with:', { ...filters, ...pagination });
+        //console.log('Dispatching fetchSalesLeads with:', { ...filters, ...pagination });
         const result = await dispatch(fetchSalesLeads({ ...filters, ...pagination }));
-        console.log('fetchSalesLeads result:', result);
+        //console.log('fetchSalesLeads result:', result);
       } catch (err) {
         console.error('Error fetching sales leads:', err);
       }
@@ -205,7 +205,7 @@ const SalesLeads = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {Array.isArray(leads) && leads.length > 0 ? leads.map((lead) => {
-                console.log('Rendering lead:', lead);
+                //console.log('Rendering lead:', lead);
                 return (
                 <tr key={lead._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">

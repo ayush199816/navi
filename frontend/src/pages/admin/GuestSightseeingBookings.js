@@ -23,7 +23,7 @@ const GuestSightseeingBookings = () => {
         return;
       }
 
-      console.log('Fetching bookings with status:', filters.status);
+      //console.log('Fetching bookings with status:', filters.status);
       const response = await axios.get(`/api/guest-sightseeing-bookings?status=${filters.status || ''}`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -32,8 +32,8 @@ const GuestSightseeingBookings = () => {
         validateStatus: (status) => status < 500 // Don't throw for 4xx errors
       });
       
-      console.log('API Response Status:', response.status);
-      console.log('API Response Data:', response.data);
+      //console.log('API Response Status:', response.status);
+      //console.log('API Response Data:', response.data);
       
       if (response.data && response.data.success === false) {
         console.error('API Error:', response.data.message || 'Unknown error');
@@ -47,7 +47,7 @@ const GuestSightseeingBookings = () => {
       const responseData = response.data || {};
       const bookingsData = responseData.data || responseData;
       
-      console.log('Processed bookings data:', bookingsData);
+      //console.log('Processed bookings data:', bookingsData);
       
       if (!bookingsData) {
         console.warn('No bookings data received');
@@ -56,7 +56,7 @@ const GuestSightseeingBookings = () => {
       }
       
       const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
-      console.log(`Found ${bookingsArray.length} bookings`);
+      //console.log(`Found ${bookingsArray.length} bookings`);
       setBookings(bookingsArray);
       
     } catch (error) {

@@ -7,7 +7,7 @@ if (-not (Get-Module -Name "PSScriptAnalyzer" -ListAvailable)) {
 $jwt = node -e "
 const jwt = require('jsonwebtoken'); 
 const token = jwt.sign({ id: 'test-user', role: 'admin' }, 'your_jwt_secret_key_here');
-console.log(token);"
+//console.log(token);"
 
 # Set headers
 $headers = @{

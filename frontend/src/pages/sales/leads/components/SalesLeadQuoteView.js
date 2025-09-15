@@ -52,10 +52,10 @@ const SalesLeadQuoteView = ({ lead, onClose, onUpdate }) => {
 
   if (!lead) return null;
 
-  console.log('Lead data in View:', lead);
-  console.log('Quote data:', lead.quote);
-  console.log('Itinerary data:', lead.quote?.itinerary);
-  console.log('Destinations:', lead.quote?.itinerary?.destinations);
+  //console.log('Lead data in View:', lead);
+  //console.log('Quote data:', lead.quote);
+  //console.log('Itinerary data:', lead.quote?.itinerary);
+  //console.log('Destinations:', lead.quote?.itinerary?.destinations);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">

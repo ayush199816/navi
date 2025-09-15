@@ -17,7 +17,7 @@ async function testUpload() {
     form.append('images', fs.createReadStream(path.join(__dirname, 'test-image.jpg')));
 
     // Make the request
-    console.log('Sending request to upload endpoint...');
+    //console.log('Sending request to upload endpoint...');
     const response = await axios.post(
       'http://localhost:5000/api/guest-sightseeing/upload',
       form,
@@ -31,13 +31,13 @@ async function testUpload() {
       }
     );
 
-    console.log('✅ Upload successful!');
-    console.log('Response:', JSON.stringify(response.data, null, 2));
+    //console.log('✅ Upload successful!');
+    //console.log('Response:', JSON.stringify(response.data, null, 2));
     
     // Save the image URL for frontend testing
     if (response.data.data && response.data.data.length > 0) {
-      console.log('\n📸 Image URL for frontend testing:');
-      console.log(response.data.data[0].url);
+      //console.log('\n📸 Image URL for frontend testing:');
+      //console.log(response.data.data[0].url);
     }
   } catch (error) {
     console.error('❌ Error:');

@@ -10,7 +10,7 @@ const GuestDashboard = () => {
 
   // Handle authentication and redirects
   useEffect(() => {
-    console.log('GuestDashboard - Auth state:', { 
+    //console.log('GuestDashboard - Auth state:', { 
       isAuthenticated, 
       loading, 
       user: user ? { 
@@ -22,13 +22,13 @@ const GuestDashboard = () => {
 
     // If still loading initial auth state, do nothing
     if (loading) {
-      console.log('GuestDashboard - Still loading auth state');
+      //console.log('GuestDashboard - Still loading auth state');
       return;
     }
     
     // If not authenticated, redirect to login
     if (!isAuthenticated || !user) {
-      console.log('GuestDashboard - Not authenticated, redirecting to login');
+      //console.log('GuestDashboard - Not authenticated, redirecting to login');
       navigate('/login', { 
         state: { 
           from: '/guest-dashboard',
@@ -41,7 +41,7 @@ const GuestDashboard = () => {
     
     // If authenticated but not a guest user, redirect to appropriate dashboard
     if (user.role !== 'user' || user.user_type !== 'guest') {
-      console.log('GuestDashboard - User is not a guest, redirecting based on role:', user.role);
+      //console.log('GuestDashboard - User is not a guest, redirecting based on role:', user.role);
       if (user.role === 'agent') {
         navigate(user.isApproved ? '/agent' : '/onboarding', { replace: true });
       } else if (user.role === 'admin') {
@@ -53,7 +53,7 @@ const GuestDashboard = () => {
     }
     
     // If we get here, user is authenticated as a guest
-    console.log('GuestDashboard - User is authenticated as guest, rendering dashboard');
+    //console.log('GuestDashboard - User is authenticated as guest, rendering dashboard');
     setIsCheckingAuth(false);
     
   }, [user, isAuthenticated, loading, navigate]);

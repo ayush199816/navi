@@ -6,7 +6,7 @@ async function verifyPassword() {
   
   try {
     const isMatch = await bcrypt.compare(passwordToCheck, storedHash);
-    console.log(`Password match for 'Admin@1234': ${isMatch}`);
+    //console.log(`Password match for 'Admin@1234': ${isMatch}`);
     
     // If it doesn't match, let's try some common passwords
     if (!isMatch) {
@@ -14,7 +14,7 @@ async function verifyPassword() {
       for (const pwd of commonPasswords) {
         const match = await bcrypt.compare(pwd, storedHash);
         if (match) {
-          console.log(`Found matching password: '${pwd}'`);
+          //console.log(`Found matching password: '${pwd}'`);
           break;
         }
       }

@@ -7,11 +7,11 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const User = require('./models/User');
 
 async function createAgent() {
-  console.log('Starting agent creation process...');
+  //console.log('Starting agent creation process...');
   
   try {
-    console.log('Connecting to MongoDB...');
-    console.log('MongoDB URI:', process.env.MONGODB_URI);
+    //console.log('Connecting to MongoDB...');
+    //console.log('MongoDB URI:', process.env.MONGODB_URI);
     
     // Connect to MongoDB with better options
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -21,7 +21,7 @@ async function createAgent() {
       socketTimeoutMS: 45000,
     });
 
-    console.log('✅ Successfully connected to MongoDB');
+    //console.log('✅ Successfully connected to MongoDB');
 
     // Agent details
     const agentData = {
@@ -36,12 +36,12 @@ async function createAgent() {
       city: 'Mumbai'
     };
 
-    console.log('Checking if agent already exists...');
+    //console.log('Checking if agent already exists...');
     // Check if agent already exists
     const existingAgent = await User.findOne({ email: agentData.email });
     if (existingAgent) {
-      console.log(`❌ Agent with email ${agentData.email} already exists.`);
-      console.log('Agent details:', {
+      //console.log(`❌ Agent with email ${agentData.email} already exists.`);
+      //console.log('Agent details:', {
         _id: existingAgent._id,
         role: existingAgent.role,
         isApproved: existingAgent.isApproved
@@ -49,24 +49,24 @@ async function createAgent() {
       return;
     }
 
-    console.log('Hashing password...');
+    //console.log('Hashing password...');
     // Hash password
     const salt = await bcrypt.genSalt(10);
     agentData.password = await bcrypt.hash(agentData.password, salt);
 
-    console.log('Creating new agent...');
+    //console.log('Creating new agent...');
     // Create agent
     const agent = new User(agentData);
     await agent.save();
 
-    console.log('\n✅ Agent created successfully!');
-    console.log('================================');
-    console.log(`Name: ${agentData.name}`);
-    console.log(`Email: ${agentData.email}`);
-    console.log('Password: Agent123! (as provided)');
-    console.log(`Role: ${agentData.role}`);
-    console.log(`Status: ${agentData.isApproved ? 'Approved' : 'Pending Approval'}`);
-    console.log('================================');
+    //console.log('\n✅ Agent created successfully!');
+    //console.log('================================');
+    //console.log(`Name: ${agentData.name}`);
+    //console.log(`Email: ${agentData.email}`);
+    //console.log('Password: Agent123! (as provided)');
+    //console.log(`Role: ${agentData.role}`);
+    //console.log(`Status: ${agentData.isApproved ? 'Approved' : 'Pending Approval'}`);
+    //console.log('================================');
 
   } catch (error) {
     console.error('\n❌ Error creating agent:');
@@ -87,9 +87,9 @@ async function createAgent() {
     // Close the connection
     if (mongoose.connection.readyState === 1) {
       await mongoose.disconnect();
-      console.log('\n🔌 Disconnected from MongoDB');
+      //console.log('\n🔌 Disconnected from MongoDB');
     } else {
-      console.log('\nℹ️ No active MongoDB connection to close');
+      //console.log('\nℹ️ No active MongoDB connection to close');
     }
   }
 }

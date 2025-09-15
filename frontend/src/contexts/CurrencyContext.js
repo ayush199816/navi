@@ -99,7 +99,7 @@ export const CurrencyProvider = ({ children }) => {
     }
     
     const currency = exchangeRates[selectedCurrency];
-    console.log('formatPrice called with:', { 
+    //console.log('formatPrice called with:', { 
       priceInUSD, 
       selectedCurrency, 
       currency, 
@@ -115,7 +115,7 @@ export const CurrencyProvider = ({ children }) => {
     const convertedPrice = (priceInUSD * currency.rate).toFixed(2);
     const formattedNumber = convertedPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     const result = `${currency.symbol} ${formattedNumber}`;
-    console.log('formatPrice result:', result);
+    //console.log('formatPrice result:', result);
     return result;
   };
 

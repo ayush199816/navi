@@ -181,7 +181,7 @@ exports.getBookings = asyncHandler(async (req, res, next) => {
   }
   
   // For debugging
-  console.log('Query:', JSON.stringify(query, null, 2));
+  //console.log('Query:', JSON.stringify(query, null, 2));
   
   // Find bookings with populated references
   const bookings = await GuestSightseeingBooking.find(query)
@@ -190,7 +190,7 @@ exports.getBookings = asyncHandler(async (req, res, next) => {
     .sort({ createdAt: -1 });
   
   // For debugging
-  console.log(`Found ${bookings.length} bookings`);
+  //console.log(`Found ${bookings.length} bookings`);
   
   res.status(200).json({
     success: true,

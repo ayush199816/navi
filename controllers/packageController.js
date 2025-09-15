@@ -112,8 +112,8 @@ exports.getPackage = async (req, res) => {
 // @access  Private/Operations
 exports.createPackage = async (req, res) => {
   // Debug logging for itinerary
-  console.log('Raw itinerary type:', typeof req.body.itinerary);
-  console.log('Raw itinerary value:', req.body.itinerary);
+  //console.log('Raw itinerary type:', typeof req.body.itinerary);
+  //console.log('Raw itinerary value:', req.body.itinerary);
 
   // Fix: Parse itinerary if it's a string
   if (typeof req.body.itinerary === 'string') {
@@ -124,8 +124,8 @@ exports.createPackage = async (req, res) => {
         parsed = JSON.parse(parsed);
       }
       req.body.itinerary = parsed;
-      console.log('Parsed itinerary type:', typeof req.body.itinerary, Array.isArray(req.body.itinerary) ? '(array)' : '');
-      console.log('Parsed itinerary value:', req.body.itinerary);
+      //console.log('Parsed itinerary type:', typeof req.body.itinerary, Array.isArray(req.body.itinerary) ? '(array)' : '');
+      //console.log('Parsed itinerary value:', req.body.itinerary);
     } catch (e) {
       console.error('Itinerary JSON parse error:', e);
       return res.status(400).json({ message: 'Invalid itinerary format. Must be array or valid JSON string.' });

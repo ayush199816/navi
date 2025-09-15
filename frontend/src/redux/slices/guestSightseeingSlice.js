@@ -6,9 +6,9 @@ export const getGuestSightseeingById = createAsyncThunk(
   'guestSightseeings/getById',
   async (id, { rejectWithValue }) => {
     try {
-      console.log('Fetching sightseeing with ID:', id);
+      //console.log('Fetching sightseeing with ID:', id);
       const response = await api.get(`/guest-sightseeing/${id}`);
-      console.log('API Response:', response.data);
+      //console.log('API Response:', response.data);
       
       // Handle different response formats
       const sightseeingData = response.data.data || response.data;
@@ -41,20 +41,20 @@ export const fetchGuestSightseeings = createAsyncThunk(
         queryParams.excludeId = params.excludeId;
       }
       
-      console.log('Fetching guest sightseeings with params:', queryParams);
+      //console.log('Fetching guest sightseeings with params:', queryParams);
       const response = await api.get('/guest-sightseeing', { params: queryParams });
-      console.log('API Response:', response.data);
+      //console.log('API Response:', response.data);
       
       // The backend now returns a consistent response format
       const { data = [], count = 0, page = 1, pages = 1, total = 0 } = response.data;
       
-      console.log('Processed data:', { 
-        data: Array.isArray(data) ? data : [], 
-        count: count || 0, 
-        total: total || count || 0,
-        page: parseInt(page, 10000) || 1, 
-        pages: parseInt(pages, 10000) || 1 
-      });
+      // console.log('Processed data:', { 
+      //   data: Array.isArray(data) ? data : [], 
+      //   count: count || 0, 
+      //   total: total || count || 0,
+      //   page: parseInt(page, 10) || 1, 
+      //   pages: parseInt(pages, 10) || 1 
+      // });
       
       return {
         data: Array.isArray(data) ? data : [],

@@ -24,7 +24,7 @@ exports.generateAIItinerary = async (req, res) => {
     }
 
     // Log the request
-    console.log('Generating AI itinerary for:', {
+    //console.log('Generating AI itinerary for:', {
       user: req.user.name,
       role: req.user.role,
       destination,
@@ -81,14 +81,14 @@ Format the itinerary in Markdown with clear headings and bullet points.`;
       if (success) break;
       
       try {
-        console.log(`Attempting to generate itinerary with ${modelName}...`);
+        //console.log(`Attempting to generate itinerary with ${modelName}...`);
         const modelInstance = genAI.getGenerativeModel({ model: modelName });
         
         const result = await modelInstance.generateContent(prompt);
         const response = await result.response;
         itinerary = response.text();
         
-        console.log(`Successfully generated itinerary with ${modelName}`);
+        //console.log(`Successfully generated itinerary with ${modelName}`);
         success = true;
       } catch (modelError) {
         console.error(`Error with ${modelName}:`, modelError.message);
@@ -97,7 +97,7 @@ Format the itinerary in Markdown with clear headings and bullet points.`;
     
     // If all models failed, use our fallback generator
     if (!success) {
-      console.log('All Gemini models failed, using fallback itinerary generator');
+      //console.log('All Gemini models failed, using fallback itinerary generator');
       itinerary = generateFallbackItinerary(destination, dates, preferences, tripDuration);
     }
     

@@ -71,7 +71,7 @@ const SightseeingDetailPage = () => {
         }
         
         const result = await dispatch(getGuestSightseeingById(id)).unwrap();
-        console.log('Sightseeing loaded:', result);
+        //console.log('Sightseeing loaded:', result);
         
         if (isMounted) {
           if (!result) {

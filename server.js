@@ -52,7 +52,7 @@ app.use('/uploads', (req, res, next) => {
 
 // Debug middleware
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  //console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
 
@@ -91,7 +91,7 @@ const routes = [
 // Register routes
 routes.forEach(({ path, route }) => {
   app.use(path, route);
-  console.log(`Registered route: ${path}`);
+  //console.log(`Registered route: ${path}`);
 });
 
 // Root route
@@ -123,7 +123,7 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('MongoDB connected successfully');
+    //console.log('MongoDB connected successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error);
     process.exit(1);
@@ -161,7 +161,7 @@ const startServer = async () => {
     
     // Start the server
     const server = app.listen(port, '0.0.0.0', () => {
-      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`);
+      //console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`);
     });
 
     // Handle server errors
@@ -176,9 +176,9 @@ const startServer = async () => {
 
     // Handle process termination
     process.on('SIGTERM', () => {
-      console.log('SIGTERM received. Shutting down gracefully...');
+      //console.log('SIGTERM received. Shutting down gracefully...');
       server.close(() => {
-        console.log('Server closed');
+        //console.log('Server closed');
         process.exit(0);
       });
     });

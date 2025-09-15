@@ -32,9 +32,9 @@ export const createUser = createAsyncThunk(
   'users/create',
   async (userData, { rejectWithValue }) => {
     try {
-      console.log('Creating user with data:', userData);
+      //console.log('Creating user with data:', userData);
       const res = await api.post('/users', userData);
-      console.log('User created successfully:', res.data);
+      //console.log('User created successfully:', res.data);
       return res.data.data;
     } catch (err) {
       console.error('Error in createUser:', {
@@ -55,9 +55,9 @@ export const getPendingAgentApprovals = createAsyncThunk(
   'users/getPendingAgentApprovals',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('Fetching pending approvals...');
+      //console.log('Fetching pending approvals...');
       const res = await api.get('/users/pending-approvals');
-      console.log('Pending approvals response:', res.data);
+      //console.log('Pending approvals response:', res.data);
       return res.data.data || [];
     } catch (err) {
       console.error('Error in getPendingAgentApprovals:', {

@@ -64,22 +64,22 @@ const BookingsAdmin = () => {
   };
   
   const handleBookingUpdate = (updatedBooking) => {
-    console.log('handleBookingUpdate called with:', updatedBooking);
+    //console.log('handleBookingUpdate called with:', updatedBooking);
     
     // Update the booking in the local state
     const updatedBookings = bookings.map(bk => {
       if (bk._id === updatedBooking._id) {
-        console.log('Found matching booking to update:', bk._id);
-        console.log('Old status:', bk.bookingStatus, 'New status:', updatedBooking.bookingStatus);
+        //console.log('Found matching booking to update:', bk._id);
+        //console.log('Old status:', bk.bookingStatus, 'New status:', updatedBooking.bookingStatus);
         return updatedBooking;
       }
       return bk;
     });
     
-    console.log('Setting updated bookings array');
+    //console.log('Setting updated bookings array');
     setBookings(updatedBookings);
     
-    console.log('Setting selected booking to:', updatedBooking);
+    //console.log('Setting selected booking to:', updatedBooking);
     setSelectedBooking(updatedBooking);
   };
 

@@ -9,36 +9,36 @@ async function testConnection() {
       useUnifiedTopology: true,
     });
     
-    console.log('✅ Connected to MongoDB');
+    //console.log('✅ Connected to MongoDB');
     
     // Get the database
     const db = mongoose.connection.db;
     
     // List all collections
     const collections = await db.listCollections().toArray();
-    console.log('\n📂 Collections in database:');
+    //console.log('\n📂 Collections in database:');
     collections.forEach((collection, i) => {
-      console.log(`${i + 1}. ${collection.name}`);
+      //console.log(`${i + 1}. ${collection.name}`);
     });
     
     // Check if guestsightseeings collection exists
     const collectionExists = collections.some(c => c.name === 'guestsightseeings');
     
     if (collectionExists) {
-      console.log('\n🔍 Found guestsightseeings collection');
+      //console.log('\n🔍 Found guestsightseeings collection');
       
       // Count documents in the collection
       const count = await mongoose.connection.db.collection('guestsightseeings').countDocuments();
-      console.log(`📊 Total documents in guestsightseeings: ${count}`);
+      //console.log(`📊 Total documents in guestsightseeings: ${count}`);
       
       // Get sample documents
       if (count > 0) {
         const sample = await mongoose.connection.db.collection('guestsightseeings').findOne({});
-        console.log('\n📄 Sample document:');
-        console.log(JSON.stringify(sample, null, 2));
+        //console.log('\n📄 Sample document:');
+        //console.log(JSON.stringify(sample, null, 2));
       }
     } else {
-      console.log('\n❌ guestsightseeings collection not found');
+      //console.log('\n❌ guestsightseeings collection not found');
       
       // Check for alternative collection names (case-insensitive)
       const altCollection = collections.find(c => 
@@ -47,7 +47,7 @@ async function testConnection() {
       );
       
       if (altCollection) {
-        console.log(`\nℹ️ Found similar collection: ${altCollection.name}`);
+        //console.log(`\nℹ️ Found similar collection: ${altCollection.name}`);
       }
     }
     

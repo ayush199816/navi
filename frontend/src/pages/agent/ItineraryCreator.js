@@ -278,7 +278,7 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
         }))
       };
 
-      console.log('Saving itinerary data:', itineraryData);
+      //console.log('Saving itinerary data:', itineraryData);
 
       // Send the data to the new backend endpoint
       const response = await api.post('/v1/itinerary-creator', itineraryData);
