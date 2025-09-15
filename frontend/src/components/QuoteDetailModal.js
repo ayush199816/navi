@@ -236,7 +236,7 @@ const QuoteDetailModal = ({ open, onClose, quote, isAdmin, children }) => {
               onClick={() => setShowHistory(!showHistory)}
               className="flex items-center bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-1 px-3 rounded-md transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="https://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {showHistory ? 'Hide History' : 'Show History'} ({quote.discussion.length} {quote.discussion.length === 1 ? 'entry' : 'entries'})

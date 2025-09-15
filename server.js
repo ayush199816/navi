@@ -15,9 +15,54 @@ const app = express();
 // Get port from environment or default to 3000
 const PORT = process.env.PORT || 3000;
 
-// Security middleware
-app.use(helmet());
-app.disable('x-powered-by');
+// Security middleware with Content Security Policy (CSP)
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'", // Required for some React features
+          "'unsafe-eval'"   // Required for some React features in development
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'"  // Required for inline styles and CSS-in-JS
+        ],
+        imgSrc: [
+          "'self'",
+          'data:',           // For data: URLs
+          'blob:',          // For blob: URLs
+          'https://*.cloudinary.com', // Cloudinary images
+          'https://*.google-analytics.com', // Google Analytics
+          'https://*.doubleclick.net' // Google Ads
+        ],
+        connectSrc: [
+          "'self'",
+          'https://*.cloudinary.com',
+          'https://*.google-analytics.com',
+          'https://*.doubleclick.net',
+          'ws://localhost:3000' // WebSocket for development
+        ],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
+      }
+    },
+    crossOriginEmbedderPolicy: false, // Required for some third-party services
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    dnsPrefetchControl: { allow: false },
+    frameguard: { action: 'deny' },
+    hidePoweredBy: true,
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+    ieNoOpen: true,
+    noSniff: true,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    xssFilter: true
+  })
+);
 
 // CORS configuration
 const corsOptions = {

@@ -3,20 +3,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { 
   fetchSalesLeads, 
-  fetchSalesLead,
   createSalesLead,
   updateSalesLead,
   deleteSalesLead,
-  resetCurrentLead,
-  setFilters as setSalesFilters,
-  setPagination as setSalesPagination
+  resetCurrentLead
 } from '../../../redux/slices/salesLeadSlice';
 import { openModal, closeModal } from '../../../redux/slices/uiSlice';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
 import LeadSearch from '../../agent/leads/components/LeadSearch';
 // Import the modal component
-import Modal from '../../../components/modals/Modal';
-import SalesLeadDetail from './components/SalesLeadDetail';
 import { toast } from 'react-toastify';
 
 const SalesLeads = () => {
@@ -28,7 +23,6 @@ const SalesLeads = () => {
   const leads = leadsState?.leads || [];
   const loading = leadsState?.loading || false;
   const error = leadsState?.error;
-  const currentLead = leadsState?.currentLead;
   
   console.log('Leads data:', leads);
   const [filters, setFilters] = useState({
@@ -39,7 +33,6 @@ const SalesLeads = () => {
     endDate: '',
     search: ''
   });
-  const [selectedLead, setSelectedLead] = useState(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10
@@ -58,7 +51,7 @@ const SalesLeads = () => {
     };
     
     fetchData();
-  }, [dispatch, JSON.stringify(filters), pagination.page, pagination.limit]);
+  }, [dispatch, filters, pagination]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -81,25 +74,8 @@ const SalesLeads = () => {
     }));
   };
 
-  const handleStatusChange = async (leadId, newStatus) => {
-    try {
-      await dispatch(updateSalesLead({ id: leadId, status: newStatus })).unwrap();
-      toast.success('Lead status updated successfully');
-      dispatch(fetchSalesLeads({ ...filters, ...pagination }));
-    } catch (error) {
-      toast.error(error || 'Failed to update lead status');
-    }
-  };
-
-  const handleAssignLead = async (leadId, agentId) => {
-    try {
-      await dispatch(updateSalesLead({ id: leadId, assignedTo: agentId })).unwrap();
-      toast.success('Lead assigned successfully');
-      dispatch(fetchSalesLeads({ ...filters, ...pagination }));
-    } catch (error) {
-      toast.error(error || 'Failed to assign lead');
-    }
-  };
+  // These functions are kept but not used in the component
+  // They might be used in child components or for future implementation
 
   const handleCreateLead = async (leadData) => {
     try {
@@ -154,7 +130,7 @@ const SalesLeads = () => {
         <div className="bg-red-50 border-l-4 border-red-400 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-red-400" xmlns="https://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
               </svg>
             </div>
