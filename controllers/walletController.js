@@ -37,7 +37,7 @@ exports.getMyWallet = async (req, res) => {
 
     // If wallet doesn't exist, create a new one for the agent
     if (!wallet) {
-      //console.log(`Creating new wallet for agent: ${req.user.id}`);
+      console.log(`Creating new wallet for agent: ${req.user.id}`);
       
       wallet = new Wallet({
         user: req.user.id,
@@ -48,7 +48,7 @@ exports.getMyWallet = async (req, res) => {
       });
       
       await wallet.save();
-      //console.log(`New wallet created successfully for agent: ${req.user.id}`);
+      console.log(`New wallet created successfully for agent: ${req.user.id}`);
     }
 
     res.status(200).json({

@@ -83,8 +83,8 @@ const handleFileUploads = (req, res, next) => {
 // @route   GET /api/guest-sightseeing
 // @access  Public
 const getGuestSightseeings = asyncHandler(async (req, res, next) => {
-  //console.log(' [GET] /api/guest-sightseeing');
-  //console.log(' Request query:', JSON.stringify(req.query, null, 2));
+  console.log(' [GET] /api/guest-sightseeing');
+  console.log(' Request query:', JSON.stringify(req.query, null, 2));
   
   // Parse query parameters
   const { sort, select, page = 1, limit = 10, search = '', country = '', excludeId, random } = req.query;
@@ -135,7 +135,7 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   // Only show active sightseeings
   filter.isActive = true;
   
-  //console.log(' Filters:', JSON.stringify(filter, null, 2));
+  console.log(' Filters:', JSON.stringify(filter, null, 2));
   
   // Parse pagination parameters
   const pageNum = parseInt(page, 10);
@@ -143,17 +143,17 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   const startIndex = (pageNum - 1) * limitNum;
   
   // Create base query
-  //console.log(' Building base query with filters');
+  console.log(' Building base query with filters');
   let query = GuestSightseeing.find(filter);
   
   // Log the raw query
-  //console.log(' Raw query:', JSON.stringify(query.getFilter(), null, 2));
+  console.log(' Raw query:', JSON.stringify(query.getFilter(), null, 2));
   
   // Select Fields
   const defaultFields = 'name description price offerPrice duration inclusions images country isActive createdAt';
   if (select) {
     const fields = select.split(',').join(' ');
-    //console.log('Selecting fields:', fields);
+    console.log('Selecting fields:', fields);
     query = query.select(fields);
   } else {
     // Always include these fields by default
@@ -172,7 +172,7 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   query = query.skip(startIndex).limit(limitNum);
   
   // Log the complete query being executed
-  //console.log(' Executing query:', JSON.stringify({
+  console.log(' Executing query:', JSON.stringify({
     collection: GuestSightseeing.collection.name,
     filter,
     sort: query._mongooseOptions?.sort,
@@ -182,17 +182,17 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   }, null, 2));
 
   // Execute query
-  //console.log(' Executing query with pagination...');
+  console.log(' Executing query with pagination...');
   try {
     // Get total count first
-    //console.log(' Counting total matching documents...');
+    console.log(' Counting total matching documents...');
     const total = await GuestSightseeing.countDocuments(filter);
-    //console.log(` Found ${total} matching documents in total`);
+    console.log(` Found ${total} matching documents in total`);
     
     // Handle random sampling if requested
     if (random) {
       const sampleSize = parseInt(random, 10) || 6;
-      //console.log(` Fetching ${sampleSize} random sightseeings`);
+      console.log(` Fetching ${sampleSize} random sightseeings`);
       
       // Get random sample of documents with all fields
       const randomSample = await GuestSightseeing.aggregate([
@@ -214,39 +214,39 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
     }
     
     if (total === 0) {
-      //console.log(' No documents found matching the filters');
+      console.log(' No documents found matching the filters');
       // Log available collections for debugging
       const collections = await mongoose.connection.db.listCollections().toArray();
-      //console.log(' Available collections:', collections.map(c => c.name));
+      console.log(' Available collections:', collections.map(c => c.name));
       
       // Check if collection exists
       const collectionExists = collections.some(c => c.name === 'guestsightseeings');
-      //console.log(` Collection 'guestsightseeings' exists: ${collectionExists}`);
+      console.log(` Collection 'guestsightseeings' exists: ${collectionExists}`);
       
       // If collection exists but no documents, check if it's empty
       if (collectionExists) {
         const totalInCollection = await GuestSightseeing.countDocuments({});
-        //console.log(` Total documents in collection: ${totalInCollection}`);
+        console.log(` Total documents in collection: ${totalInCollection}`);
         
         // Try to find any document in the collection
         const anyDoc = await GuestSightseeing.findOne({}).lean();
-        //console.log('Sample document from collection:', anyDoc);
+        console.log('Sample document from collection:', anyDoc);
         
         // Try a direct query to see if we get any results
         const directQueryResults = await GuestSightseeing.find({ isActive: true }).limit(5).lean();
-        //console.log('Direct query results (first 5 active docs):', directQueryResults);
+        console.log('Direct query results (first 5 active docs):', directQueryResults);
       }
     }
     
     // Now execute the query, including all fields
     const results = await query.lean().exec();
-    //console.log(` Retrieved ${results.length} results`);
+    console.log(` Retrieved ${results.length} results`);
     
     // Log the first few results if any
     if (results.length > 0) {
-      //console.log(' Sample result (first 2 items):', JSON.stringify(results.slice(0, 2), null, 2));
+      console.log(' Sample result (first 2 items):', JSON.stringify(results.slice(0, 2), null, 2));
     } else {
-      //console.log(' Query returned 0 results');
+      console.log(' Query returned 0 results');
     }
     
     // Prepare response
@@ -259,8 +259,8 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
       pages: Math.ceil(total / limitNum)
     };
     
-    //console.log(' Sending response with', results.length, 'items');
-    //console.log('Response object:', JSON.stringify(response, null, 2));
+    console.log(' Sending response with', results.length, 'items');
+    console.log('Response object:', JSON.stringify(response, null, 2));
     
     // Send response
     res.status(200).json(response);
@@ -369,7 +369,7 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
         const existingImages = Array.isArray(sightseeingData.images) ? sightseeingData.images : [];
         sightseeingData.images = [...existingImages, ...uploadedImageUrls];
         
-        //console.log('Successfully uploaded images:', uploadedImageUrls);
+        console.log('Successfully uploaded images:', uploadedImageUrls);
         
       } catch (uploadError) {
         console.error('Error uploading images:', uploadError);
@@ -416,14 +416,14 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
       sightseeingData.inclusions = [];
     }
     
-    //console.log('Creating sightseeing with data:', {
+    console.log('Creating sightseeing with data:', {
       ...sightseeingData,
       images: sightseeingData.images ? `${sightseeingData.images.length} images` : 'none'
     });
     
     // Create the sightseeing entry
     const sightseeing = await GuestSightseeing.create(sightseeingData);
-    //console.log('Sightseeing created successfully:', sightseeing._id);
+    console.log('Sightseeing created successfully:', sightseeing._id);
     
     res.status(201).json({
       success: true,
@@ -441,7 +441,7 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
 // @access  Private/Admin
 const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
   try {
-    //console.log('Update request body:', req.body);
+    console.log('Update request body:', req.body);
     
     let sightseeing = await GuestSightseeing.findById(req.params.id);
 
@@ -499,7 +499,7 @@ const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
       updates.duration = 'Not specified';
     }
     
-    //console.log('Updating sightseeing with data:', JSON.stringify(updates, null, 2));
+    console.log('Updating sightseeing with data:', JSON.stringify(updates, null, 2));
 
     // Update the document
     sightseeing = await GuestSightseeing.findByIdAndUpdate(

@@ -184,7 +184,7 @@ QuoteSchema.pre('save', async function (next) {
             
             // Update the sales status to indicate it's been converted to a lead
             this.salesStatus = 'converted_to_lead';
-            //console.log(`Created new sales lead for quote ${this.quoteId}`);
+            console.log(`Created new sales lead for quote ${this.quoteId}`);
           }
         }
       } catch (error) {

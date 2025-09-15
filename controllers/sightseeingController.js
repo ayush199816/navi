@@ -19,39 +19,39 @@ exports.createSightseeing = async (req, res) => {
   try {
     // Explicitly assign all expected fields to avoid missing values
     // Debug: log incoming request data
-    //console.log('=== REQUEST DATA ===');
-    //console.log('Headers:', JSON.stringify(req.headers, null, 2));
-    //console.log('Body:', JSON.stringify(req.body, null, 2));
-    //console.log('Files:', req.file);
-    //console.log('===================');
+    console.log('=== REQUEST DATA ===');
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('Files:', req.file);
+    console.log('===================');
     // Fallback: try to parse raw body if only 'name' is present
     let fallbackParsed = {};
     if (Object.keys(req.body).length === 1 && req.body.name && req.rawBody) {
       try {
         fallbackParsed = JSON.parse(req.rawBody.toString());
-        //console.log('Fallback rawBody parsed:', fallbackParsed);
+        console.log('Fallback rawBody parsed:', fallbackParsed);
       } catch (e) {}
     }
     function getField(field, fallback = '') {
       // First check req.body
       if (req.body[field] !== undefined && req.body[field] !== '') {
-        //console.log(`Found ${field} in req.body:`, req.body[field]);
+        console.log(`Found ${field} in req.body:`, req.body[field]);
         return req.body[field];
       }
       
       // Then check fallbackParsed
       if (fallbackParsed && typeof fallbackParsed === 'object' && fallbackParsed[field] !== undefined) {
-        //console.log(`Found ${field} in fallbackParsed:`, fallbackParsed[field]);
+        console.log(`Found ${field} in fallbackParsed:`, fallbackParsed[field]);
         return fallbackParsed[field];
       }
       
       // Special handling for FormData fields
       if (req.body[field] === '' && (field === 'currency' || field === 'transferType')) {
-        //console.log(`Field ${field} is empty, using default value`);
+        console.log(`Field ${field} is empty, using default value`);
         return field === 'currency' ? 'INR' : 'SIC';
       }
       
-      //console.log(`Field ${field} not found, using fallback:`, fallback);
+      console.log(`Field ${field} not found, using fallback:`, fallback);
       return fallback;
     }
 
@@ -91,10 +91,10 @@ exports.createSightseeing = async (req, res) => {
     // If currency is not provided, determine it from the country
     if (!currency && country) {
       currency = getDefaultCurrency(country);
-      //console.log(`Currency not provided, using default for ${country}: ${currency}`);
+      console.log(`Currency not provided, using default for ${country}: ${currency}`);
     } else if (!currency) {
       currency = 'USD'; // Fallback default
-      //console.log('No currency or country provided, using default currency: USD');
+      console.log('No currency or country provided, using default currency: USD');
     }
 
     // Only add fields present in req.body
@@ -127,7 +127,7 @@ exports.createSightseeing = async (req, res) => {
     }
     
     // Log the final data being saved
-    //console.log('Creating sightseeing with data:', JSON.stringify(data, null, 2));
+    console.log('Creating sightseeing with data:', JSON.stringify(data, null, 2));
     
     // Create the sightseeing entry
     const sightseeing = await Sightseeing.create(data);
@@ -147,8 +147,8 @@ exports.createSightseeing = async (req, res) => {
 // @access  Private/Admin,Operations
 exports.updateSightseeing = async (req, res) => {
   try {
-    //console.log('Update request received. Body:', req.body);
-    //console.log('Files:', req.file);
+    console.log('Update request received. Body:', req.body);
+    console.log('Files:', req.file);
     
     // Helper function to get field from form data or body
     const getField = (field) => {
@@ -218,7 +218,7 @@ exports.updateSightseeing = async (req, res) => {
     }
     
     // Log the final update data
-    //console.log('Updating sightseeing with data:', JSON.stringify(updateData, null, 2));
+    console.log('Updating sightseeing with data:', JSON.stringify(updateData, null, 2));
     
     const sightseeing = await Sightseeing.findByIdAndUpdate(
       req.params.id, 

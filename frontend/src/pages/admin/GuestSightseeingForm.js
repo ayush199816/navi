@@ -49,7 +49,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   // Initialize form data when propSightseeing changes
   useEffect(() => {
     if (propSightseeing) {
-      //console.log('Raw propSightseeing in form:', JSON.parse(JSON.stringify(propSightseeing)));
+      console.log('Raw propSightseeing in form:', JSON.parse(JSON.stringify(propSightseeing)));
       
       // Create a new form data object with all fields from propSightseeing
       const newFormData = { ...propSightseeing };
@@ -95,7 +95,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         newFormData.whatToBring = ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'];
       }
       
-      //console.log('Setting form data:', newFormData);
+      console.log('Setting form data:', newFormData);
       
       setFormData(newFormData);
       setImagePreviews(propSightseeing.images || []);
@@ -239,7 +239,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         formDataToSubmit.duration = 'Not specified';
       }
       
-      //console.log('Submitting form data:', formDataToSubmit);
+      console.log('Submitting form data:', formDataToSubmit);
 
       if (isEditMode) {
         await dispatch(updateGuestSightseeing({ 

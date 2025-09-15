@@ -19,7 +19,7 @@ const AgentApprovals = () => {
   
   // Debug log when component renders
   useEffect(() => {
-    //console.log('AgentApprovals rendered with state:', { 
+    console.log('AgentApprovals rendered with state:', { 
       pendingAgentApprovals, 
       loading, 
       error 
@@ -32,12 +32,12 @@ const AgentApprovals = () => {
 
   const loadPendingApprovals = async () => {
     try {
-      //console.log('Loading pending approvals...');
+      console.log('Loading pending approvals...');
       const resultAction = await dispatch(getPendingAgentApprovals());
-      //console.log('Pending approvals result:', resultAction);
+      console.log('Pending approvals result:', resultAction);
       
       if (getPendingAgentApprovals.fulfilled.match(resultAction)) {
-        //console.log('Pending approvals loaded successfully:', resultAction.payload);
+        console.log('Pending approvals loaded successfully:', resultAction.payload);
       } else if (getPendingAgentApprovals.rejected.match(resultAction)) {
         console.error('Error loading pending approvals:', resultAction);
         const errorMessage = resultAction.payload || 

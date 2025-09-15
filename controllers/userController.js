@@ -312,15 +312,15 @@ exports.updateAgentApproval = async (req, res) => {
 // @route   GET /api/users/pending-approvals
 // @access  Private/Accounts
 exports.getPendingApprovals = async (req, res) => {
-  //console.log('=== START getPendingApprovals ===');
-  //console.log('Request headers:', req.headers);
-  //console.log('Authenticated user:', req.user);
+  console.log('=== START getPendingApprovals ===');
+  console.log('Request headers:', req.headers);
+  console.log('Authenticated user:', req.user);
   
   try {
-    //console.log('1. Fetching pending agent approvals...');
+    console.log('1. Fetching pending agent approvals...');
     
     // Check if User model exists and has required methods
-    //console.log('2. Checking User model...');
+    console.log('2. Checking User model...');
     if (!User) {
       const error = new Error('User model is not defined');
       console.error('User model is not defined');
@@ -338,13 +338,13 @@ exports.getPendingApprovals = async (req, res) => {
       role: 'agent',
       isApproved: false
     };
-    //console.log('3. Executing query:', JSON.stringify(query, null, 2));
+    console.log('3. Executing query:', JSON.stringify(query, null, 2));
     
     // Execute the query with error handling
     let pendingAgents;
     try {
       pendingAgents = await User.find(query).select('-password').lean();
-      //console.log(`4. Query successful. Found ${pendingAgents.length} pending agents`);
+      console.log(`4. Query successful. Found ${pendingAgents.length} pending agents`);
     } catch (dbError) {
       console.error('Database query error:', {
         message: dbError.message,
@@ -394,7 +394,7 @@ exports.getPendingApprovals = async (req, res) => {
       }
     };
     
-    //console.log('Sending error response:', JSON.stringify(errorResponse, null, 2));
+    console.log('Sending error response:', JSON.stringify(errorResponse, null, 2));
     res.status(500).json(errorResponse);
   }
 };

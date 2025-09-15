@@ -8,8 +8,8 @@ import { ArrowDownIcon, ArrowUpIcon, CheckCircleIcon, XCircleIcon } from '@heroi
 
 const AdminClaimModal = ({ isOpen, onClose, booking, onSuccess }) => {
   // Log the booking object to see its structure
-  //console.log('AdminClaimModal - Booking object:', booking);
-  //console.log('AdminClaimModal - Booking agent:', booking?.agent);
+  console.log('AdminClaimModal - Booking object:', booking);
+  console.log('AdminClaimModal - Booking agent:', booking?.agent);
 
   // Initialize state
   const [formData, setFormData] = useState({

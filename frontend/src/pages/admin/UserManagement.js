@@ -32,13 +32,13 @@ const UserManagement = () => {
 
   const loadUsers = async () => {
     try {
-      //console.log('Loading users...');
+      console.log('Loading users...');
       setIsLoading(true);
       const resultAction = await dispatch(fetchUsers());
-      //console.log('Fetch users result:', resultAction);
+      console.log('Fetch users result:', resultAction);
       
       if (fetchUsers.fulfilled.match(resultAction)) {
-        //console.log('Users loaded successfully:', resultAction.payload);
+        console.log('Users loaded successfully:', resultAction.payload);
       } else if (fetchUsers.rejected.match(resultAction)) {
         console.error('Error loading users:', resultAction.error);
         const errorMessage = resultAction.error.message || 'Failed to load users';
@@ -76,11 +76,11 @@ const UserManagement = () => {
 
   const handleApproveUser = async (userId) => {
     try {
-      //console.log('Approving user:', userId);
+      console.log('Approving user:', userId);
       const resultAction = await dispatch(updateUserApproval({ userId, isApproved: true }));
       
       if (updateUserApproval.fulfilled.match(resultAction)) {
-        //console.log('User approved successfully:', resultAction.payload);
+        console.log('User approved successfully:', resultAction.payload);
         message.success('User approved successfully');
       } else if (updateUserApproval.rejected.match(resultAction)) {
         console.error('Error approving user:', resultAction.error);

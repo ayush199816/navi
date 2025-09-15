@@ -252,7 +252,7 @@ const SightseeingEditModal = ({ open, onClose, onEdit, sightseeing }) => {
         // When country changes, update the currency to match the country's default
         newForm.country = value;
         const newCurrency = getDefaultCurrency(value);
-        //console.log(`Country changed to ${value}, setting currency to ${newCurrency}`);
+        console.log(`Country changed to ${value}, setting currency to ${newCurrency}`);
         newForm.currency = newCurrency;
       } else if (name === 'currency') {
         // Allow manual currency selection
@@ -268,7 +268,7 @@ const SightseeingEditModal = ({ open, onClose, onEdit, sightseeing }) => {
         newForm[name] = value;
       }
       
-      //console.log('Form state after change:', newForm);
+      console.log('Form state after change:', newForm);
       return newForm;
     });
   }, []);
@@ -322,7 +322,7 @@ const SightseeingEditModal = ({ open, onClose, onEdit, sightseeing }) => {
       }
       
       // Debug: Log all form data being sent
-      //console.log('Submitting form with data:', {
+      console.log('Submitting form with data:', {
         name: form.name,
         type: form.type,
         country: form.country,
@@ -335,9 +335,9 @@ const SightseeingEditModal = ({ open, onClose, onEdit, sightseeing }) => {
       });
       
       // Log FormData entries
-      //console.log('FormData entries:');
+      console.log('FormData entries:');
       for (let pair of fd.entries()) {
-        //console.log(`${pair[0]}:`, pair[1]);
+        console.log(`${pair[0]}:`, pair[1]);
       }
       
       // Call the onEdit function with the form data

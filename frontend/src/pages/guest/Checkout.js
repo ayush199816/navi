@@ -273,7 +273,7 @@ const Checkout = () => {
         navigate(`/guest/booking/${responses[0].data.booking._id}`);
       } else {
         // If we get here, the booking might still be successful but the response format is unexpected
-        //console.log('Unexpected response format:', responses);
+        console.log('Unexpected response format:', responses);
         // Still clear the cart since the booking was likely successful
         dispatch(clearCart());
         // Redirect to dashboard with success message
@@ -285,7 +285,7 @@ const Checkout = () => {
       // Check if the error is due to the response format but the request was successful
       if (error.response && error.response.status >= 200 && error.response.status < 300) {
         // The request was successful but there might be an issue with the response handling
-        //console.log('Booking likely successful, but there was an issue with the response:', error.response.data);
+        console.log('Booking likely successful, but there was an issue with the response:', error.response.data);
         // Clear the cart and redirect to dashboard
         dispatch(clearCart());
         toast.success('Booking created successfully!');

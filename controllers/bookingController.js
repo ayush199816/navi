@@ -251,7 +251,7 @@ exports.getBooking = async (req, res) => {
     }
     
     // Log seller information for debugging
-    //console.log('Booking retrieved with seller:', booking.seller);
+    console.log('Booking retrieved with seller:', booking.seller);
     
     res.status(200).json({
       success: true,
@@ -395,15 +395,15 @@ exports.createBooking = async (req, res) => {
 // @access  Private/Operations
 exports.updateBookingStatus = async (req, res) => {
   try {
-    //console.log('BOOKING STATUS UPDATE REQUEST');
-    //console.log('Booking ID:', req.params.id);
-    //console.log('Request body:', req.body);
+    console.log('BOOKING STATUS UPDATE REQUEST');
+    console.log('Booking ID:', req.params.id);
+    console.log('Request body:', req.body);
     
     // First, get the current booking to check its status
     const currentBooking = await Booking.findById(req.params.id);
     
     if (!currentBooking) {
-      //console.log('Booking not found:', req.params.id);
+      console.log('Booking not found:', req.params.id);
       return res.status(404).json({
         success: false,
         message: 'Booking not found',
@@ -460,7 +460,7 @@ exports.updateBookingStatus = async (req, res) => {
     if (status === 'booked') {
       // Check if we have sellers data in the new format
       if (req.body.sellers && Array.isArray(req.body.sellers) && req.body.sellers.length > 0) {
-        //console.log('Multiple sellers provided:', req.body.sellers);
+        console.log('Multiple sellers provided:', req.body.sellers);
         
         // Validate each seller object has a seller ID
         const validSellers = req.body.sellers.every(item => item.seller);
@@ -483,11 +483,11 @@ exports.updateBookingStatus = async (req, res) => {
         updateData.seller = req.body.sellers[0].seller;
         updateData.sellerAssignedAt = Date.now();
         
-        //console.log('Added multiple sellers to booking');
+        console.log('Added multiple sellers to booking');
       } 
       // Fallback to legacy single seller format
       else if (req.body.sellerId) {
-        //console.log('Single seller provided:', req.body.sellerId);
+        console.log('Single seller provided:', req.body.sellerId);
         
         // Add seller information to the update data
         updateData.seller = req.body.sellerId;
@@ -523,15 +523,15 @@ exports.updateBookingStatus = async (req, res) => {
     });
     
     if (!booking) {
-      //console.log('Booking not found after update attempt:', req.params.id);
+      console.log('Booking not found after update attempt:', req.params.id);
       return res.status(404).json({
         success: false,
         message: 'Booking not found',
       });
     }
     
-    //console.log(`Successfully updated booking status to ${status}`);
-    //console.log('Booking status updated successfully:', booking.bookingStatus);
+    console.log(`Successfully updated booking status to ${status}`);
+    console.log('Booking status updated successfully:', booking.bookingStatus);
     
     res.status(200).json({
       success: true,
@@ -601,20 +601,20 @@ exports.generateInvoice = async (req, res) => {
 // @access  Private/Agent/Admin/Operations
 exports.updateBooking = async (req, res) => {
   try {
-    //console.log('Update booking request received:', req.params.id);
-    //console.log('Request body:', req.body);
+    console.log('Update booking request received:', req.params.id);
+    console.log('Request body:', req.body);
     
     let booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      //console.log('Booking not found:', req.params.id);
+      console.log('Booking not found:', req.params.id);
       return res.status(404).json({
         success: false,
         message: 'Booking not found',
       });
     }
     
-    //console.log('Original booking status:', booking.bookingStatus);
+    console.log('Original booking status:', booking.bookingStatus);
 
     // Build updateData from request body
     let updateData = { ...req.body };
@@ -660,7 +660,7 @@ exports.updateBooking = async (req, res) => {
       }
     }
     
-    //console.log('Final update data:', updateData);
+    console.log('Final update data:', updateData);
 
     // Update booking
     booking = await Booking.findByIdAndUpdate(
@@ -669,7 +669,7 @@ exports.updateBooking = async (req, res) => {
       { new: true, runValidators: true }
     ).populate('agent');
     
-    //console.log('Updated booking status:', booking.bookingStatus);
+    console.log('Updated booking status:', booking.bookingStatus);
 
     res.status(200).json({
       success: true,
@@ -689,7 +689,7 @@ exports.updateBooking = async (req, res) => {
 // @access  Private/Admin/Operations
 exports.claimPayment = async (req, res, next) => {
   try {
-    //console.log('Claim payment request received:', {
+    console.log('Claim payment request received:', {
       params: req.params,
       body: req.body,
       user: req.user
@@ -730,7 +730,7 @@ exports.claimPayment = async (req, res, next) => {
     const newClaimedAmount = claimedAmount + paymentAmountNum;
     const totalAmount = booking.totalAmount || booking.pricing?.totalAmount || 0;
     
-    //console.log('Payment details:', {
+    console.log('Payment details:', {
       claimedAmount,
       newClaimedAmount,
       totalAmount,
@@ -780,7 +780,7 @@ exports.claimPayment = async (req, res, next) => {
         }
       };
       
-      //console.log('Updating wallet with:', walletUpdate);
+      console.log('Updating wallet with:', walletUpdate);
       
       // Update wallet directly without transactions
       const updatedWallet = await Wallet.findOneAndUpdate(
@@ -792,7 +792,7 @@ exports.claimPayment = async (req, res, next) => {
         { new: true }
       );
       
-      //console.log('Wallet update result:', updatedWallet ? 'Success' : 'Failed');
+      console.log('Wallet update result:', updatedWallet ? 'Success' : 'Failed');
 
       if (!updatedWallet) {
         return next(new ErrorResponse('Insufficient wallet balance or wallet not found', 400));
@@ -802,7 +802,7 @@ exports.claimPayment = async (req, res, next) => {
       const isFullyPaid = Math.abs(newClaimedAmount - totalAmount) < 0.01;
       
       const paymentStatus = isFullyPaid ? 'paid' : 'partial';
-      //console.log('Setting payment status to:', paymentStatus);
+      console.log('Setting payment status to:', paymentStatus);
       
       const updatedBooking = await Booking.findByIdAndUpdate(
         bookingId,

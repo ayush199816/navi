@@ -73,7 +73,7 @@ exports.register = async (req, res) => {
     // For agents, send email notification to admin for approval
     if (!role || role === 'agent') {
       // TODO: Implement email notification to admin
-      //console.log(`New agent registration awaiting approval: ${email}`);
+      console.log(`New agent registration awaiting approval: ${email}`);
     }
 
     // If documents were uploaded, save their paths
@@ -328,7 +328,7 @@ exports.rejectAgent = async (req, res, next) => {
     };
 
     // TODO: Send rejection email to agent
-    //console.log('Agent rejected:', rejectionData);
+    console.log('Agent rejected:', rejectionData);
 
     // Delete the user
     await user.remove();

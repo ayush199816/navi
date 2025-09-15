@@ -12,7 +12,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
-  //console.log('MongoDB Connected');
+  console.log('MongoDB Connected');
   convertQuotesToLeads();
 }).catch(err => {
   console.error('MongoDB connection error:', err);
@@ -21,14 +21,14 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 async function convertQuotesToLeads() {
   try {
-    //console.log('Starting to convert quotes to leads...');
+    console.log('Starting to convert quotes to leads...');
     
     // Find all quotes that don't have a lead yet and are not rejected or already converted
     const quotes = await Quote.find({
       status: { $nin: ['rejected', 'converted_to_lead', 'in_sales'] }
     });
 
-    //console.log(`Found ${quotes.length} quotes to process`);
+    console.log(`Found ${quotes.length} quotes to process`);
 
     let convertedCount = 0;
     const adminUser = await User.findOne({ role: 'admin' });
@@ -63,16 +63,16 @@ async function convertQuotesToLeads() {
           await quote.save();
           
           convertedCount++;
-          //console.log(`Converted quote ${quote.quoteId} to lead`);
+          console.log(`Converted quote ${quote.quoteId} to lead`);
         }
       } catch (error) {
         console.error(`Error processing quote ${quote.quoteId}:`, error.message);
       }
     }
 
-    //console.log(`\nConversion complete!`);
-    //console.log(`Total quotes processed: ${quotes.length}`);
-    //console.log(`New leads created: ${convertedCount}`);
+    console.log(`\nConversion complete!`);
+    console.log(`Total quotes processed: ${quotes.length}`);
+    console.log(`New leads created: ${convertedCount}`);
     
     process.exit(0);
   } catch (error) {

@@ -42,7 +42,7 @@ const Dashboard = () => {
               creditLimit: walletRes.data.data.creditLimit || 0
             };
           }
-          //console.log('Wallet data:', walletData);
+          console.log('Wallet data:', walletData);
         } catch (err) {
           console.error('Error fetching wallet:', err);
         }
@@ -58,7 +58,7 @@ const Dashboard = () => {
               active: quotesRes.data.active || 0
             };
           }
-          //console.log('Quotes data:', quotesData);
+          console.log('Quotes data:', quotesData);
         } catch (err) {
           console.error('Error fetching quotes:', err);
         }
@@ -73,7 +73,7 @@ const Dashboard = () => {
               active: bookingsRes.data.active || 0
             };
           }
-          //console.log('Bookings data:', bookingsData);
+          console.log('Bookings data:', bookingsData);
         } catch (err) {
           console.error('Error fetching bookings:', err);
         }
@@ -88,7 +88,7 @@ const Dashboard = () => {
               new: leadsRes.data.new || 0
             };
           }
-          //console.log('Leads data:', leadsData);
+          console.log('Leads data:', leadsData);
         } catch (err) {
           console.error('Error fetching leads:', err);
         }
@@ -102,7 +102,7 @@ const Dashboard = () => {
               total: itinerariesRes.data.total || 0
             };
           }
-          //console.log('Itineraries data:', itinerariesData);
+          console.log('Itineraries data:', itinerariesData);
         } catch (err) {
           console.error('Error fetching itineraries:', err);
         }
@@ -118,7 +118,7 @@ const Dashboard = () => {
               active: packagesRes.data.active || 0
             };
           }
-          //console.log('Packages data:', packagesData);
+          console.log('Packages data:', packagesData);
         } catch (err) {
           console.error('Error fetching packages:', err);
         }

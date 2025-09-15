@@ -28,19 +28,19 @@ const COUNTRY_CURRENCY_MAP = {
 
 async function runMigration() {
   try {
-    //console.log('Connecting to MongoDB...');
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    //console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     // Get the Sightseeing model
     const Sightseeing = mongoose.model('Sightseeing');
 
     // Find all sightseeing documents
     const sightseeings = await Sightseeing.find({});
-    //console.log(`Found ${sightseeings.length} sightseeing documents`);
+    console.log(`Found ${sightseeings.length} sightseeing documents`);
 
     let updatedCount = 0;
     
@@ -51,7 +51,7 @@ async function runMigration() {
       
       // Only update if currency is not set or is different
       if (!doc.currency || doc.currency !== currency) {
-        //console.log(`Updating ${doc.name} (${country}): ${doc.currency || 'no currency'} -> ${currency}`);
+        console.log(`Updating ${doc.name} (${country}): ${doc.currency || 'no currency'} -> ${currency}`);
         
         await Sightseeing.updateOne(
           { _id: doc._id },
@@ -62,7 +62,7 @@ async function runMigration() {
       }
     }
 
-    //console.log(`\nUpdated ${updatedCount} sightseeing documents with currency information`);
+    console.log(`\nUpdated ${updatedCount} sightseeing documents with currency information`);
     process.exit(0);
   } catch (error) {
     console.error('Migration failed:', error);

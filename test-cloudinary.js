@@ -13,7 +13,7 @@ cloudinary.config({
 // Test upload function
 async function testUpload() {
   try {
-    //console.log('Testing Cloudinary upload...');
+    console.log('Testing Cloudinary upload...');
     
     // Path to a test image (you might need to adjust this)
     const testImagePath = path.join(__dirname, 'test-image.jpg');
@@ -33,14 +33,14 @@ async function testUpload() {
       ]
     });
 
-    //console.log('✅ Upload successful!');
-    //console.log('Image URL:', result.secure_url);
-    //console.log('Public ID:', result.public_id);
+    console.log('✅ Upload successful!');
+    console.log('Image URL:', result.secure_url);
+    console.log('Public ID:', result.public_id);
     
     // Test deletion
     // Uncomment to test deletion after upload
     // await cloudinary.uploader.destroy(result.public_id);
-    // //console.log('✅ Test image deleted from Cloudinary');
+    // console.log('✅ Test image deleted from Cloudinary');
     
   } catch (error) {
     console.error('❌ Error during upload:', error.message);

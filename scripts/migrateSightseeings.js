@@ -6,16 +6,16 @@ const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/navigati
 
 async function migrate() {
   try {
-    //console.log('Connecting to MongoDB...');
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    //console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     // Find all sightseeings
     const sightseeings = await GuestSightseeing.find({});
-    //console.log(`Found ${sightseeings.length} sightseeings to check`);
+    console.log(`Found ${sightseeings.length} sightseeings to check`);
 
     let updatedCount = 0;
     
@@ -39,7 +39,7 @@ async function migrate() {
         update.inclusions = ['No inclusions specified'];
       }
       
-      //console.log('Sightseeing:', {
+      console.log('Sightseeing:', {
         _id: sightseeing._id,
         currentDuration: sightseeing.duration,
         currentInclusions: sightseeing.inclusions,
@@ -55,7 +55,7 @@ async function migrate() {
       }
     }
 
-    //console.log(`Successfully updated ${updatedCount} sightseeings`);
+    console.log(`Successfully updated ${updatedCount} sightseeings`);
     process.exit(0);
   } catch (error) {
     console.error('Migration failed:', error);

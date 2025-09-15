@@ -81,12 +81,12 @@ export const updateBookingStatus = createAsyncThunk(
   'bookings/updateBookingStatus',
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      //console.log(`Updating booking ${id} status to ${status}`);
-      //console.log('Request payload:', { status });
+      console.log(`Updating booking ${id} status to ${status}`);
+      console.log('Request payload:', { status });
       
       // Log the exact URL and payload being sent
       const url = `/api/bookings/${id}/status`;
-      //console.log('Request URL:', url);
+      console.log('Request URL:', url);
       
       // Make the API call with explicit content type
       const res = await axios.put(url, 
@@ -94,7 +94,7 @@ export const updateBookingStatus = createAsyncThunk(
         { headers: { 'Content-Type': 'application/json' } }
       );
       
-      //console.log('Response received:', res.data);
+      console.log('Response received:', res.data);
       toast.success(`Booking status updated to ${status}!`);
       return res.data;
     } catch (err) {
@@ -236,7 +236,7 @@ const bookingSlice = createSlice({
           pages: action.payload.pagination?.totalPages || 1
         };
         
-        //console.log('Normalized bookings with pricing:', state.bookings);
+        console.log('Normalized bookings with pricing:', state.bookings);
       })
       .addCase(getMyBookings.rejected, (state, action) => {
         state.loading = false;

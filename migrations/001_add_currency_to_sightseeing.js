@@ -41,19 +41,19 @@ const runMigration = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    //console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     // Get the Sightseeing model
     const Sightseeing = mongoose.model('Sightseeing');
 
-    //console.log('Fetching sightseeing documents...');
+    console.log('Fetching sightseeing documents...');
     
     // First, find all sightseeing documents to check their current state
     const allSightseeings = await Sightseeing.find({});
-    //console.log(`Found ${allSightseeings.length} total sightseeing documents`);
+    console.log(`Found ${allSightseeings.length} total sightseeing documents`);
     
     // Log a few documents to see their current state
-    //console.log('Sample documents:', allSightseeings.slice(0, 3).map(doc => ({
+    console.log('Sample documents:', allSightseeings.slice(0, 3).map(doc => ({
       _id: doc._id,
       name: doc.name,
       country: doc.country,
@@ -66,32 +66,32 @@ const runMigration = async () => {
       doc.currency === undefined || doc.currency === null
     );
     
-    //console.log(`Found ${sightseeings.length} sightseeing documents that need currency update`);
+    console.log(`Found ${sightseeings.length} sightseeing documents that need currency update`);
 
-    //console.log(`Found ${sightseeings.length} sightseeing documents to update`);
+    console.log(`Found ${sightseeings.length} sightseeing documents to update`);
 
     // Update each document with the appropriate currency
     let updatedCount = 0;
     for (const sightseeing of sightseeings) {
       try {
         const currency = getDefaultCurrency(sightseeing.country);
-        //console.log(`Updating sightseeing ${sightseeing._id} (${sightseeing.name}) with currency ${currency}`);
+        console.log(`Updating sightseeing ${sightseeing._id} (${sightseeing.name}) with currency ${currency}`);
         
         const result = await Sightseeing.updateOne(
           { _id: sightseeing._id },
           { $set: { currency } }
         );
         
-        //console.log(`Update result for ${sightseeing._id}:`, result);
+        console.log(`Update result for ${sightseeing._id}:`, result);
         updatedCount++;
       } catch (error) {
         console.error(`Error updating sightseeing ${sightseeing._id}:`, error.message);
       }
     }
     
-    //console.log(`Successfully updated ${updatedCount} out of ${sightseeings.length} documents`);
+    console.log(`Successfully updated ${updatedCount} out of ${sightseeings.length} documents`);
 
-    //console.log('Migration completed successfully');
+    console.log('Migration completed successfully');
     process.exit(0);
   } catch (error) {
     console.error('Migration failed:', error);

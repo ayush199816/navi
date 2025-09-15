@@ -4,7 +4,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 // Debug middleware
 router.use((req, res, next) => {
-  //console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
 

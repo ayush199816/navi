@@ -41,14 +41,14 @@ router.get('/agent', authorize('agent'), isApprovedAgent, async (req, res) => {
     const agentId = req.user?.id;
     
     if (!agentId) {
-      //console.log('No user ID found in request');
+      console.log('No user ID found in request');
       return res.status(401).json({
         success: false,
         error: 'Authentication required'
       });
     }
     
-    //console.log(`Fetching itineraries for agent: ${agentId}`);
+    console.log(`Fetching itineraries for agent: ${agentId}`);
     
     const itineraries = await Itinerary.find({ createdBy: agentId })
       .select('title destination arrivalDate departureDate status createdAt')
@@ -71,7 +71,7 @@ router.get('/agent', authorize('agent'), isApprovedAgent, async (req, res) => {
 
 // Test route
 router.get('/test', (req, res) => {
-  //console.log('GET /api/v1/itinerary-creator/test called');
+  console.log('GET /api/v1/itinerary-creator/test called');
   res.status(200).json({ 
     success: true, 
     message: 'Itinerary creator routes are working!',
@@ -84,13 +84,13 @@ router.post('/', async (req, res) => {
   const startTime = Date.now();
   
   // Log request start
-  //console.log('=== NEW ITINERARY REQUEST ===');
-  //console.log('Request received at:', new Date().toISOString());
+  console.log('=== NEW ITINERARY REQUEST ===');
+  console.log('Request received at:', new Date().toISOString());
   
   try {
     // Log request size
     const requestSize = Buffer.byteLength(JSON.stringify(req.body), 'utf8');
-    //console.log(`Request size: ${(requestSize / 1024).toFixed(2)} KB`);
+    console.log(`Request size: ${(requestSize / 1024).toFixed(2)} KB`);
     
     // Start timing data processing
     const processStart = process.hrtime();
@@ -165,23 +165,23 @@ router.post('/', async (req, res) => {
       tags: Array.isArray(req.body.tags) ? req.body.tags : []
     };
 
-    //console.log('Creating itinerary with data:', JSON.stringify(itineraryData, null, 2));
+    console.log('Creating itinerary with data:', JSON.stringify(itineraryData, null, 2));
     
     // Log data processing time
     const processEnd = process.hrtime(processStart);
-    //console.log(`Data processing took: ${processEnd[0]}s ${processEnd[1] / 1000000}ms`);
+    console.log(`Data processing took: ${processEnd[0]}s ${processEnd[1] / 1000000}ms`);
     
     // Save to database
-    //console.log('Saving to database...');
+    console.log('Saving to database...');
     const dbStart = process.hrtime();
     const itinerary = await Itinerary.create(itineraryData);
     const dbEnd = process.hrtime(dbStart);
     
-    //console.log(`Database save took: ${dbEnd[0]}s ${dbEnd[1] / 1000000}ms`);
+    console.log(`Database save took: ${dbEnd[0]}s ${dbEnd[1] / 1000000}ms`);
     
     // Calculate total time
     const totalTime = Date.now() - startTime;
-    //console.log(`Total request time: ${totalTime}ms`);
+    console.log(`Total request time: ${totalTime}ms`);
     
     res.status(201).json({
       success: true,

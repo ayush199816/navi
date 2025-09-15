@@ -6,9 +6,9 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/naviga
 
 async function updateImageUrls() {
   try {
-    //console.log('Connecting to MongoDB...');
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI);
-    //console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     // Find all guest sightseeings with images
     const sightseeings = await GuestSightseeing.find({
@@ -18,7 +18,7 @@ async function updateImageUrls() {
       ]
     });
 
-    //console.log(`Found ${sightseeings.length} sightseeings with images to check`);
+    console.log(`Found ${sightseeings.length} sightseeings with images to check`);
 
     let updatedCount = 0;
     
@@ -51,13 +51,13 @@ async function updateImageUrls() {
       if (needsUpdate) {
         await sightseeing.save();
         updatedCount++;
-        //console.log(`Updated sightseeing: ${sightseeing._id}`);
+        console.log(`Updated sightseeing: ${sightseeing._id}`);
       }
     }
 
-    //console.log(`\nMigration complete!`);
-    //console.log(`Total sightseeings checked: ${sightseeings.length}`);
-    //console.log(`Sightseeings updated: ${updatedCount}`);
+    console.log(`\nMigration complete!`);
+    console.log(`Total sightseeings checked: ${sightseeings.length}`);
+    console.log(`Sightseeings updated: ${updatedCount}`);
     
     process.exit(0);
   } catch (error) {

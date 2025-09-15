@@ -72,7 +72,7 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
   const location = useLocation();
   
   useEffect(() => {
-    //console.log('ProtectedRoute - Checking access:', {
+    console.log('ProtectedRoute - Checking access:', {
       isAuthenticated,
       user: user ? { role: user.role, user_type: user.user_type } : null,
       currentPath: location.pathname,
@@ -81,13 +81,13 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
     
     // Don't run redirect logic if still loading
     if (loading) {
-      //console.log('ProtectedRoute - Still loading auth state');
+      console.log('ProtectedRoute - Still loading auth state');
       return;
     }
     
     // If not authenticated, redirect to login
     if (!isAuthenticated || !user) {
-      //console.log('ProtectedRoute - Not authenticated, redirecting to login');
+      console.log('ProtectedRoute - Not authenticated, redirecting to login');
       navigate('/login', { 
         state: { 
           from: location.pathname === '/guest-dashboard' ? '/guest-dashboard' : location.pathname 
@@ -102,7 +102,7 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
     
     // Handle guest users
     if (isGuestUser) {
-      //console.log('ProtectedRoute - Handling guest user access');
+      console.log('ProtectedRoute - Handling guest user access');
       // Allow access to guest routes, cart, and sightseeing
       const allowedPaths = [
         '/guest-dashboard',
@@ -115,11 +115,11 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
       const isAllowedPath = allowedPaths.some(path => currentPath.startsWith(path));
       
       if (isAllowedPath) {
-        //console.log('ProtectedRoute - Allowing access to guest path:', currentPath);
+        console.log('ProtectedRoute - Allowing access to guest path:', currentPath);
         return;
       }
       
-      //console.log('ProtectedRoute - Redirecting guest to dashboard from:', currentPath);
+      console.log('ProtectedRoute - Redirecting guest to dashboard from:', currentPath);
       navigate('/guest-dashboard', { replace: true });
       return;
     }
@@ -215,7 +215,7 @@ function App() {
   const [showCart, setShowCart] = useState(false);
   
   useEffect(() => {
-    //console.log('ProtectedRoute - Checking access:', {
+    console.log('ProtectedRoute - Checking access:', {
       isAuthenticated,
       user: user ? { role: user.role, user_type: user.user_type } : null,
       currentPath: location.pathname,

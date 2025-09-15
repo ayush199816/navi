@@ -6,7 +6,7 @@ const GuestSightseeing = require('../models/GuestSightseeing');
 // Public test endpoint - no authentication required
 router.get('/test', async (req, res) => {
   try {
-    //console.log('🔍 [TEST] Checking database connection...');
+    console.log('🔍 [TEST] Checking database connection...');
     
     // Check if collection exists
     const collections = await mongoose.connection.db.listCollections().toArray();
@@ -22,11 +22,11 @@ router.get('/test', async (req, res) => {
     
     // Count all documents
     const count = await GuestSightseeing.countDocuments();
-    //console.log(`✅ Found ${count} documents in collection`);
+    console.log(`✅ Found ${count} documents in collection`);
     
     // Get all documents
     const allData = await GuestSightseeing.find({}).lean();
-    //console.log(`📄 Retrieved ${allData.length} documents`);
+    console.log(`📄 Retrieved ${allData.length} documents`);
     
     // Get database stats
     const stats = await mongoose.connection.db.stats();

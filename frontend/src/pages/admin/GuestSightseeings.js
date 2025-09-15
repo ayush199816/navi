@@ -17,7 +17,7 @@ import SearchBox from '../../components/common/SearchBox';
 import GuestSightseeingForm from './GuestSightseeingForm';
 
 const GuestSightseeings = () => {
-  //console.log('GuestSightseeings component rendered');
+  console.log('GuestSightseeings component rendered');
   const dispatch = useDispatch();
   const store = useStore();
   const guestSightseeingsState = useSelector((state) => state.guestSightseeings);
@@ -25,7 +25,7 @@ const GuestSightseeings = () => {
   
   // Debug log
   useEffect(() => {
-    //console.log('Redux State:', {
+    console.log('Redux State:', {
       sightseeings,
       loading,
       error,
@@ -59,11 +59,11 @@ const GuestSightseeings = () => {
       ...filters
     };
     
-    //console.log('Fetching guest sightseeings with params:', params);
+    console.log('Fetching guest sightseeings with params:', params);
     const promise = dispatch(fetchGuestSightseeings(params));
     
     promise.unwrap()
-      .then(data => //console.log('Fetched data:', data))
+      .then(data => console.log('Fetched data:', data))
       .catch(err => console.error('Error fetching data:', err));
     
     return () => {
@@ -103,7 +103,7 @@ const GuestSightseeings = () => {
       const fullSightseeing = response.data.data;
       
       // Log the full data for debugging
-      //console.log('Full sightseeing data:', fullSightseeing);
+      console.log('Full sightseeing data:', fullSightseeing);
       
       // Create a clean copy of the full sightseeing data
       const sightseeingData = { ...fullSightseeing };
@@ -140,7 +140,7 @@ const GuestSightseeings = () => {
         ...(sightseeingData.isActive === undefined && { isActive: true })
       };
       
-      //console.log('Setting editing sightseeing data:', editingData);
+      console.log('Setting editing sightseeing data:', editingData);
       setEditingSightseeing(editingData);
       setShowEditModal(true);
     } catch (error) {
@@ -181,11 +181,11 @@ const GuestSightseeings = () => {
     );
   }
 
-  //console.log('Rendering with sightseeings:', sightseeings);
+  console.log('Rendering with sightseeings:', sightseeings);
   
   return (
     <div className="container mx-auto px-4 py-8">
-      {//console.log('In JSX - sightseeings:', sightseeings)}
+      {console.log('In JSX - sightseeings:', sightseeings)}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Guest Sightseeings</h1>
