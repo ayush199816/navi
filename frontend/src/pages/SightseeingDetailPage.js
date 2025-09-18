@@ -237,7 +237,7 @@ const SightseeingDetailPage = () => {
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">{sightseeing.name}</h1>
                   <div className="flex items-center text-gray-600 mb-4">
                     <FiMapPin className="mr-1" />
-                    <span>{sightseeing.location || 'Location not specified'}</span>
+                    <span>{sightseeing.city || sightseeing.location || 'Location not specified'}</span>
                     {sightseeing.country && (
                       <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
                         {sightseeing.country}
