@@ -133,241 +133,45 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   }
   
   // Only show active sightseeings
-  filter.isActive = true;
-  
-  console.log(' Initial Filters:', JSON.stringify(filter, null, 2));
-  
-  // Parse pagination parameters
-  const pageNum = parseInt(page, 10) || 1;
-  const limitNum = parseInt(limit, 10) || 10;
-  const startIndex = (pageNum - 1) * limitNum;
-  
-  // Create base query
-  let query = GuestSightseeing.find(filter);
-
-  // Select fields
-  const defaultFields = 'name description price offerPrice duration inclusions images country isActive createdAt city';
-  if (select) {
-    const fields = select.split(',').join(' ');
-    console.log('Selecting fields:', fields);
-    query = query.select(fields);
-  } else {
-    query = query.select(defaultFields);
-  }
-
-  // Get search terms if they exist
-  const searchTerm = (req.query.search || '').toLowerCase().trim();
-  const cityTerm = (req.query.city || '').toLowerCase().trim();
-  
-  // If we have search terms, we'll do custom sorting
-  if (searchTerm || cityTerm) {
-    console.log('Performing custom sort with searchTerm:', searchTerm, 'cityTerm:', cityTerm);
-    
-    // Convert search terms to lowercase for case-insensitive comparison
-    const searchTermLower = searchTerm ? searchTerm.toLowerCase() : '';
-    const cityTermLower = cityTerm ? cityTerm.toLowerCase() : '';
-    
-    // Get all matching documents first
-    const results = await query.lean().exec();
-    
-    // Sort results with priority:
-    // 1. Exact match for both city and search term in name (highest priority)
-    // 2. Exact match for city and partial match for search term in name
-    // 3. Partial match for city and exact match for search term in name
-    // 4. Partial match for both
-    // 5. Sort by name for equal priority
-    const sortedResults = results.sort((a, b) => {
-      const aName = (a.name || '').toLowerCase();
-      const bName = (b.name || '').toLowerCase();
-      const aCity = (a.city || '').toLowerCase();
-      const bCity = (b.city || '').toLowerCase();
-      
-      // Get original names for case-sensitive display (but keep using lowercase for comparison)
-      const aOriginalName = a.name || '';
-      const bOriginalName = b.name || '';
-
-      // Calculate match scores
-      let aScore = 0;
-      let bScore = 0;
-
-      // Special handling when both city and search term are provided
-      if (cityTermLower && searchTermLower) {
-        // Check for both terms in the name (in any order)
-        const aHasBoth = aName.includes(cityTermLower) && aName.includes(searchTermLower);
-        const bHasBoth = bName.includes(cityTermLower) && bName.includes(searchTermLower);
-        
-        // Higher score if both terms appear close to each other
-        const aProximity = aName.includes(`${cityTermLower} ${searchTermLower}`) || 
-                          aName.includes(`${searchTermLower} ${cityTermLower}`) ||
-                          aName.includes(`${cityTermLower}-${searchTermLower}`) ||
-                          aName.includes(`${searchTermLower}-${cityTermLower}`);
-                          
-        const bProximity = bName.includes(`${cityTermLower} ${searchTermLower}`) || 
-                          bName.includes(`${searchTermLower} ${cityTermLower}`) ||
-                          bName.includes(`${cityTermLower}-${searchTermLower}`) ||
-                          bName.includes(`${searchTermLower}-${cityTermLower}`);
-        
-        if (aHasBoth) aScore += 50;
-        if (bHasBoth) bScore += 50;
-        
-        if (aProximity) aScore += 30; // Extra points for terms appearing close together
-        if (bProximity) bScore += 30;
-      }
-
-      // Check for combined match of city and search term in name
-      if (searchTermLower && cityTermLower) {
-        // Check if both terms appear in the name (in any order)
-        const aHasBothTerms = aName.includes(cityTermLower) && aName.includes(searchTermLower);
-        const bHasBothTerms = bName.includes(cityTermLower) && bName.includes(searchTermLower);
-        
-        // Check for number + search term (e.g., "4 island", "3 day", etc.)
-        const numberPattern = new RegExp(`\\d+\\s*${searchTermLower}`, 'i');
-        const aHasNumberedTerm = numberPattern.test(aOriginalName);
-        const bHasNumberedTerm = numberPattern.test(bOriginalName);
-        
-        // Score based on match quality
-        if (aHasBothTerms) aScore += 80; // Increased from 60 to 80 for having both terms
-        if (bHasBothTerms) bScore += 80;
-        
-        if (aHasNumberedTerm) aScore += 40; // Extra points for numbered terms
-        if (bHasNumberedTerm) bScore += 40;
-        
-        // Check for exact phrase match (with space or hyphen)
-        const phrasePatterns = [
-          `${cityTermLower} ${searchTermLower}`,
-          `${searchTermLower} ${cityTermLower}`,
-          `${cityTermLower}-${searchTermLower}`,
-          `${searchTermLower}-${cityTermLower}`
-        ];
-        
-        // Check for exact case match in original name for better precision
-        const exactCasePatterns = [
-          `${cityTerm} ${searchTerm}`,
-          `${searchTerm} ${cityTerm}`,
-          `${cityTerm}-${searchTerm}`,
-          `${searchTerm}-${cityTerm}`
-        ];
-        
-        // Check for matches in both case-insensitive and case-sensitive patterns
-        if (phrasePatterns.some(pattern => aName.includes(pattern)) ||
-            exactCasePatterns.some(pattern => aOriginalName.includes(pattern))) {
-          aScore += 40; // Increased from 30 to 40 for exact phrase matches
-        }
-        if (phrasePatterns.some(pattern => bName.includes(pattern)) ||
-            exactCasePatterns.some(pattern => bOriginalName.includes(pattern))) {
-          bScore += 40;
-        }
-      }
-
-      // Check for city matches in name and city field
-      if (cityTermLower) {
-        // Exact case match in name (highest priority)
-        if (aOriginalName.startsWith(cityTerm)) aScore += 70;  // Very high score for exact case match at start
-        if (bOriginalName.startsWith(cityTerm)) bScore += 70;
-        
-        // Case-insensitive match at start
-        if (aName.startsWith(cityTermLower) && aScore < 70) aScore += 60;
-        if (bName.startsWith(cityTermLower) && bScore < 70) bScore += 60;
-        
-        // Exact case match anywhere in name
-        if (aOriginalName.includes(cityTerm) && !aOriginalName.startsWith(cityTerm)) aScore += 40;
-        if (bOriginalName.includes(cityTerm) && !bOriginalName.startsWith(cityTerm)) bScore += 40;
-        
-        // Case-insensitive match anywhere in name
-        if (aName.includes(cityTermLower) && aScore < 40) aScore += 30;
-        if (bName.includes(cityTermLower) && bScore < 40) bScore += 30;
-        
-        // Exact city match in city field (case sensitive)
-        if (a.city === cityTerm) aScore += 25;
-        if (b.city === cityTerm) bScore += 25;
-        
-        // Case-insensitive city match in city field
-        if (aCity === cityTermLower && aScore < 25) aScore += 20;
-        if (bCity === cityTermLower && bScore < 25) bScore += 20;
-      }
-
-      // Check for search term matches in name
-      if (searchTermLower) {
-        // Exact case match at start of name
-        if (aOriginalName.startsWith(searchTerm)) aScore += 30;
-        if (bOriginalName.startsWith(searchTerm)) bScore += 30;
-        
-        // Case-insensitive match at start
-        if (aName.startsWith(searchTermLower) && aScore < 30) aScore += 25;
-        if (bName.startsWith(searchTermLower) && bScore < 30) bScore += 25;
-        
-        // Exact case match anywhere in name
-        if (aOriginalName.includes(searchTerm) && !aOriginalName.startsWith(searchTerm)) aScore += 20;
-        if (bOriginalName.includes(searchTerm) && !bOriginalName.startsWith(searchTerm)) bScore += 20;
-        
-        // Case-insensitive match anywhere in name (lowest priority)
-        if (aName.includes(searchTermLower) && aScore < 20) aScore += 15;
-        if (bName.includes(searchTermLower) && bScore < 20) bScore += 15;
-      }
-
-      // If same score, use secondary sorting criteria
-      if (aScore === bScore) {
-        // First, check if one has the city in the name and the other doesn't
-        const aHasCity = cityTermLower && aName.includes(cityTermLower);
-        const bHasCity = cityTermLower && bName.includes(cityTermLower);
-        
-        if (aHasCity && !bHasCity) return -1;
-        if (!aHasCity && bHasCity) return 1;
-        
-        // If both have city in name, check which one has it earlier
-        if (aHasCity && bHasCity) {
-          const aCityPos = aName.indexOf(cityTermLower);
-          const bCityPos = bName.indexOf(cityTermLower);
-          if (aCityPos !== bCityPos) return aCityPos - bCityPos;
-        }
-        
-        // If still tied, check search term position
-        if (searchTermLower) {
-          const aTermPos = aName.indexOf(searchTermLower);
-          const bTermPos = bName.indexOf(searchTermLower);
-          if (aTermPos !== -1 && bTermPos !== -1 && aTermPos !== bTermPos) {
-            return aTermPos - bTermPos;
-          }
-        }
-        
-        // If all else is equal, sort alphabetically by name
-        return aName.localeCompare(bName);
-      }
-
-      // Higher score comes first
-      return bScore - aScore;
-    });
-
-    // Apply pagination
-    const paginatedResults = sortedResults.slice(startIndex, startIndex + limitNum);
-    
-    console.log(`Returning ${paginatedResults.length} of ${sortedResults.length} results`);
-    
-    return res.status(200).json({
-      success: true,
-      data: paginatedResults,
-      count: paginatedResults.length,
-      total: sortedResults.length,
-      page: pageNum,
-      pages: Math.ceil(sortedResults.length / limitNum)
-    });
-  } else {
-    // Default sorting by creation date if no search terms
-    query = query.sort('-createdAt');
-  }
- 
-  // Apply pagination
-  query = query.skip(startIndex).limit(limitNum);
- 
-  // Log the complete query being executed
-  console.log(' Executing query:', JSON.stringify({
-    collection: GuestSightseeing.collection.name,
-    filter,
-    sort: query._mongooseOptions?.sort,
-    skip: query._mongooseOptions?.skip,
-    limit: query._mongooseOptions?.limit,
-    selectedFields: query._fields
-  }, null, 2));
+  filter.isActive = true;
+  
+  console.log(' Filters:', JSON.stringify(filter, null, 2));
+  
+  // Parse pagination parameters
+  const pageNum = parseInt(page, 10);
+  const limitNum = parseInt(limit, 10);
+  const startIndex = (pageNum - 1) * limitNum;
+  
+  // Create base query
+  console.log(' Building base query with filters');
+  let query = GuestSightseeing.find(filter);
+  
+  // Log the raw query
+  console.log(' Raw query:', JSON.stringify(query.getFilter(), null, 2));
+  
+  // Select Fields
+  const defaultFields = 'name description price offerPrice duration inclusions images country isActive createdAt';
+  if (select) {
+    const fields = select.split(',').join(' ');
+    console.log('Selecting fields:', fields);
+    query = query.select(fields);
+  } else {
+    // Always include these fields by default
+    query = query.select(defaultFields);
+  }
+  
+  // Sort
+  if (sort) {
+    const sortBy = sort.split(',').join(' ');
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort('-createdAt');
+  }
+  
+  // Apply pagination
+  query = query.skip(startIndex).limit(limitNum);
+  
+  // Log the complete query being executed
   console.log(' Executing query:', JSON.stringify({
     collection: GuestSightseeing.collection.name,
     filter,
@@ -521,8 +325,12 @@ const getGuestSightseeing = asyncHandler(async (req, res, next) => {
 // @access  Private/Admin
 const createGuestSightseeing = asyncHandler(async (req, res, next) => {
   try {
-    // Parse the form data
-    let sightseeingData = {};
+    console.log('=== NEW REQUEST ===');
+    console.log('Request headers:', JSON.stringify(req.headers['content-type']));
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    
+    // Parse the form data
+    let sightseeingData = {};
     
     // If data is sent as JSON string in form-data
     if (req.body.data) {
@@ -532,8 +340,11 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse('Invalid JSON data in form-data', 400));
       }
     } else {
-      // If sent as regular form fields
-      sightseeingData = { ...req.body };
+      console.log('Processing regular form fields');
+      sightseeingData = { ...req.body };
+      console.log('Raw sightseeing data (before processing):', JSON.stringify(sightseeingData, null, 2));
+      console.log('City field in raw data:', sightseeingData.city);
+      console.log('Received form data:', JSON.stringify(sightseeingData, null, 2));
       
       // Convert string arrays if needed
       if (sightseeingData.images && typeof sightseeingData.images === 'string') {
@@ -546,55 +357,11 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
       }
     }
     
-    // Handle file uploads if any
-    if (req.files && req.files.length > 0) {
-      try {
-        // Upload each file to Cloudinary
-        const uploadPromises = req.files.map(file => {
-          if (!file.buffer) {
-            throw new Error('No file buffer found');
-          }
-          return uploadToCloudinary(file.buffer);
-        });
-        
-        // Wait for all uploads to complete and get the secure URLs
-        const results = await Promise.all(uploadPromises);
-        const uploadedImageUrls = results.map(result => result.secure_url);
-        
-        // Combine with any existing image URLs
-        const existingImages = Array.isArray(sightseeingData.images) ? sightseeingData.images : [];
-        sightseeingData.images = [...existingImages, ...uploadedImageUrls];
-        
-        console.log('Successfully uploaded images:', uploadedImageUrls);
-        
-      } catch (uploadError) {
-        console.error('Error uploading images:', uploadError);
-        return next(new ErrorResponse('Error uploading images: ' + uploadError.message, 500));
-      }
-    }
-    
-    // Ensure images is an array
-    if (!sightseeingData.images || !Array.isArray(sightseeingData.images)) {
-      sightseeingData.images = [];
-    }
-    
-    // Convert string arrays if needed
-    if (typeof sightseeingData.inclusions === 'string') {
-      sightseeingData.inclusions = sightseeingData.inclusions
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-    }
-    
-    if (typeof sightseeingData.keywords === 'string') {
-      sightseeingData.keywords = sightseeingData.keywords
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-    }
-    
-    // Add user ID
-    sightseeingData.user = req.user.id;
+     // Debug: Log the city field
+    console.log('City field:', sightseeingData.city);
+
+     // Debug: Log the sightseeing data before creating the document
+    console.log('Final sightseeing data before creation:', JSON.stringify(sightseeingData, null, 2));
     
     // Ensure default values
     if (!sightseeingData.duration) sightseeingData.duration = 'Not specified';
@@ -617,11 +384,15 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
       images: sightseeingData.images ? `${sightseeingData.images.length} images` : 'none'
     });
     
-    // Create the sightseeing entry
-    const sightseeing = await GuestSightseeing.create(sightseeingData);
-    console.log('Sightseeing created successfully:', sightseeing._id);
-    
-    res.status(201).json({
+    // Debug: Log the exact data being sent to the model
+    console.log('Data being sent to GuestSightseeing.create():', JSON.stringify(sightseeingData, null, 2));
+    
+    // Create the sightseeing entry
+    console.log('Creating document in database with data:', JSON.stringify(sightseeingData, null, 2));
+    const sightseeing = await GuestSightseeing.create(sightseeingData);
+    console.log('Sightseeing created successfully. Document from DB:', JSON.stringify(sightseeing.toObject(), null, 2));
+    
+    res.status(201).json({
       success: true,
       data: sightseeing
     });
@@ -711,53 +482,139 @@ const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
     if (!sightseeing) {
       throw new Error('Failed to update sightseeing');
     }
+  }
+  }
+  
+  // Convert offerPrice to number if it exists and is not empty string
+  if (updates.offerPrice !== undefined && updates.offerPrice !== '') {
+  updates.offerPrice = Number(updates.offerPrice);
+  if (isNaN(updates.offerPrice)) {
+  return next(new ErrorResponse('Offer price must be a valid number', 400));
+  }
+  } else if (updates.offerPrice === '') {
+  // If offerPrice is an empty string, set it to null/undefined to remove it
+  updates.offerPrice = undefined;
+  }
+  
+  // Ensure inclusions is an array
+  if (updates.inclusions !== undefined) {
+  if (!Array.isArray(updates.inclusions)) {
+  updates.inclusions = [updates.inclusions];
+  }
+  // Remove empty strings from inclusions
+  updates.inclusions = updates.inclusions.filter(incl => incl && incl.trim() !== '');
+  
+  // If no valid inclusions, set default
+  if (updates.inclusions.length === 0) {
+  updates.inclusions = ['No inclusions specified'];
+  }
+  }
+  
+  // Ensure duration has a value
+  if (updates.duration === '') {
+  updates.duration = 'Not specified';
+  }
+  
+  console.log('Updating sightseeing with data:', JSON.stringify(updates, null, 2));
 
-    res.status(200).json({ 
-      success: true, 
-      data: sightseeing 
-    });
-    
+  // Update the document
+  sightseeing = await GuestSightseeing.findByIdAndUpdate(
+  req.params.id, 
+  updates,
+  {
+  new: true,
+  runValidators: true,
+  context: 'query'
+  }
+  );
+
+  if (!sightseeing) {
+  throw new Error('Failed to update sightseeing');
+  }
+
+  res.status(200).json({ 
+  success: true, 
+  data: sightseeing 
+  });
+  
   } catch (error) {
-    console.error('Update error:', error);
-    next(new ErrorResponse(error.message || 'Failed to update guest sightseeing', 500));
+  console.error('Update error:', error);
+  next(new ErrorResponse(error.message || 'Failed to update guest sightseeing', 500));
   }
 });
 
-// @desc    Delete guest sightseeing
+// @desc   Delete guest sightseeing
 // @route   DELETE /api/guest-sightseeing/:id
-// @access  Private/Admin
+// @access   Private/Admin
 const deleteGuestSightseeing = asyncHandler(async (req, res, next) => {
-  const sightseeing = await GuestSightseeing.findById(req.params.id);
+  const sightseeing = await GuestSightseeing.findById(req.params.id);
 
-  if (!sightseeing) {
-    return next(
-      new ErrorResponse(`Sightseeing not found with id of ${req.params.id}`, 404)
-    );
-  }
+  if (!sightseeing) {
+    return next(
+      new ErrorResponse(`Sightseeing not found with id of ${req.params.id}`, 404)
+    );
+  }
 
-  // Make sure user is admin
-  if (req.user.role !== 'admin') {
-    return next(
-      new ErrorResponse(`User ${req.user.id} is not authorized to delete this sightseeing`, 401)
-    );
-  }
+  // Make sure user is admin
+  if (req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(`Not authorized to delete this sightseeing`, 401)
+    );
+  }
 
-  // Use deleteOne() instead of remove() as it's the modern approach
-  await GuestSightseeing.deleteOne({ _id: req.params.id });
+  await sightseeing.remove();
+  
+  res.status(200).json({
+    success: true,
+    data: {}
+  });
+});
 
-  res.status(200).json({ 
-    success: true, 
-    data: {},
-    message: 'Sightseeing deleted successfully'
-  });
+// @desc    Debug route to check database schema and data
+// @route   GET /api/guest-sightseeing-debug
+// @access  Private/Admin
+const debugGuestSightseeing = asyncHandler(async (req, res, next) => {
+  try {
+    // Get the first document to check schema
+    const doc = await GuestSightseeing.findOne({});
+    
+    // Get all distinct fields in the collection
+    const fields = await GuestSightseeing.aggregate([
+      { $sample: { size: 1 } },
+      { $project: { arrayofkeyvalue: { $objectToArray: "$$ROOT" } } },
+      { $unwind: "$arrayofkeyvalue" },
+      { $group: { _id: null, allKeys: { $addToSet: "$arrayofkeyvalue.k" } } }
+    ]);
+    
+    // Count documents with city field
+    const withCity = await GuestSightseeing.countDocuments({ city: { $exists: true } });
+    const total = await GuestSightseeing.countDocuments();
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        sampleDocument: doc,
+        allFields: fields.length > 0 ? fields[0].allKeys : [],
+        stats: {
+          totalDocuments: total,
+          documentsWithCity: withCity,
+          collectionName: GuestSightseeing.collection.name
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Debug error:', error);
+    next(new ErrorResponse('Debug error: ' + error.message, 500));
+  }
 });
 
 module.exports = {
-  getGuestSightseeings,
-  getGuestSightseeing,
-  createGuestSightseeing,
-  updateGuestSightseeing,
-  deleteGuestSightseeing,
-  uploadGuestSightseeingImages,
-  handleFileUploads
+  getGuestSightseeings,
+  getGuestSightseeing,
+  createGuestSightseeing,
+  updateGuestSightseeing,
+  deleteGuestSightseeing,
+  uploadGuestSightseeingImages,
+  handleFileUploads,
+  debugGuestSightseeing
 };

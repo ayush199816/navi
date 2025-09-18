@@ -207,7 +207,7 @@ const GuestSightseeings = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="w-full md:w-1/3">
               <SearchBox
-                placeholder="Search sightseeings..."
+                placeholder="Search Island Tour/ Dinner Cruise Tiger Park..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onSubmit={handleSearch}
