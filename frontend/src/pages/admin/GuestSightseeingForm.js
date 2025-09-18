@@ -23,6 +23,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   const [formData, setFormData] = useState({
     name: '',
     country: '',
+    city: '',
     description: '',
     price: '',
     priceCurrency: 'USD', // Default currency
@@ -33,6 +34,8 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     isActive: true,
     images: [],
     keywords: [],
+    tourType: 'shared', // Default to shared
+    activityType: 'Sightseeing', // Default to Sightseeing
     aboutTour: 'No detailed description available.',
     highlights: ['No highlights available'],
     meetingPoint: 'To be advised upon booking',
@@ -49,15 +52,15 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   // Initialize form data when propSightseeing changes
   useEffect(() => {
     if (propSightseeing) {
-      console.log('Raw propSightseeing in form:', JSON.parse(JSON.stringify(propSightseeing)));
+      // Create a safe copy of propSightseeing without circular references
+      const safeSightseeing = JSON.parse(JSON.stringify(propSightseeing));
+      console.log('Raw propSightseeing in form:', safeSightseeing);
       
-      // Create a new form data object with all fields from propSightseeing
-      const newFormData = { ...propSightseeing };
-      
-      // Only set defaults for fields that are actually undefined or null
+      // Define default values
       const defaultValues = {
         name: '',
         country: '',
+        city: '',
         description: '',
         price: '',
         priceCurrency: 'USD',
@@ -68,20 +71,43 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         isActive: true,
         images: [],
         keywords: [],
+        tourType: 'shared',
+        activityType: 'Sightseeing',
         aboutTour: 'No detailed description available.',
         highlights: ['No highlights available'],
         meetingPoint: 'To be advised upon booking',
         whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
       };
       
-      // Apply defaults only to undefined fields
-      Object.keys(defaultValues).forEach(key => {
-        if (newFormData[key] === undefined || newFormData[key] === null) {
-          newFormData[key] = defaultValues[key];
+      // Create new form data with defaults and override with prop values
+      const newFormData = { ...defaultValues };
+      
+      // Only override with prop values that are not undefined or null
+      Object.keys(safeSightseeing).forEach(key => {
+        if (safeSightseeing[key] !== undefined && safeSightseeing[key] !== null) {
+          // Special handling for arrays to ensure they are properly initialized
+          if (Array.isArray(defaultValues[key])) {
+            newFormData[key] = Array.isArray(safeSightseeing[key]) 
+              ? [...safeSightseeing[key]] 
+              : [];
+          } else {
+            newFormData[key] = safeSightseeing[key];
+          }
         }
       });
       
-      // Handle array fields
+      // Ensure required fields have proper values
+      if (!newFormData.tourType) {
+        newFormData.tourType = 'shared';
+      }
+      if (!newFormData.activityType) {
+        newFormData.activityType = 'Sightseeing';
+      }
+      if (!newFormData.city) {
+        newFormData.city = '';
+      }
+      
+      // Handle array fields to ensure they are properly initialized
       if (!Array.isArray(newFormData.inclusions) || newFormData.inclusions.length === 0) {
         newFormData.inclusions = ['No inclusions specified'];
       }
@@ -104,14 +130,19 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
       setFormData({
         name: '',
         country: '',
+        city: '',
         description: '',
         price: '',
+        priceCurrency: 'USD',
         offerPrice: '',
+        offerPriceCurrency: 'USD',
         duration: 'Not specified',
         inclusions: ['No inclusions specified'],
         isActive: true,
         images: [],
         keywords: [],
+        tourType: 'shared',
+        activityType: 'Sightseeing',
         aboutTour: 'No detailed description available.',
         highlights: ['No highlights available'],
         meetingPoint: 'To be advised upon booking',
@@ -216,9 +247,23 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Log the form data before any processing
+    console.log('Form data before submission:', JSON.stringify(formData, null, 2));
+    console.log('Current tourType value:', formData.tourType);
+
     try {
+      console.log('Form data before submission:', formData);
+      console.log('Current tourType value:', formData.tourType);
       // Prepare form data with proper types
-      const formDataToSubmit = { ...formData };
+      const formDataToSubmit = { 
+        ...formData,
+        tourType: formData.tourType || 'shared' // Ensure tourType is always included with a default value
+      };
+      
+      // Log the final data being submitted
+      console.log('Final data being submitted:', JSON.stringify(formDataToSubmit, null, 2));
+      
+      console.log('Submitting form data with tourType:', formDataToSubmit.tourType);
       
       // Ensure price and offerPrice are numbers
       if (formDataToSubmit.price) {
@@ -237,6 +282,11 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
       // Ensure duration has a default value
       if (!formDataToSubmit.duration) {
         formDataToSubmit.duration = 'Not specified';
+      }
+      
+      // Ensure tourType has a default value
+      if (!formDataToSubmit.tourType) {
+        formDataToSubmit.tourType = 'shared';
       }
       
       console.log('Submitting form data:', formDataToSubmit);
@@ -305,6 +355,64 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                     onChange={handleChange}
                     className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   />
+                </div>
+              </div>
+
+              <div className="sm:col-span-3">
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                  City *
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="text"
+                    name="city"
+                    id="city"
+                    required
+                    value={formData.city || ''}
+                    onChange={handleChange}
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-3">
+                <label htmlFor="activityType" className="block text-sm font-medium text-gray-700">
+                  Activity Type *
+                </label>
+                <div className="mt-1">
+                  <select
+                    id="activityType"
+                    name="activityType"
+                    value={formData.activityType || 'Sightseeing'}
+                    onChange={handleChange}
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="Sightseeing">Sightseeing</option>
+                    <option value="Transfers">Transfers</option>
+                    <option value="Both">Both</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="sm:col-span-3">
+                <label htmlFor="tourType" className="block text-sm font-medium text-gray-700">
+                  Tour Type *
+                </label>
+                <div className="mt-1">
+                  <select
+                    id="tourType"
+                    name="tourType"
+                    value={formData.tourType || 'shared'}
+                    onChange={handleChange}
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="shared">Shared Tour</option>
+                    <option value="private">Private Tour</option>
+                    <option value="both">Both Shared & Private</option>
+                    <option value="none">None</option>
+                  </select>
                 </div>
               </div>
 
