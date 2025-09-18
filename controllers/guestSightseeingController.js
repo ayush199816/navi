@@ -87,7 +87,17 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   console.log(' Request query:', JSON.stringify(req.query, null, 2));
   
   // Parse query parameters
-  const { sort, select, page = 1, limit = 10, search = '', country = '', excludeId, random } = req.query;
+  const { 
+    sort, 
+    select, 
+    page = 1, 
+    limit = 10, 
+    search = '', 
+    country = '', 
+    excludeId, 
+    random,
+    tourType 
+  } = req.query;
   
   // Build filter object
   const filter = {};
@@ -135,7 +145,41 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   // Only show active sightseeings
   filter.isActive = true;
   
-  console.log(' Initial Filters:', JSON.stringify(filter, null, 2));
+  // Add tour type filter if provided
+  if (tourType) {
+    const normalizedTourType = tourType.toLowerCase().trim();
+    if (normalizedTourType === 'shared') {
+      filter.tourType = 'shared';
+    } else if (normalizedTourType === 'private') {
+      filter.tourType = 'private';
+    } else if (normalizedTourType === 'both') {
+      // For 'both', we'll use an $or condition to match either shared or private
+      filter.tourType = { $in: ['shared', 'private'] };
+    } else if (normalizedTourType === 'none') {
+      // For 'none', we'll only show items where tourType is not set, is null, or is 'none'
+      filter.$or = [
+        { tourType: { $exists: false } },
+        { tourType: null },
+        { tourType: 'none' }
+      ];
+    }
+  }
+  
+  // If there's an $or condition, we need to ensure other filters are applied to each condition
+  if (filter.$or) {
+    // Create a copy of the filter without $or
+    const { $or, ...otherFilters } = filter;
+    
+    // Apply other filters to each $or condition
+    filter = {
+      $and: [
+        { $or },
+        { ...otherFilters }
+      ]
+    };
+  }
+  
+  console.log('Initial Filters:', JSON.stringify(filter, null, 2));
   
   // Parse pagination parameters
   const pageNum = parseInt(page, 10) || 1;
@@ -516,13 +560,19 @@ const getGuestSightseeing = asyncHandler(async (req, res, next) => {
   }
 });
 
-// @desc    Create new guest sightseeing
-// @route   POST /api/guest-sightseeing
-// @access  Private/Admin
+// @desc    Create new guest sightseeing
+// @route   POST /api/guest-sightseeing
+// @access  Private/Admin
 const createGuestSightseeing = asyncHandler(async (req, res, next) => {
-  try {
-    // Parse the form data
-    let sightseeingData = {};
+  try {
+    console.log('Raw request body:', JSON.stringify(req.body, null, 2));
+    
+    // Parse the form data
+    let sightseeingData = {};
+    
+    // Debug: Log the raw request body and headers
+    console.log('Request headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Content-Type:', req.get('Content-Type'));
     
     // If data is sent as JSON string in form-data
     if (req.body.data) {
@@ -578,54 +628,81 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
       sightseeingData.images = [];
     }
     
-    // Convert string arrays if needed
-    if (typeof sightseeingData.inclusions === 'string') {
-      sightseeingData.inclusions = sightseeingData.inclusions
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-    }
-    
-    if (typeof sightseeingData.keywords === 'string') {
-      sightseeingData.keywords = sightseeingData.keywords
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-    }
-    
-    // Add user ID
-    sightseeingData.user = req.user.id;
-    
-    // Ensure default values
-    if (!sightseeingData.duration) sightseeingData.duration = 'Not specified';
-    if (sightseeingData.price) sightseeingData.price = Number(sightseeingData.price) || 0;
-    if (sightseeingData.offerPrice) sightseeingData.offerPrice = Number(sightseeingData.offerPrice) || 0;
-    
-    // Ensure inclusions is an array
-    if (sightseeingData.inclusions) {
-      if (typeof sightseeingData.inclusions === 'string') {
-        sightseeingData.inclusions = [sightseeingData.inclusions];
-      } else if (!Array.isArray(sightseeingData.inclusions)) {
-        sightseeingData.inclusions = [];
-      }
-    } else {
-      sightseeingData.inclusions = [];
-    }
-    
-    console.log('Creating sightseeing with data:', {
-      ...sightseeingData,
-      images: sightseeingData.images ? `${sightseeingData.images.length} images` : 'none'
-    });
-    
-    // Create the sightseeing entry
-    const sightseeing = await GuestSightseeing.create(sightseeingData);
-    console.log('Sightseeing created successfully:', sightseeing._id);
-    
-    res.status(201).json({
-      success: true,
-      data: sightseeing
-    });
-    
+    // Convert string arrays if needed
+    if (typeof sightseeingData.inclusions === 'string') {
+      sightseeingData.inclusions = sightseeingData.inclusions
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+    
+    if (typeof sightseeingData.keywords === 'string') {
+      sightseeingData.keywords = sightseeingData.keywords
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+    
+    // Add user ID if not present
+    if (!sightseeingData.user && req.user) {
+      sightseeingData.user = req.user.id;
+    }
+    
+    // Ensure duration has a default value
+    if (!sightseeingData.duration) {
+      sightseeingData.duration = 'Not specified';
+    }
+    
+    // Ensure tourType is set and valid
+    if (!sightseeingData.tourType || !['shared', 'private', 'both'].includes(sightseeingData.tourType)) {
+      console.log('Invalid or missing tourType, defaulting to shared');
+      sightseeingData.tourType = 'shared';
+    }
+    
+    // Convert prices to numbers
+    if (sightseeingData.price) sightseeingData.price = Number(sightseeingData.price) || 0;
+    if (sightseeingData.offerPrice) sightseeingData.offerPrice = Number(sightseeingData.offerPrice) || 0;
+    
+    // Ensure inclusions is an array
+    if (sightseeingData.inclusions) {
+      if (typeof sightseeingData.inclusions === 'string') {
+        sightseeingData.inclusions = [sightseeingData.inclusions];
+      } else if (!Array.isArray(sightseeingData.inclusions)) {
+        sightseeingData.inclusions = [];
+      }
+    } else {
+      sightseeingData.inclusions = [];
+    }
+    
+    // Log the data being saved with more details
+    console.log('Creating sightseeing with data:', {
+      ...sightseeingData,
+      images: sightseeingData.images ? `${sightseeingData.images.length} images` : 'none',
+      tourType: sightseeingData.tourType || 'not set',
+      // Add type information for debugging
+      _tourTypeType: typeof sightseeingData.tourType,
+      _hasTourType: 'tourType' in sightseeingData
+    });
+    
+    // Force include tourType in the saved document
+    if (!sightseeingData.tourType) {
+      console.log('WARNING: tourType is missing, setting default');
+      sightseeingData.tourType = 'shared';
+    }
+     
+     // Log the data being saved
+    console.log('Creating sightseeing with data:', JSON.stringify(sightseeingData, null, 2));
+    
+    // Create the sightseeing entry
+    const sightseeing = await GuestSightseeing.create(sightseeingData);
+    
+    console.log('Created sightseeing:', JSON.stringify(sightseeing, null, 2));
+
+     res.status(201).json({
+       success: true,
+       data: sightseeing
+     });
+     
   } catch (error) {
     console.error('Error creating sightseeing:', error);
     next(new ErrorResponse('Failed to create sightseeing: ' + error.message, 500));

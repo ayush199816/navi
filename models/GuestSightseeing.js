@@ -71,10 +71,6 @@ const guestSightseeingSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  images: [{
-    type: String,
-    trim: true
-  }],
   duration: {
     type: String,
     trim: true,
@@ -96,6 +92,27 @@ const guestSightseeingSchema = new mongoose.Schema({
   keywords: {
     type: [String],
     default: []
+  },
+  tourType: {
+    type: String,
+    enum: ['shared', 'private', 'both', 'none'],
+    default: 'shared',
+    required: [true, 'Please specify the tour type'],
+    lowercase: true,
+    trim: true,
+    select: true
+  },
+  activityType: {
+    type: String,
+    enum: ['Sightseeing', 'Transfers', 'Both'],
+    default: 'Sightseeing',
+    required: [true, 'Please specify the activity type'],
+    trim: true
+  },
+  city: {
+    type: String,
+    required: [true, 'Please specify the city'],
+    trim: true
   },
   aboutTour: {
     type: String,

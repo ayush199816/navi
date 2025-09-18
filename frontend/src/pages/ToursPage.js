@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp, FiUsers } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
@@ -11,6 +11,7 @@ const ToursPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
+  const [tourType, setTourType] = useState('');
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const currencyDropdownRef = useRef(null);
   const dispatch = useDispatch();
@@ -49,6 +50,7 @@ const ToursPage = () => {
     const filters = {
       city: citySearch.trim(),
       country: countryFilter,
+      tourType: tourType,
       isActive: true
     };
     
@@ -122,7 +124,7 @@ const ToursPage = () => {
         {/* Search Form */}
         <div className="bg-white p-6 rounded-2xl shadow-lg mb-12 border border-gray-100">
           <form onSubmit={handleSearch}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* City Input */}
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -167,6 +169,26 @@ const ToursPage = () => {
                   {Array.from(new Set(sightseeings.map(s => s.country))).map((country, idx) => (
                     <option key={idx} value={country}>{country}</option>
                   ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <FiChevronDown className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+
+              {/* Tour Type Filter */}
+              <div className="relative flex-1 md:col-span-2">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiUsers className="h-5 w-5 text-gray-400" />
+                </div>
+                <select
+                  className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                  value={tourType}
+                  onChange={(e) => setTourType(e.target.value)}
+                >
+                  <option value="">All Tour Types</option>
+                  <option value="shared">Shared Tours</option>
+                  <option value="private">Private Tours</option>
+                  <option value="both">Both Shared & Private</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <FiChevronDown className="h-5 w-5 text-gray-400" />
