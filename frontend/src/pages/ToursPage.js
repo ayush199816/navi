@@ -9,6 +9,7 @@ import { useCurrency } from '../contexts/CurrencyContext';
 
 const ToursPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [citySearch, setCitySearch] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const currencyDropdownRef = useRef(null);
@@ -44,21 +45,26 @@ const ToursPage = () => {
   
   const handleSearch = (e) => {
     e.preventDefault();
-    // Filter the sightseeings based on search term and country
+    // First, filter by city if provided
     const filters = {
-      search: searchTerm,
+      city: citySearch.trim(),
       country: countryFilter,
       isActive: true
     };
     
-    // Only include search if there's a search term
-    if (!searchTerm.trim()) {
-      delete filters.search;
+    // Only include city if there's a city search term
+    if (!filters.city) {
+      delete filters.city;
     }
     
     // Only include country if one is selected
-    if (!countryFilter) {
+    if (!filters.country) {
       delete filters.country;
+    }
+    
+    // Add search term to filters if provided
+    if (searchTerm.trim()) {
+      filters.search = searchTerm.trim();
     }
     
     dispatch(fetchGuestSightseeings(filters));
@@ -114,18 +120,33 @@ const ToursPage = () => {
         </div>
 
         {/* Search Form */}
-        <div className="bg-white p-6 rounded-xl shadow-lg mb-12">
-          <form onSubmit={handleSearch} className="space-y-4">
+        <div className="bg-white p-6 rounded-2xl shadow-lg mb-12 border border-gray-100">
+          <form onSubmit={handleSearch}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Destination Input */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              {/* City Input */}
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiMapPin className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-12 pr-4 py-3.5 text-gray-700 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  placeholder="Search by city..."
+                  value={citySearch}
+                  onChange={(e) => setCitySearch(e.target.value)}
+                  aria-label="Search by city"
+                />
+              </div>
+
+              {/* Sightseeing Name Input */}
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <FiSearch className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Search by name..."
+                  className="block w-full pl-12 pr-4 py-3.5 text-gray-700 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  placeholder="Search Island Tour/ Dinner Cruise Tiger Park..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   aria-label="Search sightseeings by name"
@@ -133,28 +154,33 @@ const ToursPage = () => {
               </div>
 
               {/* Country Filter */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <FiMapPin className="h-5 w-5 text-gray-400" />
                 </div>
                 <select
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                  className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
                   value={countryFilter}
                   onChange={(e) => setCountryFilter(e.target.value)}
                 >
-                  <option value="">All Countries</option>
+                  <option value="">All Destinations</option>
                   {Array.from(new Set(sightseeings.map(s => s.country))).map((country, idx) => (
                     <option key={idx} value={country}>{country}</option>
                   ))}
                 </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <FiChevronDown className="h-5 w-5 text-gray-400" />
+                </div>
               </div>
-
+            </div>
+            
+            <div className="mt-6 flex justify-center">
               <button
                 type="submit"
-                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                className="w-full md:min-w-[300px] px-16 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-lg rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 whitespace-nowrap transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <FiSearch className="h-5 w-5" />
-                <span>Search</span>
+                <span className="font-semibold">Search Tours</span>
               </button>
             </div>
           </form>
