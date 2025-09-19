@@ -96,11 +96,11 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
     country = '', 
     excludeId, 
     random,
-    tourType 
+    // tourType removed
   } = req.query;
   
   // Build filter object
-  const filter = {};
+  let filter = {};
   
   // Add search filter if provided
   if (search) {
@@ -145,38 +145,24 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   // Only show active sightseeings
   filter.isActive = true;
   
-  // Add tour type filter if provided
-  if (tourType) {
-    const normalizedTourType = tourType.toLowerCase().trim();
-    if (normalizedTourType === 'shared') {
-      filter.tourType = 'shared';
-    } else if (normalizedTourType === 'private') {
-      filter.tourType = 'private';
-    } else if (normalizedTourType === 'both') {
-      // For 'both', we'll use an $or condition to match either shared or private
-      filter.tourType = { $in: ['shared', 'private'] };
-    } else if (normalizedTourType === 'none') {
-      // For 'none', we'll only show items where tourType is not set, is null, or is 'none'
-      filter.$or = [
-        { tourType: { $exists: false } },
-        { tourType: null },
-        { tourType: 'none' }
-      ];
-    }
-  }
+  // Tour type filter has been removed
   
   // If there's an $or condition, we need to ensure other filters are applied to each condition
   if (filter.$or) {
     // Create a copy of the filter without $or
     const { $or, ...otherFilters } = filter;
     
-    // Apply other filters to each $or condition
-    filter = {
-      $and: [
+    // If there are other filters, combine them with $and
+    if (Object.keys(otherFilters).length > 0) {
+      // Create a new $and array with the $or and other filters
+      filter.$and = [
         { $or },
-        { ...otherFilters }
-      ]
-    };
+        ...Object.entries(otherFilters).map(([key, value]) => ({ [key]: value }))
+      ];
+      // Remove the original $or and other filters since they're now in $and
+      delete filter.$or;
+      Object.keys(otherFilters).forEach(key => delete filter[key]);
+    }
   }
   
   console.log('Initial Filters:', JSON.stringify(filter, null, 2));
