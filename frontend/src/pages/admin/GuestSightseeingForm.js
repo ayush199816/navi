@@ -45,6 +45,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   const [newInclusion, setNewInclusion] = useState('');
   const [newHighlight, setNewHighlight] = useState('');
   const [newWhatToBring, setNewWhatToBring] = useState('');
+  const [newKeyword, setNewKeyword] = useState('');
 
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -524,39 +525,87 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
 
               <div className="sm:col-span-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Keywords (Separate with commas)
+                  Keywords
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    value={formData.keywords.join(', ')}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      // Only split on commas that aren't inside quotes and trim whitespace
-                      const keywords = inputValue
-                        .split(',')
-                        .map(k => k.trim())
-                        .filter(k => k.length > 0);
-                      setFormData(prev => ({
-                        ...prev,
-                        keywords: [...new Set(keywords)] // Remove duplicates
-                      }));
-                    }}
-                    onBlur={(e) => {
-                      // Clean up the input when it loses focus
-                      const inputValue = e.target.value;
-                      const keywords = inputValue
-                        .split(',')
-                        .map(k => k.trim())
-                        .filter(k => k.length > 0);
-                      setFormData(prev => ({
-                        ...prev,
-                        keywords: [...new Set(keywords)] // Remove duplicates
-                      }));
-                    }}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                    placeholder="e.g., adventure, family-friendly, cultural"
-                  />
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.keywords.map((keyword, index) => (
+                      <div key={index} className="flex items-center bg-blue-100 rounded-full px-3 py-1">
+                        <span className="text-sm text-blue-800 mr-1">{keyword}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newKeywords = [...formData.keywords];
+                            newKeywords.splice(index, 1);
+                            setFormData(prev => ({
+                              ...prev,
+                              keywords: newKeywords
+                            }));
+                          }}
+                          className="text-blue-400 hover:text-blue-700 focus:outline-none"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex">
+                    <input
+                      type="text"
+                      value={newKeyword}
+                      onChange={(e) => setNewKeyword(e.target.value)}
+                      onKeyDown={(e) => {
+                        if ((e.key === 'Enter' || e.key === ',') && newKeyword.trim()) {
+                          e.preventDefault();
+                          const keywordToAdd = newKeyword.trim().replace(/,+$/, '');
+                          if (keywordToAdd) {
+                            setFormData(prev => ({
+                              ...prev,
+                              keywords: [...new Set([...prev.keywords, keywordToAdd])]
+                            }));
+                            setNewKeyword('');
+                          }
+                        }
+                      }}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const pastedText = e.clipboardData.getData('text');
+                        const pastedKeywords = pastedText
+                          .split(',')
+                          .map(k => k.trim())
+                          .filter(k => k.length > 0);
+                        
+                        if (pastedKeywords.length > 0) {
+                          setFormData(prev => ({
+                            ...prev,
+                            keywords: [...new Set([...prev.keywords, ...pastedKeywords])]
+                          }));
+                        }
+                      }}
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                      placeholder="Type and press Enter or comma to add keywords"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newKeyword.trim()) {
+                          const keywordToAdd = newKeyword.trim().replace(/,+$/, '');
+                          if (keywordToAdd) {
+                            setFormData(prev => ({
+                              ...prev,
+                              keywords: [...new Set([...prev.keywords, keywordToAdd])]
+                            }));
+                            setNewKeyword('');
+                          }
+                        }
+                      }}
+                      className="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -565,12 +614,30 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                   Highlights
                 </label>
                 <div className="space-y-2">
-                  {formData.highlights.map((highlight, index) => (
-                    <div key={index} className="flex items-center">
-                      <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-                      <span className="text-sm text-gray-700">{highlight}</span>
-                    </div>
-                  ))}
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.highlights.map((highlight, index) => (
+                      <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                        <CheckIcon className="h-4 w-4 text-green-500 mr-1" />
+                        <span className="text-sm text-gray-700 mr-1">{highlight}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newHighlights = [...formData.highlights];
+                            newHighlights.splice(index, 1);
+                            setFormData(prev => ({
+                              ...prev,
+                              highlights: newHighlights.length > 0 ? newHighlights : ['No highlights available']
+                            }));
+                          }}
+                          className="text-gray-400 hover:text-red-500 focus:outline-none"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                   <div className="flex mt-2">
                     <input
                       type="text"
@@ -579,9 +646,10 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && newHighlight.trim()) {
                           e.preventDefault();
+                          const newHighlights = [...formData.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            highlights: [...prev.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()]
+                            highlights: newHighlights
                           }));
                           setNewHighlight('');
                         }
@@ -593,9 +661,10 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                       type="button"
                       onClick={() => {
                         if (newHighlight.trim()) {
+                          const newHighlights = [...formData.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            highlights: [...prev.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()]
+                            highlights: newHighlights
                           }));
                           setNewHighlight('');
                         }
@@ -630,12 +699,30 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                   What to Bring
                 </label>
                 <div className="space-y-2">
-                  {formData.whatToBring.map((item, index) => (
-                    <div key={index} className="flex items-center">
-                      <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-                      <span className="text-sm text-gray-700">{item}</span>
-                    </div>
-                  ))}
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.whatToBring.map((item, index) => (
+                      <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                        <CheckIcon className="h-4 w-4 text-green-500 mr-1" />
+                        <span className="text-sm text-gray-700 mr-1">{item}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newWhatToBring = [...formData.whatToBring];
+                            newWhatToBring.splice(index, 1);
+                            setFormData(prev => ({
+                              ...prev,
+                              whatToBring: newWhatToBring.length > 0 ? newWhatToBring : ['No items specified']
+                            }));
+                          }}
+                          className="text-gray-400 hover:text-red-500 focus:outline-none"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                   <div className="flex mt-2">
                     <input
                       type="text"
@@ -644,9 +731,12 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && newWhatToBring.trim()) {
                           e.preventDefault();
+                          const updatedItems = [...formData.whatToBring, newWhatToBring.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            whatToBring: [...prev.whatToBring, newWhatToBring.trim()]
+                            whatToBring: updatedItems.includes('No items specified') 
+                              ? updatedItems.filter(item => item !== 'No items specified')
+                              : updatedItems
                           }));
                           setNewWhatToBring('');
                         }
@@ -658,9 +748,12 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                       type="button"
                       onClick={() => {
                         if (newWhatToBring.trim()) {
+                          const updatedItems = [...formData.whatToBring, newWhatToBring.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            whatToBring: [...prev.whatToBring, newWhatToBring.trim()]
+                            whatToBring: updatedItems.includes('No items specified') 
+                              ? updatedItems.filter(item => item !== 'No items specified')
+                              : updatedItems
                           }));
                           setNewWhatToBring('');
                         }
@@ -678,12 +771,30 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                   What's Included
                 </label>
                 <div className="space-y-2">
-                  {formData.inclusions.map((inclusion, index) => (
-                    <div key={index} className="flex items-center">
-                      <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
-                      <span className="text-sm text-gray-700">{inclusion}</span>
-                    </div>
-                  ))}
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.inclusions.map((inclusion, index) => (
+                      <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                        <CheckIcon className="h-4 w-4 text-green-500 mr-1" />
+                        <span className="text-sm text-gray-700 mr-1">{inclusion}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newInclusions = [...formData.inclusions];
+                            newInclusions.splice(index, 1);
+                            setFormData(prev => ({
+                              ...prev,
+                              inclusions: newInclusions.length > 0 ? newInclusions : ['No inclusions specified']
+                            }));
+                          }}
+                          className="text-gray-400 hover:text-red-500 focus:outline-none"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                   <div className="flex mt-2">
                     <input
                       type="text"
@@ -692,9 +803,12 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && newInclusion.trim()) {
                           e.preventDefault();
+                          const updatedInclusions = [...formData.inclusions, newInclusion.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            inclusions: [...prev.inclusions.filter(i => i !== 'No inclusions specified'), newInclusion.trim()]
+                            inclusions: updatedInclusions.includes('No inclusions specified')
+                              ? updatedInclusions.filter(item => item !== 'No inclusions specified')
+                              : updatedInclusions
                           }));
                           setNewInclusion('');
                         }
@@ -706,9 +820,12 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                       type="button"
                       onClick={() => {
                         if (newInclusion.trim()) {
+                          const updatedInclusions = [...formData.inclusions, newInclusion.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            inclusions: [...prev.inclusions.filter(i => i !== 'No inclusions specified'), newInclusion.trim()]
+                            inclusions: updatedInclusions.includes('No inclusions specified')
+                              ? updatedInclusions.filter(item => item !== 'No inclusions specified')
+                              : updatedInclusions
                           }));
                           setNewInclusion('');
                         }
