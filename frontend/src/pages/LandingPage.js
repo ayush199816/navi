@@ -162,8 +162,8 @@ const LandingPage = () => {
             images: ['https://source.unsplash.com/1920x1080/?bali'],
             description: 'Experience the island of gods with its lush jungles, ancient temples, and pristine beaches that will take your breath away.',
             rating: 4.8,
-            price: 1299,
-            priceCurrency: 'USD',
+            price: 99999,
+            priceCurrency: 'INR',
             duration: '7 Days / 6 Nights',
             highlights: ['Private guided tours', 'Luxury accommodations', 'Cultural experiences']
           },
@@ -174,8 +174,8 @@ const LandingPage = () => {
             images: ['https://source.unsplash.com/1920x1080/?phuket'],
             description: 'Discover the pearl of the Andaman with its crystal-clear waters, vibrant nightlife, and rich cultural heritage.',
             rating: 4.7,
-            price: 1599,
-            priceCurrency: 'USD',
+            price: 129999,
+            priceCurrency: 'INR',
             duration: '8 Days / 7 Nights',
             highlights: ['Island hopping', 'Beachfront resorts', 'Local cuisine tours']
           }
@@ -208,7 +208,7 @@ const LandingPage = () => {
     
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev === destinations.length - 1 ? 0 : prev + 1));
-    }, 5000);
+    }, 10000);
     return () => clearInterval(timer);
   }, [destinations.length]);
 
@@ -252,7 +252,7 @@ const LandingPage = () => {
                 BookMySight.com 
               </span>
               <span className={`text-xs ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
-                Powered by Navigatio
+                Powered by Navigatio Connect Pvt. Ltd
               </span>
             </Link>
 
@@ -865,7 +865,7 @@ const LandingPage = () => {
                 <p className="text-gray-600">Happy Travelers</p>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">500+</div>
+                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">1000+</div>
                 <p className="text-gray-600">Trips</p>
               </div>
               <div>

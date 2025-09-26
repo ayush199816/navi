@@ -34,7 +34,7 @@ export const CurrencyProvider = ({ children }) => {
   // Initialize selectedCurrency from localStorage or default to USD
   const [selectedCurrency, setSelectedCurrency] = useState(() => {
     const savedCurrency = localStorage.getItem('selectedCurrency');
-    return savedCurrency && CURRENCY_SYMBOLS[savedCurrency] ? savedCurrency : 'USD';
+    return savedCurrency && CURRENCY_SYMBOLS[savedCurrency] ? savedCurrency : 'INR';
   });
   
   const [exchangeRates, setExchangeRates] = useState({});
