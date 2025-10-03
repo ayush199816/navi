@@ -95,7 +95,7 @@ const ItinerarySchema = new mongoose.Schema(
             dropLocation: String,
             pickupTime: {
               type: String,
-              default: '09:00',
+              default: '',
             },
             transferType: {
               type: String,

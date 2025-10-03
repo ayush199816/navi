@@ -1,50 +1,133 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { format, addDays, differenceInDays, parseISO } from 'date-fns';
+import { useNavigate, useParams } from 'react-router-dom';
+import { format, addDays, differenceInDays, parseISO, isValid } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import api from '../../utils/api';
-import { formatPrice } from '../../utils/currencyFormatter';
 import { toast } from 'react-toastify';
+import { formatPrice } from '../../utils/currencyFormatter';
 
-const ItineraryCreator = () => {
+const ItineraryCreator = (props) => {
   const { user } = useSelector((state) => state.auth);
+  const { id: itineraryId } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(!!props.editMode);
+  const [itineraryDays, setItineraryDays] = useState([]);
+  const [activityModal, setActivityModal] = useState(null);
+  // Helper function to safely format dates
+  const safeFormat = (date, formatStr, fallback = '') => {
+    if (!date) return fallback;
+    const d = typeof date === 'string' ? parseISO(date) : date;
+    return isValid(d) ? format(d, formatStr) : fallback;
+  };
+
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
     customerPhone: '',
     destination: '',
-    arrivalDate: format(new Date(), 'yyyy-MM-dd'),
-    departureDate: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+    arrivalDate: safeFormat(new Date(), 'yyyy-MM-dd'),
+    departureDate: safeFormat(addDays(new Date(), 7), 'yyyy-MM-dd'),
     adults: 1,
     children: 0,
     hotels: [{ name: '', checkIn: '', checkOut: '', confirmationNumber: '' }],
     flights: [{ flightNumber: '', from: '', to: '', departure: '', arrival: '' }]
   });
-  const [itineraryDays, setItineraryDays] = useState([]);
-  const [selectedSightseeings, setSelectedSightseeings] = useState({});
-  const [activityModal, setActivityModal] = useState(null);
-  const navigate = useNavigate();
+
+  // Fetch itinerary data when in edit mode
+  useEffect(() => {
+    const fetchItinerary = async () => {
+      if (!props.editMode || !itineraryId) return;
+      
+      try {
+        setLoading(true);
+        const response = await api.get(`/v1/itinerary-creator/${itineraryId}`);
+        
+        if (!response.data || !response.data.data) {
+          throw new Error('Invalid itinerary data received');
+        }
+        
+        const { data: itinerary } = response.data;
+        console.log('Fetched itinerary:', itinerary);
+        
+        // Update form data with fetched itinerary
+        setFormData(prev => ({
+          ...prev,
+          // Customer information might be in different fields or not present
+          customerName: itinerary.customerName || itinerary.travelerName || '',
+          customerEmail: itinerary.customerEmail || itinerary.travelerEmail || '',
+          customerPhone: itinerary.customerPhone || itinerary.travelerPhone || '',
+          destination: itinerary.destination || '',
+          arrivalDate: safeFormat(itinerary.arrivalDate, 'yyyy-MM-dd'),
+          departureDate: safeFormat(itinerary.departureDate, 'yyyy-MM-dd'),
+          adults: itinerary.adults || 1,
+          children: itinerary.children || 0,
+          hotels: Array.isArray(itinerary.hotels) && itinerary.hotels.length > 0 
+            ? itinerary.hotels.map(hotel => ({
+                ...hotel,
+                checkIn: safeFormat(hotel.checkIn, "yyyy-MM-dd'T'HH:mm"),
+                checkOut: safeFormat(hotel.checkOut, "yyyy-MM-dd'T'HH:mm")
+              }))
+            : [{ name: '', checkIn: '', checkOut: '', confirmationNumber: '' }],
+          flights: Array.isArray(itinerary.flights) && itinerary.flights.length > 0
+            ? itinerary.flights.map(flight => ({
+                ...flight,
+                departure: safeFormat(flight.departure, "yyyy-MM-dd'T'HH:mm"),
+                arrival: safeFormat(flight.arrival, "yyyy-MM-dd'T'HH:mm")
+              }))
+            : [{ flightNumber: '', from: '', to: '', departure: '', arrival: '' }]
+        }));
+        
+        // Update itinerary days if needed
+        if (itinerary.days && Array.isArray(itinerary.days)) {
+          const formattedDays = itinerary.days.map(day => ({
+            ...day,
+            date: day.date ? new Date(day.date) : new Date(),
+            activities: Array.isArray(day.activities) ? day.activities : []
+          }));
+          console.log('Formatted days:', formattedDays);
+          setItineraryDays(formattedDays);
+        }
+      } catch (error) {
+        console.error('Error fetching itinerary:', error);
+        toast.error(`Failed to load itinerary data: ${error.message || 'Unknown error'}`);
+        console.log('Error details:', {
+          error,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchItinerary();
+  }, [itineraryId, props.editMode]);
 
   // Calculate number of days
-  const numberOfDays = differenceInDays(
-    parseISO(formData.departureDate),
-    parseISO(formData.arrivalDate)
-  ) + 1;
+  const arrival = parseISO(formData.arrivalDate);
+  const departure = parseISO(formData.departureDate);
+  const numberOfDays = (isValid(arrival) && isValid(departure)) 
+    ? Math.max(1, differenceInDays(departure, arrival) + 1)
+    : 7; // Default to 7 days if dates are invalid
 
   // Initialize itinerary days when dates change
   useEffect(() => {
     const days = [];
-    for (let i = 0; i < numberOfDays; i++) {
-      const date = addDays(parseISO(formData.arrivalDate), i);
-      days.push({
-        date,
-        activities: []
-      });
+    const startDate = parseISO(formData.arrivalDate);
+    
+    if (isValid(startDate)) {
+      for (let i = 0; i < numberOfDays; i++) {
+        const date = addDays(startDate, i);
+        days.push({
+          date,
+          activities: []
+        });
+      }
+      setItineraryDays(days);
     }
-    setItineraryDays(days);
-  }, [formData.arrivalDate, formData.departureDate]);
+  }, [formData.arrivalDate, formData.departureDate, numberOfDays]);
 
   const generateActivityInfo = (activityName) => {
     if (!activityName.trim()) return '';
@@ -124,9 +207,10 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
     description: '',
     pickupLocation: '',
     dropLocation: '',
-    pickupTime: '09:00',
+    pickupTime: '', // No default time
     aiInfo: '',
-    image: null
+    image: null,
+    transferType: 'private'
   });
 
   const handleActivityNameChange = (e) => {
@@ -199,16 +283,36 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
 
   const addActivity = (dayIndex, sightseeing) => {
     const updatedDays = [...itineraryDays];
-    updatedDays[dayIndex].activities.push({
-      ...sightseeing,
-      transferType: 'private',
-      pickupTime: '09:00',
-      pickupLocation: '',
-      dropLocation: '',
-      notes: ''
-    });
+    // Get the current time in HH:MM format
+    const currentTime = new Date().toTimeString().slice(0, 5);
+    
+    const activityToAdd = {
+      name: sightseeing.name || newActivity.name || 'Untitled Activity',
+      description: sightseeing.description || newActivity.description || '',
+      // Use the time from the form if available, otherwise use the current time
+      pickupTime: newActivity.pickupTime || sightseeing.pickupTime,
+      transferType: sightseeing.transferType || newActivity.transferType || 'private',
+      pickupLocation: sightseeing.pickupLocation || newActivity.pickupLocation || '',
+      dropLocation: sightseeing.dropLocation || newActivity.dropLocation || '',
+      notes: sightseeing.notes || newActivity.notes || '',
+      images: [...(sightseeing.images || []), ...(newActivity.images ? [newActivity.images] : [])].filter(Boolean)
+    };
+
+    updatedDays[dayIndex].activities.push(activityToAdd);
     setItineraryDays(updatedDays);
     setActivityModal(null);
+    
+    // Reset the newActivity form
+    setNewActivity({
+      name: '',
+      description: '',
+      pickupLocation: newActivity.pickupLocation, // Keep the last pickup location
+      dropLocation: newActivity.dropLocation,     // Keep the last drop location
+      pickupTime: newActivity.pickupTime,         // Keep the last pickup time
+      transferType: 'private',
+      aiInfo: '',
+      image: null
+    });
   };
 
   const updateActivity = (dayIndex, activityIndex, field, value) => {
@@ -267,8 +371,8 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
             description: activity.description || '',
             pickupLocation: activity.pickupLocation || '',
             dropLocation: activity.dropLocation || '',
-            pickupTime: activity.pickupTime || '09:00',
-            transferType: activity.transferType || 'private',
+            pickupTime: activity.pickupTime,
+            transferType: activity.transferType,
             notes: activity.notes || '',
             // Convert File objects to base64 URLs
             images: activity.images?.map(img => 
@@ -465,12 +569,12 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
                         <div style="padding: 15px; border-bottom: 1px solid #f0f0f0; ${activityIndex % 2 === 0 ? 'background: #fff;' : 'background: #fcfcfc;'}">
                           <div style="display: flex;">
                             <div style="min-width: 80px; font-weight: bold; color: #2c3e50;">
-                              ${activity.time || '09:00'}
+                              ${activity.pickupTime || 'Time TBD'}
                             </div>
                             <div style="flex: 1;">
                               <div style="margin-bottom: 8px;">
                                 <div style="font-weight: bold; font-size: 1.1em; color: #2c3e50;">${activity.name || 'Activity'}</div>
-                                <div style="color: #7f8c8d; font-size: 0.9em; margin-top: 2px;">${activity.time || ''}</div>
+                                <div style="color: #7f8c8d; font-size: 0.9em; margin-top: 2px;">${activity.pickupTime || ''}</div>
                               </div>
                               ${activity.description ? `
                                 <div style="color: #333; margin: 6px 0; font-size: 0.95em; line-height: 1.4;">
@@ -941,7 +1045,7 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
                 <div style="margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                   <div style="background: #3498db; color: white; padding: 8px 12px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <div style="font-weight: 600;">${activity.time || '09:00'}</div>
+                      <div style="font-weight: 600;">${activity.pickupTime || 'Time TBD'}</div>
                       <div style="font-size: 0.85em; opacity: 0.9;">${activity.duration ? activity.duration + ' min' : ''}</div>
                     </div>
                   </div>
@@ -1201,7 +1305,7 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
                 <label className="block text-sm font-medium text-gray-700">Check-in *</label>
                 <input
                   type="date"
-                  value={hotel.checkIn}
+                  value={hotel.checkIn ? (typeof hotel.checkIn === 'string' ? hotel.checkIn.split('T')[0] : format(new Date(hotel.checkIn), 'yyyy-MM-dd')) : ''}
                   onChange={(e) => handleHotelChange(index, 'checkIn', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   required
@@ -1211,9 +1315,10 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
                 <label className="block text-sm font-medium text-gray-700">Check-out *</label>
                 <input
                   type="date"
-                  value={hotel.checkOut}
+                  value={hotel.checkOut ? (typeof hotel.checkOut === 'string' ? hotel.checkOut.split('T')[0] : format(new Date(hotel.checkOut), 'yyyy-MM-dd')) : ''}
                   onChange={(e) => handleHotelChange(index, 'checkOut', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  min={hotel.checkIn || ''}
                   required
                 />
               </div>
