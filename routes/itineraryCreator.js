@@ -69,6 +69,40 @@ router.get('/agent', authorize('agent'), isApprovedAgent, async (req, res) => {
   }
 });
 
+// Get a single itinerary by ID
+router.get('/:id', authorize('agent'), isApprovedAgent, async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+    
+    if (!itinerary) {
+      return res.status(404).json({
+        success: false,
+        error: 'Itinerary not found'
+      });
+    }
+    
+    // Check if the user is authorized to view this itinerary
+    if (itinerary.createdBy.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to access this itinerary'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: itinerary
+    });
+  } catch (error) {
+    console.error('Error fetching itinerary:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Test route
 router.get('/test', (req, res) => {
   console.log('GET /api/v1/itinerary-creator/test called');
@@ -106,7 +140,7 @@ router.post('/', async (req, res) => {
       children: Number(req.body.children) || 0,
       notes: req.body.notes || '',
       status: 'draft',
-      createdBy: new mongoose.Types.ObjectId('5f8d0a8b7f4bfa0a3c4d5e6f'),
+      createdBy: req.user?.id ? new mongoose.Types.ObjectId(req.user.id) : null,
       
       // Travel preferences
       travelStyle: req.body.travelStyle || 'leisure',
@@ -147,7 +181,11 @@ router.post('/', async (req, res) => {
           name: activity.name || 'Unnamed Activity',
           type: activity.type || 'activity',
           description: activity.description || '',
-          location: activity.location || '',
+          pickupLocation: activity.pickupLocation || '',
+          dropLocation: activity.dropLocation || '',
+          pickupTime: activity.pickupTime || '',
+          transferType: activity.transferType || 'private',
+          images: Array.isArray(activity.images) ? activity.images : [],
           time: activity.time ? new Date(activity.time) : null,
           duration: activity.duration || 60, // in minutes
           cost: activity.cost || 0,

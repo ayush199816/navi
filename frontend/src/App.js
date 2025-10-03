@@ -339,6 +339,11 @@ function App() {
               <ItineraryCreator />
             </ProtectedRoute>
           } />
+          <Route path="agent/itineraries/edit/:id" element={
+            <ProtectedRoute roles={['agent']}>
+              <ItineraryCreator editMode={true} />
+            </ProtectedRoute>
+          } />
           <Route path="agent/itinerary-builder" element={
             <ProtectedRoute roles={['agent']}>
               <ItineraryBuilder />
