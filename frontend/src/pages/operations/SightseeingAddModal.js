@@ -415,6 +415,7 @@ const SightseeingAddModal = ({ open, onClose, onAdd }) => {
             >
               <option value="SIC">SIC</option>
               <option value="PVT">PVT</option>
+              <option value="NONE">No Transfers</option>
             </select>
             {form.type === 'activity' && (
               <p className="text-xs text-gray-500 mt-1">Transfer type is only applicable for Transfers</p>
