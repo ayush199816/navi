@@ -16,6 +16,14 @@ const Dashboard = () => (
           </li>
           <li>
             <a 
+              href="/admin/guest-bookings" 
+              className="flex items-center text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors"
+            >
+              <span className="ml-2">Guest Bookings</span>
+            </a>
+          </li>
+          <li>
+            <a 
               href="/admin/sightseeing" 
               className="flex items-center text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors"
             >

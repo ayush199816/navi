@@ -28,8 +28,8 @@ router.get('/:id', getBooking);
 // Delete booking
 router.delete('/:id', deleteBooking);
 
-// Admin routes
-router.use(authorize('admin'));
+// Admin and Operations routes
+router.use(authorize('admin', 'operations'));
 
 // Get all bookings (admin only)
 router.get(

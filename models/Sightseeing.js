@@ -21,7 +21,7 @@ const SightseeingSchema = new mongoose.Schema(
     },
     transferType: {
       type: String,
-      enum: ['SIC', 'PVT'],
+      enum: ['SIC', 'PVT', 'NONE'],
       default: 'SIC',
     },
     sellingPrice: {
