@@ -294,7 +294,7 @@ const getRandomPlaceholderImage = (title) => {
                   <FiSearch className="text-muted" />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Search by title or Booking ID/Quote ID"
+                  placeholder="Search by title or Destination"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border-start-0"

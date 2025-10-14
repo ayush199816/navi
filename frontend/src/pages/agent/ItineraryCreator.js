@@ -38,11 +38,14 @@ const ItineraryCreator = (props) => {
   // Fetch itinerary data when in edit mode
   useEffect(() => {
     const fetchItinerary = async () => {
-      if (!props.editMode || !itineraryId) return;
+      const id = itineraryId || props.id;
+      
+      if (!props.editMode || !id) return;
       
       try {
         setLoading(true);
-        const response = await api.get(`/v1/itinerary-creator/${itineraryId}`);
+        console.log('Fetching itinerary with ID:', id);
+        const response = await api.get(`/v1/itinerary-creator/${id}`);
         
         if (!response.data || !response.data.data) {
           throw new Error('Invalid itinerary data received');
@@ -51,33 +54,49 @@ const ItineraryCreator = (props) => {
         const { data: itinerary } = response.data;
         console.log('Fetched itinerary:', itinerary);
         
+        // Format dates to ensure they're in the correct format for the form
+        const formatDate = (date) => {
+          if (!date) return '';
+          try {
+            const d = typeof date === 'string' ? new Date(date) : date;
+            return format(d, 'yyyy-MM-dd');
+          } catch (e) {
+            console.error('Error formatting date:', e);
+            return '';
+          }
+        };
+        
         // Update form data with fetched itinerary
-        setFormData(prev => ({
-          ...prev,
+        const newFormData = {
+          ...formData,
           // Customer information might be in different fields or not present
           customerName: itinerary.customerName || itinerary.travelerName || '',
           customerEmail: itinerary.customerEmail || itinerary.travelerEmail || '',
           customerPhone: itinerary.customerPhone || itinerary.travelerPhone || '',
           destination: itinerary.destination || '',
-          arrivalDate: safeFormat(itinerary.arrivalDate, 'yyyy-MM-dd'),
-          departureDate: safeFormat(itinerary.departureDate, 'yyyy-MM-dd'),
+          arrivalDate: formatDate(itinerary.arrivalDate) || formData.arrivalDate,
+          departureDate: formatDate(itinerary.departureDate) || formData.departureDate,
           adults: itinerary.adults || 1,
           children: itinerary.children || 0,
+          notes: itinerary.notes || '',
           hotels: Array.isArray(itinerary.hotels) && itinerary.hotels.length > 0 
             ? itinerary.hotels.map(hotel => ({
                 ...hotel,
-                checkIn: safeFormat(hotel.checkIn, "yyyy-MM-dd'T'HH:mm"),
-                checkOut: safeFormat(hotel.checkOut, "yyyy-MM-dd'T'HH:mm")
+                checkIn: safeFormat(hotel.checkIn, "yyyy-MM-dd'T'HH:mm") || '',
+                checkOut: safeFormat(hotel.checkOut, "yyyy-MM-dd'T'HH:mm") || ''
               }))
             : [{ name: '', checkIn: '', checkOut: '', confirmationNumber: '' }],
           flights: Array.isArray(itinerary.flights) && itinerary.flights.length > 0
             ? itinerary.flights.map(flight => ({
                 ...flight,
-                departure: safeFormat(flight.departure, "yyyy-MM-dd'T'HH:mm"),
-                arrival: safeFormat(flight.arrival, "yyyy-MM-dd'T'HH:mm")
+                departure: safeFormat(flight.departure, "yyyy-MM-dd'T'HH:mm") || '',
+                arrival: safeFormat(flight.arrival, "yyyy-MM-dd'T'HH:mm") || ''
               }))
             : [{ flightNumber: '', from: '', to: '', departure: '', arrival: '' }]
-        }));
+        };
+        
+        console.log('Setting form data:', newFormData);
+        setFormData(newFormData);
         
         // Update itinerary days if needed
         if (itinerary.days && Array.isArray(itinerary.days)) {
@@ -88,6 +107,18 @@ const ItineraryCreator = (props) => {
           }));
           console.log('Formatted days:', formattedDays);
           setItineraryDays(formattedDays);
+        } else {
+          // If no days data, create days based on the date range
+          const startDate = new Date(itinerary.arrivalDate || Date.now());
+          const endDate = new Date(itinerary.departureDate || Date.now() + 7 * 24 * 60 * 60 * 1000);
+          const daysCount = differenceInDays(endDate, startDate) + 1;
+          
+          const defaultDays = Array.from({ length: Math.max(1, daysCount) }, (_, i) => ({
+            date: addDays(startDate, i),
+            activities: []
+          }));
+          
+          setItineraryDays(defaultDays);
         }
       } catch (error) {
         console.error('Error fetching itinerary:', error);
@@ -103,7 +134,7 @@ const ItineraryCreator = (props) => {
     };
     
     fetchItinerary();
-  }, [itineraryId, props.editMode]);
+  }, [itineraryId, props.editMode, props.id]);
 
   // Calculate number of days
   const arrival = parseISO(formData.arrivalDate);
