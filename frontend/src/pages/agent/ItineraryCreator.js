@@ -143,22 +143,30 @@ const ItineraryCreator = (props) => {
     ? Math.max(1, differenceInDays(departure, arrival) + 1)
     : 7; // Default to 7 days if dates are invalid
 
-  // Initialize itinerary days when dates change
+  // Initialize itinerary days when dates change or when in edit mode without days
   useEffect(() => {
-    const days = [];
-    const startDate = parseISO(formData.arrivalDate);
-    
-    if (isValid(startDate)) {
-      for (let i = 0; i < numberOfDays; i++) {
-        const date = addDays(startDate, i);
-        days.push({
-          date,
-          activities: []
-        });
+    // Only initialize days if we're not in edit mode or if we don't have any days yet
+    if (!props.editMode || (props.editMode && (!itineraryDays || itineraryDays.length === 0))) {
+      const days = [];
+      const startDate = parseISO(formData.arrivalDate);
+      
+      if (isValid(startDate)) {
+        for (let i = 0; i < numberOfDays; i++) {
+          const date = addDays(startDate, i);
+          // Check if we already have this date in our existing days
+          const existingDay = itineraryDays.find(d => 
+            d.date && format(new Date(d.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+          );
+          
+          days.push(existingDay || {
+            date,
+            activities: []
+          });
+        }
+        setItineraryDays(days);
       }
-      setItineraryDays(days);
     }
-  }, [formData.arrivalDate, formData.departureDate, numberOfDays]);
+  }, [formData.arrivalDate, formData.departureDate, numberOfDays, props.editMode, itineraryDays]);
 
   const generateActivityInfo = (activityName) => {
     if (!activityName.trim()) return '';
