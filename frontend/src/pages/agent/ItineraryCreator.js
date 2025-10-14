@@ -344,8 +344,8 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
     try {
       // Prepare the itinerary data
       const itineraryData = {
-        title: formData.title || `Itinerary for ${formData.destination}`,
-        destination: formData.destination,
+        title: formData.title || `Itinerary for ${formData.customerName || 'Guest'}`,
+        destination: formData.destination, // This will store the Booking ID/Quote ID
         arrivalDate: formData.arrivalDate,
         departureDate: formData.departureDate,
         adults: parseInt(formData.adults, 10) || 1,
@@ -1123,117 +1123,172 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
           `);
         }
         
-        // Add Daily Itinerary section
+        // Add Daily Itinerary section with proper page breaks
         if (itineraryDays && itineraryDays.length > 0) {
-          // Add each day as a separate section to handle page breaks
-          for (const [dayIndex, day] of itineraryDays.entries()) {
+          // Add a new page for the first day
+          currentPage++;
+          currentY = addNewPage(pdf, currentPage, 'Daily Itinerary');
+          
+          for (let dayIndex = 0; dayIndex < itineraryDays.length; dayIndex++) {
+            const day = itineraryDays[dayIndex];
             const date = typeof day.date === 'string' ? new Date(day.date) : day.date;
-            // Add day header with improved styling
-            let dayContent = `
-              <div style="background: #f8f9fa; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px;
-                   border: 1px solid #e9ecef; position: relative; overflow: hidden;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">
-                    Day ${dayIndex + 1}
-                  </h3>
-                  <span style="color: #6c757d; font-size: 14px;">
-                    ${format(date, 'EEEE, MMMM d, yyyy')}
-                  </span>
-                </div>
-              </div>
-            `;
             
+            // For the first day, we've already added a new page
+            // For subsequent days, just add some space
+            if (dayIndex > 0) {
+              // Add more space between days
+              currentY += 15;
+              
+              // Draw a subtle separator between days
+              pdf.setDrawColor(230, 230, 230);
+              pdf.setLineWidth(0.5);
+              pdf.line(margin, currentY - 5, pageWidth - margin, currentY - 5);
+              
+              // Add some space after the separator
+              currentY += 5;
+            }
+            
+            // Check if we need a new page (only if we're not at the top of a new page)
+            if (currentY > margin + 20 && currentY + 100 > pageHeight - margin) {
+              currentPage++;
+              currentY = addNewPage(pdf, currentPage, 'Daily Itinerary (continued)');
+            }
+            
+            // Add day header with a colored background
+            const dayHeaderHeight = 10;
+            
+            // Save current graphics state
+            pdf.saveGraphicsState();
+            
+            // Add colored background for day header
+            pdf.setFillColor(52, 152, 219);
+            pdf.roundedRect(
+              margin, 
+              currentY - 2, 
+              contentWidth, 
+              dayHeaderHeight + 4, 
+              2, 2, 'F'
+            );
+            
+            // Add day text
+            pdf.setFontSize(11);
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFont(undefined, 'bold');
+            const dayTitle = `Day ${dayIndex + 1}: ${format(date, 'EEEE, MMMM d, yyyy')}`;
+            pdf.text(dayTitle, margin + 5, currentY + dayHeaderHeight - 3);
+            
+            // Restore graphics state
+            pdf.restoreGraphicsState();
+            
+            currentY += dayHeaderHeight + 8; // Add some space after the header
+            
+            // Add activities for the day
             if (day.activities && day.activities.length > 0) {
-              dayContent += day.activities.map(activity => `
-                <div style="margin-bottom: 15px; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                  <div style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                      <div style="width: 36px; height: 36px; background: #e9f5ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1a73e8;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                      </div>
-                      <div style="font-weight: 600; color: #2c3e50;">
-                        ${activity.pickupTime || 'Time TBD'}
-                      </div>
-                    </div>
+              for (const activity of day.activities) {
+                // Check if we need a new page for this activity
+                if (currentY > pageHeight - 40) { // Leave room for at least a small activity
+                  currentPage++;
+                  currentY = addNewPage(pdf, currentPage, 'Daily Itinerary (continued)');
+                }
+                
+                // Create activity element
+                const activityDiv = document.createElement('div');
+                activityDiv.style.marginBottom = '15px';
+                activityDiv.style.border = '1px solid #e0e0e0';
+                activityDiv.style.borderRadius = '6px';
+                activityDiv.style.overflow = 'hidden';
+                
+                // Add activity header with time
+                activityDiv.innerHTML = `
+                  <div style="background: #f5f5f5; padding: 8px 15px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight: 600; color: #333;">${activity.pickupTime || 'Time TBD'}</div>
                     ${activity.type ? `
-                    <div style="background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;">
-                      ${activity.type}
-                    </div>` : ''}
+                      <div style="background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;">
+                        ${activity.type}
+                      </div>` : ''}
                   </div>
                   <div style="padding: 15px; background: white;">
                     ${activity.name ? `
-                    <h3 style="margin: 0 0 10px 0; color: #1a237e; font-size: 16px; font-weight: 600;">
-                      ${activity.name}
-                    </h3>` : ''}
+                      <h3 style="margin: 0 0 10px 0; color: #1a237e; font-size: 16px; font-weight: 600;">
+                        ${activity.name}
+                      </h3>` : ''}
                     ${activity.description ? `
                       <div style="color: #555; font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;">
                         ${activity.description}
-                      </div>
-                    ` : ''}
-                    <div style="margin-top: 15px; background: #f8f9fa; border-radius: 6px; padding: 12px; border: 1px solid #e9ecef;">
-                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        ${activity.pickupLocation ? `
-                          <div>
-                            <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Pickup</div>
-                            <div style="font-size: 14px; color: #2c3e50; font-weight: 500;">${activity.pickupLocation}</div>
-                          </div>
-                        ` : ''}
-                        ${activity.dropLocation ? `
-                          <div>
-                            <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Drop-off</div>
-                            <div style="font-size: 14px; color: #2c3e50; font-weight: 500;">${activity.dropLocation}</div>
-                          </div>
-                        ` : ''}
+                      </div>` : ''}
+                    ${(activity.pickupLocation || activity.dropLocation) ? `
+                      <div style="margin-top: 10px; background: #f8f9fa; border-radius: 6px; padding: 12px; border: 1px solid #e9ecef;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                          ${activity.pickupLocation ? `
+                            <div>
+                              <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Pickup</div>
+                              <div style="font-weight: 500; font-size: 0.95em;">${activity.pickupLocation}</div>
+                            </div>` : ''}
+                          ${activity.dropLocation ? `
+                            <div>
+                              <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Drop-off</div>
+                              <div style="font-weight: 500; font-size: 0.95em;">${activity.dropLocation}</div>
+                            </div>` : ''}
+                        </div>
+                      </div>` : ''}
+                    ${activity.cost || activity.location ? `
+                      <div style="margin-top: 10px; display: grid; grid-template-columns: ${activity.cost && activity.location ? '1fr 1fr' : '1fr'}; gap: 10px;">
                         ${activity.cost ? `
                           <div>
                             <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Price</div>
                             <div style="font-size: 14px; color: #27ae60; font-weight: 600;">${formatPrice(activity.cost)}</div>
-                          </div>
-                        ` : ''}
+                          </div>` : ''}
                         ${activity.location ? `
                           <div>
                             <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Location</div>
                             <div style="font-size: 14px; color: #2c3e50; font-weight: 500;">${activity.location}</div>
-                          </div>
-                        ` : ''}
-                      </div>
-                      ${activity.notes ? `
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dee2e6;">
-                          <div style="font-size: 12px; color: #6c757d; margin-bottom: 5px;">Notes:</div>
-                          <div style="font-size: 13px; color: #495057; line-height: 1.5;">${activity.notes}</div>
-                        </div>
-                      ` : ''}
-                    </div>
+                          </div>` : ''}
+                      </div>` : ''}
+                    ${activity.notes ? `
+                      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dee2e6;">
+                        <div style="font-size: 12px; color: #6c757d; margin-bottom: 5px;">Notes:</div>
+                        <div style="font-size: 13px; color: #495057; line-height: 1.5;">${activity.notes}</div>
+                      </div>` : ''}
                   </div>
-                </div>
-              `).join('');
+                `;
+                
+                // Add activity to the document
+                content.innerHTML = '';
+                content.appendChild(activityDiv);
+                
+                // Convert to canvas and add to PDF
+                const canvas = await html2canvas(activityDiv, {
+                  scale: 2,
+                  useCORS: true,
+                  allowTaint: true,
+                  backgroundColor: null,
+                  scrollY: 0,
+                  windowWidth: 794, // A4 width in pixels at 96 DPI
+                  width: 794
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgWidth = contentWidth;
+                const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+                
+                // Add to PDF if there's enough space, otherwise add a new page
+                if (currentY + imgHeight > pageHeight - margin) {
+                  currentPage++;
+                  currentY = addNewPage(pdf, currentPage, 'Daily Itinerary (continued)');
+                }
+                
+                pdf.addImage(imgData, 'PNG', margin, currentY, imgWidth, imgHeight);
+                currentY += imgHeight + 5; // Add small space after activity
+              }
             } else {
-              dayContent = `
-                <div style="padding: 15px; text-align: center; color: #7f8c8d; font-style: italic; background: #f9f9f9; border-radius: 6px;">
-                  No activities scheduled for this day.
-                </div>
-              `;
+              // No activities for this day
+              pdf.setFontSize(10);
+              pdf.setTextColor(100, 100, 100);
+              pdf.setFont(undefined, 'italic');
+              pdf.text('No activities scheduled for this day.', margin + 5, currentY);
+              currentY += lineHeight;
             }
-            
-            // Ensure we're on page 2 for the Day Wise Itinerary
-            if (currentPage === 1) {
-              currentPage++;
-              currentY = addNewPage(pdf, currentPage, 'Day Wise Itinerary');
-            } else if (currentPage > 1) {
-              currentY = addNewPage(pdf, currentPage, 'Day Wise Itinerary');
-              currentPage++;
-            }
-            
-            // Add the Day Wise Itinerary section
-            await addSection('', `
-              <div style="margin-bottom: 20px;">
-                <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 1.8em; font-weight: 700; text-align: center; padding-top: 10px;"></h2>
-                ${dayContent}
-              </div>
-            `, { noGap: true });
           }
         }
         
@@ -1284,7 +1339,7 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
           <h2 className="text-xl font-semibold mb-4">Customer Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Customer Name *</label>
+              <label className="block text-sm font-medium text-gray-700">Customer Name + Query code*</label>
               <input
                 type="text"
                 name="customerName"

@@ -294,7 +294,7 @@ const getRandomPlaceholderImage = (title) => {
                   <FiSearch className="text-muted" />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Search by title or destination..."
+                  placeholder="Search by title or Booking ID/Quote ID"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border-start-0"
@@ -384,11 +384,9 @@ const getRandomPlaceholderImage = (title) => {
                     <div className="position-absolute w-100 h-100" style={{
                       background: 'linear-gradient(0deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)'
                     }} />
-                    {itinerary.destination && (
-                      <h5 className="position-relative text-white mb-0 fw-semibold">
-                        {itinerary.destination}
-                      </h5>
-                    )}
+                    <h5 className="position-relative text-white mb-0 fw-semibold text-center px-2">
+                      {itinerary.title || `Itinerary for Guest`}
+                    </h5>
                   </div>
                   
                   <div className="status-badge">
