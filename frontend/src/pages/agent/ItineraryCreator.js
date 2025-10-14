@@ -426,6 +426,56 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
       
       // Add content to the div
       content.innerHTML = `
+  <!-- Company Header with Background Image -->
+  <div style="
+    background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+    background-size: cover;
+    background-position: center;
+    padding: 120px 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    color: white;
+  ">
+    <!-- Dark overlay for better text readability -->
+    <div style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1;
+    "></div>
+    
+    <!-- Content -->
+    <div style="position: relative; z-index: 2;">
+      <h1 style="
+        margin: 0;
+        font-size: 4em;
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        margin-bottom: 15px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        line-height: 1.1;
+      ">
+        ${user?.companyName || user?.company || 'Navi Travels'}
+      </h1>
+      <div style="
+        width: 120px;
+        height: 4px;
+        background: #fff;
+        margin: 20px auto;
+        border-radius: 2px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      "></div>
+    </div>
+  </div>
+
+
         <!-- Agent Information -->
         <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #9b59b6; margin-bottom: 15px;">
           <div style="display: flex; align-items: center; gap: 15px;">
@@ -433,10 +483,9 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
               ${user?.name?.charAt(0)?.toUpperCase() || 'A'}
             </div>
             <div>
-              <h3 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 1.2em;">${user?.name || 'Your Travel Partner'}</h3>
+              <h3 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 2.2em;">${user?.name || 'Your Travel Agent'}</h3>
               ${user?.email ? `<div style="color: #7f8c8d; font-size: 0.95em; margin-bottom: 3px;">${user.email}</div>` : ''}
               ${user?.phoneNumber ? `<div style="color: #7f8c8d; font-size: 0.95em;">${user.phoneNumber}</div>` : ''}
-              ${user?.companyName ? `<div style="color: #7f8c8d; font-size: 0.95em; margin-top: 5px;">${user.companyName}</div>` : ''}
             </div>
           </div>
         </div>
@@ -522,9 +571,15 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
               <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
                 <h4 style="margin-top: 0; margin-bottom: 10px; color: #2c3e50;">${hotel.name || `Hotel ${index + 1}`}</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                  <div>
-                    <p style="margin: 5px 0;"><strong>Check-in:</strong> ${hotel.checkIn ? format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy') : 'N/A'}</p>
-                    <p style="margin: 5px 0;"><strong>Check-out:</strong> ${hotel.checkOut ? format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy') : 'N/A'}</p>
+                  <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 10px; background: #f8f9fa; padding: 10px; border-radius: 6px;">
+                    <div style="flex: 1; text-align: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
+                      <div style="font-size: 11px; color: #6c757d; margin-bottom: 3px;">CHECK-IN</div>
+                      <div style="font-weight: 600; color: #2c3e50;">${hotel.checkIn ? format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy') : 'N/A'}</div>
+                    </div>
+                    <div style="flex: 1; text-align: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
+                      <div style="font-size: 11px; color: #6c757d; margin-bottom: 3px;">CHECK-OUT</div>
+                      <div style="font-weight: 600; color: #2c3e50;">${hotel.checkOut ? format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy') : 'N/A'}</div>
+                    </div>
                   </div>
                   <div>
                     ${hotel.roomType ? `<p style="margin: 5px 0;"><strong>Room Type:</strong> ${hotel.roomType}</p>` : ''}
@@ -912,28 +967,53 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
       // Add sections one by one with proper page breaks
       try {
         // Add Agent Information section
-        await addSection('Your Travel Partner', `
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #9b59b6; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
+        await addSection('', `
+          <div style="background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); padding: 15px; border-radius: 6px; border-left: 4px solid #9b59b6; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 50px;">
               <div style="width: 50px; height: 50px; border-radius: 50%; background: #9b59b6; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2em; font-weight: bold; flex-shrink: 0;">
                 ${user?.name?.charAt(0)?.toUpperCase() || 'A'}
               </div>
               <div>
-                <h3 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 1.1em;">${user?.name || 'Your Travel Partner'}</h3>
-                ${user?.email ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 2px;">${user.email}</div>` : ''}
-                ${user?.phoneNumber ? `<div style="color: #7f8c8d; font-size: 0.9em;">${user.phoneNumber}</div>` : ''}
-                ${user?.companyName ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-top: 3px; font-weight: 500;">${user.companyName}</div>` : ''}
+                <h3 style="margin: 0 0 20px 0; color:rgb(255, 255, 255); font-size: 2em; line-height: 1.3; word-break: break-word; white-space: normal; max-width: 100%; padding: 0 10px; box-sizing: border-box;">
+                  ${user?.name || 'Your Travel Partner'}
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  ${user?.email ? `
+                    <div style="color:rgb(255, 255, 255); font-size: 1.1em; display: flex; align-items: center; gap: 8px;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                      </svg>
+                      ${user.email}
+                    </div>` : ''}
+                  ${user?.phoneNumber ? `
+                    <div style="color:rgb(255, 255, 255); font-size: 1.1em; display: flex; align-items: center; gap: 8px;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                      ${user.phoneNumber}
+                    </div>` : ''}
+                  ${user?.companyName ? `
+                    <div style="color:rgb(255, 255, 255); font-size: 1.1em; margin-top: 5px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                      </svg>
+                      ${user.companyName}
+                    </div>` : ''}
+                </div>
               </div>
             </div>
           </div>
-        `, { marginBottom: 15 });
+        `, { marginBottom: 1 });
         
         // Add Travelers section
-        await addSection('Traveler Information', `
+        await addSection('', `
           <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
               <div>
-                <h4 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 1.05em; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px;">Contact Details</h4>
+                <h4 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 1.05em; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px;">Passenger Contact Details</h4>
                 <div style="display: grid; gap: 6px;">
                   <div style="display: flex;">
                     <span style="flex: 0 0 90px; color: #7f8c8d; font-size: 0.95em;">Name:</span>
@@ -950,7 +1030,7 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
                 </div>
               </div>
               <div>
-                <h4 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 1.05em; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px;">Passenger Details</h4>
+                <h4 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 1.05em; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px;">Number of Passengers</h4>
                 <div style="display: grid; gap: 6px;">
                   <div style="display: flex;">
                     <span style="flex: 0 0 90px; color: #7f8c8d; font-size: 0.95em;">Adults:</span>
@@ -964,17 +1044,17 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
               </div>
             </div>
           </div>
-        `, { marginBottom: 10 });
+        `, { marginBottom: 1 });
         
         // Add Flights section if exists
         if (formData.flights && formData.flights.length > 0) {
-          await addSection('Flight Details', `
+          await addSection('', `
             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c;">
               ${formData.flights.map((flight, index) => `
                 <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h4 style="margin: 0; color: #2c3e50;">Flight ${index + 1}: ${flight.airline || 'Airline'} ${flight.flightNumber || ''}</h4>
-                    <span style="background: #f1c40f; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.8em;">
+                    <h4 style="margin: 0; color: #2c3e50; display: flex; align-items: center; min-height: 100%;">Flight ${index + 1}: ${flight.airline || 'Airline'} ${flight.flightNumber || ''}</h4>
+                    <span style="background: #f1c40f; color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 0.8em; display: inline-block; text-align: center; min-width: 90px; line-height: 1.2;">
                       ${flight.flightType === 'roundtrip' ? 'Round Trip' : 'One Way'}
                     </span>
                   </div>
@@ -983,10 +1063,10 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
                       <div style="font-weight: bold; font-size: 1.2em;">${flight.from || 'N/A'}</div>
                       <div style="color: #7f8c8d; font-size: 0.9em;">${formatFlightTime(flight.departure)}</div>
                     </div>
-                    <div style="text-align: center; color: #7f8c8d;">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
+                    <div style="text-align: center; color: #3b82f6; transform: rotate(45deg); margin: 0 5px;">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
                       </svg>
                     </div>
                     <div style="text-align: right;">
@@ -1007,15 +1087,25 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
         
         // Add Accommodation section if exists
         if (formData.hotels && formData.hotels.length > 0) {
-          await addSection('Accommodation', `
+          await addSection('', `
             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #2ecc71;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #2c3e50;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                  <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                  <line x1="6" y1="1" x2="6" y2="4"></line>
+                  <line x1="10" y1="1" x2="10" y2="4"></line>
+                  <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+                <h3 style="margin: 0; font-size: 1.2em;">Accommodation</h3>
+              </div>
               ${formData.hotels.map((hotel, index) => `
                 <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
                   <h4 style="margin-top: 0; margin-bottom: 10px; color: #2c3e50;">${hotel.name || `Hotel ${index + 1}`}</h4>
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
-                      <p style="margin: 5px 0;"><strong>Check-in:</strong> ${hotel.checkIn ? format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy') : 'N/A'}</p>
-                      <p style="margin: 5px 0;"><strong>Check-out:</strong> ${hotel.checkOut ? format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy') : 'N/A'}</p>
+                      <p style="margin: 3px 0; font-size: 0.9em;"><strong style="font-size: 0.9em;">Check-in:</strong> ${hotel.checkIn ? format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy') : 'N/A'}</p>
+                      <p style="margin: 3px 0; font-size: 0.9em;"><strong style="font-size: 0.9em;">Check-out:</strong> ${hotel.checkOut ? format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy') : 'N/A'}</p>
                     </div>
                     <div>
                       ${hotel.roomType ? `<p style="margin: 5px 0;"><strong>Room Type:</strong> ${hotel.roomType}</p>` : ''}
@@ -1038,60 +1128,83 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
           // Add each day as a separate section to handle page breaks
           for (const [dayIndex, day] of itineraryDays.entries()) {
             const date = typeof day.date === 'string' ? new Date(day.date) : day.date;
-            let dayContent = '';
+            // Add day header with improved styling
+            let dayContent = `
+              <div style="background: #f8f9fa; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px;
+                   border: 1px solid #e9ecef; position: relative; overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">
+                    Day ${dayIndex + 1}
+                  </h3>
+                  <span style="color: #6c757d; font-size: 14px;">
+                    ${format(date, 'EEEE, MMMM d, yyyy')}
+                  </span>
+                </div>
+              </div>
+            `;
             
             if (day.activities && day.activities.length > 0) {
-              dayContent = day.activities.map(activity => `
-                <div style="margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                  <div style="background: #3498db; color: white; padding: 8px 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <div style="font-weight: 600;">${activity.pickupTime || 'Time TBD'}</div>
-                      <div style="font-size: 0.85em; opacity: 0.9;">${activity.duration ? activity.duration + ' min' : ''}</div>
-                    </div>
-                  </div>
-                  <div style="padding: 12px 15px; background: white;">
-                    <div style="font-weight: 600; font-size: 1.1em; color: #2c3e50; margin-bottom: 6px;">
-                      ${activity.name || 'Activity'}
-                    </div>
-                    ${(activity.pickupLocation || activity.dropLocation) ? `
-                      <div style="margin-top: 8px; font-size: 0.9em;">
-                        ${activity.pickupLocation ? `
-                          <div style="display: flex; margin-bottom: 4px; color: #2c3e50;">
-                            <span style="color: #7f8c8d; min-width: 70px;">Pickup:</span>
-                            <span>${activity.pickupLocation}</span>
-                          </div>
-                        ` : ''}
-                        ${activity.dropLocation ? `
-                          <div style="display: flex; color: #2c3e50;">
-                            <span style="color: #7f8c8d; min-width: 70px;">Drop-off:</span>
-                            <span>${activity.dropLocation}</span>
-                          </div>
-                        ` : ''}
+              dayContent += day.activities.map(activity => `
+                <div style="margin-bottom: 15px; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                  <div style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <div style="width: 36px; height: 36px; background: #e9f5ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1a73e8;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
                       </div>
-                    ` : ''}
+                      <div style="font-weight: 600; color: #2c3e50;">
+                        ${activity.pickupTime || 'Time TBD'}
+                      </div>
+                    </div>
+                    ${activity.type ? `
+                    <div style="background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;">
+                      ${activity.type}
+                    </div>` : ''}
+                  </div>
+                  <div style="padding: 15px; background: white;">
+                    ${activity.name ? `
+                    <h3 style="margin: 0 0 10px 0; color: #1a237e; font-size: 16px; font-weight: 600;">
+                      ${activity.name}
+                    </h3>` : ''}
                     ${activity.description ? `
                       <div style="color: #555; font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;">
                         ${activity.description}
                       </div>
                     ` : ''}
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: 0.85em; color: #7f8c8d;">
-                      ${activity.cost ? `
-                        <span style="display: inline-flex; align-items: center; color: #27ae60; font-weight: 500;">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
-                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                          </svg>
-                          ${formatPrice(activity.cost)}
-                        </span>
-                      ` : ''}
-                      ${activity.location ? `
-                        <span style="display: inline-flex; align-items: center;">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                          </svg>
-                          ${activity.location}
-                        </span>
+                    <div style="margin-top: 15px; background: #f8f9fa; border-radius: 6px; padding: 12px; border: 1px solid #e9ecef;">
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        ${activity.pickupLocation ? `
+                          <div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Pickup</div>
+                            <div style="font-size: 14px; color: #2c3e50; font-weight: 500;">${activity.pickupLocation}</div>
+                          </div>
+                        ` : ''}
+                        ${activity.dropLocation ? `
+                          <div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Drop-off</div>
+                            <div style="font-size: 14px; color: #2c3e50; font-weight: 500;">${activity.dropLocation}</div>
+                          </div>
+                        ` : ''}
+                        ${activity.cost ? `
+                          <div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Price</div>
+                            <div style="font-size: 14px; color: #27ae60; font-weight: 600;">${formatPrice(activity.cost)}</div>
+                          </div>
+                        ` : ''}
+                        ${activity.location ? `
+                          <div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: #6c757d; margin-bottom: 3px;">Location</div>
+                            <div style="font-size: 14px; color: #2c3e50; font-weight: 500;">${activity.location}</div>
+                          </div>
+                        ` : ''}
+                      </div>
+                      ${activity.notes ? `
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dee2e6;">
+                          <div style="font-size: 12px; color: #6c757d; margin-bottom: 5px;">Notes:</div>
+                          <div style="font-size: 13px; color: #495057; line-height: 1.5;">${activity.notes}</div>
+                        </div>
                       ` : ''}
                     </div>
                   </div>
@@ -1105,7 +1218,22 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
               `;
             }
             
-            await addSection(`Day ${dayIndex + 1}: ${format(date, 'EEEE, MMMM d, yyyy')}`, dayContent);
+            // Ensure we're on page 2 for the Day Wise Itinerary
+            if (currentPage === 1) {
+              currentPage++;
+              currentY = addNewPage(pdf, currentPage, 'Day Wise Itinerary');
+            } else if (currentPage > 1) {
+              currentY = addNewPage(pdf, currentPage, 'Day Wise Itinerary');
+              currentPage++;
+            }
+            
+            // Add the Day Wise Itinerary section
+            await addSection('', `
+              <div style="margin-bottom: 20px;">
+                <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 1.8em; font-weight: 700; text-align: center; padding-top: 10px;"></h2>
+                ${dayContent}
+              </div>
+            `, { noGap: true });
           }
         }
         
