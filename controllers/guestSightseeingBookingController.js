@@ -228,3 +228,65 @@ exports.updateBookingStatusAdminOperations = asyncHandler(async (req, res, next)
     data: booking
   });
 });
+// @desc    Update booking payment status after successful payment
+// @route   PUT /api/guest-sightseeing-bookings/:id/payment-success
+// @access  Public (for payment webhooks/callbacks)
+exports.updateBookingPaymentStatus = asyncHandler(async (req, res, next) => {
+  const { paymentId, paymentDetails } = req.body;
+
+  console.log('Updating payment status for booking:', {
+    bookingId: req.params.id,
+    paymentId,
+    hasUser: !!req.user
+  });
+
+  try {
+    // Find and update the booking (no userId check for payment updates)
+    const booking = await GuestSightseeingBooking.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        'payment.status': { $ne: 'PAID' } // Only update if not already paid
+      },
+      {
+        $set: {
+          'paymentStatus': 'paid',
+          'status': 'confirmed',
+          'bookingStatus': 'confirmed',
+          'payment.paymentId': paymentId,
+          'payment.status': 'PAID',
+          'payment.paymentDate': new Date(),
+          'payment.paymentDetails': paymentDetails,
+          'payment.amount': paymentDetails.amount || 0,
+          'payment.currency': paymentDetails.currency || 'INR'
+        }
+      },
+      { new: true, runValidators: true }
+    ).populate('sightseeing', 'name price offerPrice images');
+
+    console.log('Update result:', {
+      foundBooking: !!booking,
+      bookingId: booking?._id,
+      userId: booking?.userId
+    });
+
+    if (!booking) {
+      console.error('Booking not found or already processed:', {
+        bookingId: req.params.id
+      });
+      return next(
+        new ErrorResponse('Booking not found or already processed', 404)
+      );
+    }
+
+    // TODO: Send confirmation email
+    // await sendBookingConfirmationEmail(booking);
+
+    res.status(200).json({
+      success: true,
+      data: booking
+    });
+  } catch (error) {
+    console.error('Error in updateBookingPaymentStatus:', error);
+    next(error);
+  }
+});

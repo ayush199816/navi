@@ -65,6 +65,14 @@ import SightseeingListOps from './pages/operations/SightseeingList';
 import SalesLeads from './pages/sales/leads/SalesLeads';
 import SalesLeadDetail from './pages/sales/SalesLeadDetail';
 
+// Guest Pages
+
+// Other imports...
+import PaymentSuccess from './pages/guest/PaymentSuccess';
+import PaymentCallback from './pages/guest/PaymentCallback';
+
+// Inside your routes:
+
 // Protected Route Component with Approval Check
 const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
   const { isAuthenticated, user, loading } = useSelector(state => state.auth);
@@ -204,7 +212,10 @@ const AgentAuthWrapper = ({ children }) => {
   }
   
   return children;
+
+  
 };
+
 
 function App() {
   const dispatch = useDispatch();
@@ -241,6 +252,16 @@ function App() {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/payment/callback" element={<PaymentCallback />} />
+        
+
+        {/* Payment Success Route - Protected */}
+        <Route path="/payment/success" element={
+          <ProtectedRoute>
+            <PaymentSuccess />
+          </ProtectedRoute>
+        } />
+ 
         
         {/* Agent Onboarding Flow */}
         <Route path="/onboarding" element={

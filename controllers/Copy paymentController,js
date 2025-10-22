@@ -1,0 +1,320 @@
+const { Cashfree, CFEnvironment } = require('cashfree-pg');
+const ErrorResponse = require('../utils/errorResponse');
+
+// Initialize Cashfree client
+const cashfree = new Cashfree(
+  CFEnvironment.SANDBOX,
+  process.env.CASHFREE_APP_ID,
+  process.env.CASHFREE_SECRET_KEY
+);
+
+// @desc    Create payment session
+// @route   POST /api/payments/create-session
+// @access  Public
+const createPaymentSession = async (req, res, next) => {
+  try {
+    const { bookingId, amount, customerDetails, returnUrl } = req.body;
+
+    console.log('Creating payment session with data:', {
+      bookingId,
+      amount,
+      customerDetails: {
+        ...customerDetails,
+        phone: customerDetails.phone ? '***' + customerDetails.phone.slice(-3) : 'not provided'
+      }
+    });
+
+    if (!bookingId || !amount || !customerDetails) {
+      return next(new ErrorResponse('Missing required fields', 400));
+    }
+
+    // Input validation
+    if (isNaN(amount) || amount <= 0) {
+      return next(new ErrorResponse('Invalid amount', 400));
+    }
+
+    // Generate order ID and customer ID
+    const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const customerId = `cust_${bookingId.toString().slice(-8)}_${Math.random().toString(36).substr(2, 6)}`;
+
+    // Create payment request
+    const paymentRequest = {
+      order_amount: Number(amount),
+      order_currency: "INR",
+      order_id: orderId,
+      customer_details: {
+        customer_id: customerId,
+        customer_phone: customerDetails.phone,
+        customer_name: customerDetails.name,
+        customer_email: customerDetails.email
+      },
+      order_meta: {
+        return_url: returnUrl || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/callback`,
+        notify_url: `${process.env.BACKEND_URL || `http://${req.headers.host}`}/api/payments/webhook`
+      }
+    };
+
+    console.log('Sending request to Cashfree:', JSON.stringify(paymentRequest, null, 2));
+
+    // Create payment session using the correct method
+    const response = await cashfree.PGCreateOrder({
+      order_id: orderId,
+      order_amount: paymentRequest.order_amount,
+      order_currency: paymentRequest.order_currency,
+      customer_details: paymentRequest.customer_details,
+      order_meta: paymentRequest.order_meta
+    });
+    
+    // Extract only the data we need to avoid circular references
+    const responseData = response?.data ? {
+      payment_session_id: response.data.payment_session_id,
+      payment_url: response.data.payment_url
+    } : null;
+    
+    console.log('Cashfree API Response:', JSON.stringify({
+      status: response.status,
+      statusText: response.statusText,
+      data: responseData
+    }, null, 2));
+
+    if (!responseData || !responseData.payment_session_id) {
+      throw new Error('Invalid response from payment gateway: Missing payment_session_id');
+    }
+
+    // Return the payment URL to the frontend
+    return res.status(200).json({
+      success: true,
+      data: {
+        paymentSessionId: responseData.payment_session_id,
+        orderId: orderId,
+        paymentUrl: responseData.payment_url || `https://sandbox.cashfree.com/pg/checkout/pay/${responseData.payment_session_id}`
+      }
+    });
+  } catch (error) {
+    // Safely extract error information
+    const errorInfo = {
+      message: error.message,
+      response: error.response ? {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      } : undefined,
+      stack: error.stack
+    };
+    
+    console.error('Error creating payment session:', JSON.stringify(errorInfo, null, 2));
+    
+    // Create a clean error object to pass to next()
+    const err = new Error(error.message || 'Payment initialization failed');
+    err.statusCode = error.response?.status || 500;
+    return next(new ErrorResponse(err.message, err.statusCode));
+  }
+};
+
+// Add this after the createPaymentSession function and before module.exports
+
+// @desc    Verify payment with Cashfree
+// @route   GET /api/payments/verify/:orderId
+// @access  Private
+// @desc    Verify payment with Cashfree
+// @route   GET /api/payments/verify/:orderId
+// @access  Private
+const verifyPayment = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    
+    if (!orderId) {
+      return next(new ErrorResponse('Order ID is required', 400));
+    }
+
+    console.log('Fetching payment status for order:', orderId);
+
+    // Fetch order details from Cashfree
+    const response = await cashfree.PGFetchOrder({
+      order_id: orderId
+    });
+
+    console.log('Cashfree order response:', {
+      status: response.status,
+      data: response.data
+    });
+
+    const orderStatus = response.data?.order_status;
+    const paymentStatus = response.data?.payment_status;
+
+    // Check if payment was successful
+    if (orderStatus === 'PAID' && paymentStatus === 'SUCCESS') {
+      // Update your database here
+      const booking = await GuestSightseeingBooking.findOneAndUpdate(
+        { 'payment.orderId': orderId },
+        {
+          $set: {
+            'paymentStatus': 'paid',
+            'status': 'confirmed',
+            'bookingStatus': 'confirmed',
+            'payment.status': 'PAID',
+            'payment.paymentDate': new Date(),
+            'payment.paymentDetails': response.data
+          }
+        },
+        { new: true }
+      );
+
+      if (!booking) {
+        console.error('Booking not found for order ID:', orderId);
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Booking not found' 
+        });
+      }
+
+      return res.json({ 
+        success: true, 
+        message: 'Payment verified successfully',
+        data: {
+          orderId,
+          status: 'PAID',
+          amount: response.data.order_amount,
+          currency: response.data.order_currency,
+          paymentDetails: response.data
+        }
+      });
+    }
+
+    // If payment is still pending
+    if (orderStatus === 'ACTIVE' && !paymentStatus) {
+      return res.status(200).json({
+        success: false,
+        message: 'Payment is still pending',
+        data: {
+          orderId,
+          status: 'PENDING',
+          paymentDetails: response.data
+        }
+      });
+    }
+
+    // If payment failed
+    return res.status(200).json({
+      success: false,
+      message: `Payment ${paymentStatus || 'failed'}`,
+      data: {
+        orderId,
+        status: paymentStatus || 'FAILED',
+        paymentDetails: response.data
+      }
+    });
+
+  } catch (error) {
+    console.error('Error verifying payment:', {
+      message: error.message,
+      response: error.response?.data,
+      stack: error.stack
+    });
+
+    return next(new ErrorResponse(
+      error.response?.data?.message || 'Error verifying payment',
+      error.response?.status || 500
+    ));
+  }
+};
+// Update exports to include verifyPayment
+// Add this before the module.exports at the bottom of paymentController.js
+
+// @desc    Handle Cashfree Webhook
+// @route   POST /api/payments/webhook
+// @access  Public
+const handleWebhook = async (req, res) => {
+  try {
+    const webhookData = req.body;
+    console.log('Received webhook:', JSON.stringify(webhookData, null, 2));
+
+    // Verify the webhook signature (important for security)
+    // const webhookSignature = req.headers['x-webhook-signature'];
+    // if (!verifyWebhookSignature(webhookSignature, webhookData)) {
+    //   return res.status(400).json({ success: false, message: 'Invalid signature' });
+    // }
+
+    const { data } = webhookData;
+    if (!data || !data.order || !data.payment) {
+      return res.status(400).json({ success: false, message: 'Invalid webhook data' });
+    }
+
+    const { order, payment } = data;
+    const orderId = order.order_id;
+    
+    // Verify payment status with Cashfree API
+    const cashfree = new Cashfree(
+      process.env.CF_ENV === 'production' ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX,
+      process.env.CASHFREE_APP_ID,
+      process.env.CASHFREE_SECRET_KEY
+    );
+
+    // Get payment details from Cashfree
+    const paymentResponse = await cashfree.PGOrderFetchPayments(orderId);
+    const payments = paymentResponse.data || [];
+    
+    // Determine order status based on payment statuses
+    let orderStatus = 'FAILED';
+    if (payments.some(tx => tx.payment_status === 'SUCCESS' || tx.payment_status === 'SUCCESSFUL')) {
+      orderStatus = 'SUCCESS';
+    } else if (payments.some(tx => tx.payment_status === 'PENDING')) {
+      orderStatus = 'PENDING';
+    }
+
+    console.log(`Processing webhook for order ${orderId} with status: ${orderStatus}`);
+
+    // Update your database based on payment status
+    if (orderStatus === 'SUCCESS') {
+      // Find and update the booking
+      const booking = await GuestSightseeingBooking.findOneAndUpdate(
+        { 'payment.orderId': orderId },
+        {
+          $set: {
+            'paymentStatus': 'paid',
+            'status': 'confirmed',
+            'bookingStatus': 'confirmed',
+            'payment.status': 'PAID',
+            'payment.paymentDate': new Date(),
+            'payment.paymentDetails': payment,
+            'payment.verified': true,
+            'payment.verificationDate': new Date(),
+            'updatedAt': new Date()
+          }
+        },
+        { new: true }
+      );
+
+      if (!booking) {
+        console.error(`Booking not found for order ID: ${orderId}`);
+        return res.status(404).json({ success: false, message: 'Booking not found' });
+      }
+
+      console.log(`Successfully updated booking for order ${orderId}`);
+      
+      // Here you might want to:
+      // 1. Send confirmation email
+      // 2. Update inventory
+      // 3. Trigger any post-payment actions
+      
+      return res.status(200).json({ success: true, message: 'Webhook processed successfully' });
+    } else {
+      console.log(`Payment for order ${orderId} is ${orderStatus}. No updates made.`);
+      return res.status(200).json({ success: true, message: `Payment status: ${orderStatus}` });
+    }
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error processing webhook',
+      error: error.message
+    });
+  }
+};
+
+// Then update your module.exports to include handleWebhook
+module.exports = {
+  createPaymentSession,
+  verifyPayment,
+  handleWebhook  // Add this line
+};
