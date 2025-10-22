@@ -84,6 +84,28 @@ const guestSightseeingBookingSchema = new mongoose.Schema({
     enum: ['pending', 'paid', 'failed', 'refunded'],
     default: 'pending'
   },
+  payment: {
+  paymentId: { type: String },
+  orderId: { type: String, index: true },
+  amount: { type: Number },  // Removed required: true
+  currency: { type: String, default: 'INR' },
+  status: {
+    type: String,
+    enum: ['PENDING', 'PAID', 'FAILED', 'CANCELLED'],
+    default: 'PENDING'
+  },
+  gateway: { type: String, default: 'cashfree' },
+  paymentLink: { type: String },
+  paymentDetails: { type: Object },
+  paymentDate: { type: Date }
+},
+
+  // Make sure you have this field as well
+  bookingStatus: {
+    type: String,
+    enum: ['pending', 'confirmed', 'cancelled', 'completed', 'payment_failed'],
+    default: 'pending'
+  },
   paymentId: String,
   paymentMethod: String,
   notes: String

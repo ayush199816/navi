@@ -1,15 +1,18 @@
 const express = require('express');
-const router = express.Router({ mergeParams: true });
+const router = express.Router();
 const {
-  getBookings,
-  getBooking,
   createGuestSightseeingBooking,
+  getMyBookings,
+  getBooking,
   updateBookingStatus,
   deleteBooking,
-  getMyBookings
+  getBookings,
+  updateBookingStatusAdminOperations,
+  updateBookingPaymentStatus
 } = require('../controllers/guestSightseeingBookingController');
 
-const { protect, authorize } = require('../middleware/auth');
+const { protect,authorize,auth } = require('../middleware/auth');  // Make sure this is the correct path to your auth middleware
+
 const advancedResults = require('../middleware/advancedResults');
 const GuestSightseeingBooking = require('../models/GuestSightseeingBooking');
 
@@ -38,6 +41,16 @@ router.get(
     // Skip advancedResults middleware and go straight to controller
     return getBookings(req, res, next);
   }
+);
+
+
+// ... other routes
+
+// Update payment status after successful payment (public for payment callbacks)
+router.put(
+  '/:id/payment-success',
+  // No authentication required - payment verification is handled in controller
+  updateBookingPaymentStatus
 );
 
 // Update booking status (admin only)

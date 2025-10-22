@@ -130,9 +130,12 @@ const routes = [
   { path: '/api/wallets', route: require('./routes/wallet') },
   { path: '/api/lms', route: require('./routes/lms') },
   { path: '/api/ai', route: require('./routes/ai') },
-  { path: '/api/test', route: require('./routes/test') }
+  { path: '/api/test', route: require('./routes/test') },
+  { path: '/api/payments', route: require('./routes/payment') },
+  { path: '/api/payment-tracking', route: require('./routes/paymentTracking') },
 ];
-
+// Mount routers
+app.use('/api/payments', require('./routes/payment'));
 // Register routes
 routes.forEach(({ path, route }) => {
   app.use(path, route);

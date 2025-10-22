@@ -1,36 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { removeFromCart, clearCart } from '../../redux/slices/cartSlice';
 import { useCurrency } from '../../contexts/CurrencyContext';
-import { convertUSDToINR, formatPrice } from '../../utils/currencyConverter';
 import axios from '../../utils/axiosConfig';
 import { toast } from 'react-toastify';
 import { load } from "@cashfreepayments/cashfree-js";
 
 const Checkout = () => {
 
-  const [cashfree, setCashfree] = useState(null);
-  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   
-  // Initialize Cashfree
-  useEffect(() => {
-    const initializeCashfree = async () => {
-      try {
-        const cashfreeInstance = await load({
-          mode: "sandbox" // or "production" for live
-        });
-        setCashfree(cashfreeInstance);
-      } catch (error) {
-        console.error('Failed to load Cashfree:', error);
-        toast.error('Failed to initialize payment gateway');
-      }
-    };
-    
-    initializeCashfree();
-  }, []);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -39,8 +20,6 @@ const Checkout = () => {
   const user = useSelector(state => state.auth.user);
   const [sightseeings, setSightseeings] = useState({});
   const [loading, setLoading] = useState(true);
-  const currentOrderIdRef = useRef(null);
-  const currentBookingIdRef = useRef(null);
   const { formatPrice } = useCurrency();
   
   // Calculate pax counts based on the new requirements
@@ -231,244 +210,38 @@ const Checkout = () => {
   };
   // Create payment session
 const createPaymentSession = async (bookingId, amount, customerDetails) => {
-  setIsPaymentProcessing(true);
   try {
     console.log('Creating payment session with:', { bookingId, amount, customerDetails });
-
-    // Convert USD amount to INR for payment gateway
-    const totalAmountINR = await convertUSDToINR(amount);
-    console.log(`Converting $${amount} USD to ₹${totalAmountINR} INR for payment gateway`);
-
+    
     const response = await axios.post('/api/payments/create-session', {
       bookingId,
-      amount: totalAmountINR, // ← Send INR amount to payment gateway
-      customerDetails
+      amount,
+      customerDetails,
+      returnUrl: `${window.location.origin}/payment/callback`
     });
 
-    console.log('Payment session response:', response.data);
-    const { paymentSessionId, orderId } = response.data.data || {};
+    console.log('Raw API Response:', JSON.stringify(response.data, null, 2));
     
-    if (!paymentSessionId) {
-      throw new Error('Missing payment session ID in response');
+    // 🎯 Use optional chaining for safe access:
+    const paymentUrl = response.data?.data?.paymentUrl; 
+    
+    if (paymentUrl) {
+      console.log('Redirecting to payment URL:', paymentUrl);
+      // Redirect to the full payment URL provided by the backend
+      window.location.href = paymentUrl;
+    } else {
+      // Line 233 in your error log refers to this console.error:
+      console.error('Missing payment URL in response:', response.data); 
+      throw new Error('Failed to get payment URL from server');
     }
-
-    // Create payment record in the tracking system
-    try {
-      await axios.post('/api/payment-tracking', {
-        bookingId,
-        orderId,
-        amount: totalAmountINR, // ← Use INR amount for tracking
-        currency: 'INR',
-        paymentMethod: 'cashfree',
-        paymentDetails: {
-          paymentSessionId,
-          customerDetails,
-          originalUSDAmount: amount // ← Track original USD amount
-        }
-      });
-      console.log('✅ Payment record created for order:', orderId);
-    } catch (paymentRecordError) {
-      console.error('❌ Failed to create payment record:', paymentRecordError);
-      // Don't fail the payment flow if payment record creation fails
-    }
-
-    // Store both orderId and bookingId for later use in verification
-    if (orderId) {
-      currentOrderIdRef.current = orderId;
-      console.log('Stored orderId for verification:', orderId);
-    }
-    if (bookingId) {
-      currentBookingIdRef.current = bookingId;
-      console.log('Stored bookingId for updates:', bookingId);
-    }
-
-    if (!cashfree) {
-      throw new Error('Payment gateway not initialized');
-    }
-
-    // Open Cashfree checkout
-    const checkoutOptions = {
-      paymentSessionId,
-      redirectTarget: "_modal",
-      onSuccess: async (data) => {
-        console.log('Payment successful callback triggered:', data);
-        try {
-          // Use the stored bookingId for verification
-          const bookingId = currentBookingIdRef.current;
-          if (!bookingId) {
-            console.error('No stored bookingId found for verification');
-            throw new Error('No booking ID available for payment verification');
-          }
-
-          console.log('Verifying payment status for booking:', bookingId);
-
-          // Check payment status from backend
-          const statusResponse = await axios.get(`/api/payments/verify/${currentOrderIdRef.current}`);
-          const { status } = statusResponse.data;
-
-          console.log('Payment status from API:', status);
-
-          if (status === 'PAID' || status === 'SUCCESS') {
-            // Payment is actually successful, update booking
-            try {
-              console.log('Attempting to update booking status for bookingId:', bookingId);
-              await axios.put(`/api/guest-sightseeing-bookings/${bookingId}/payment-success`, {
-                paymentId: data.paymentId || data.referenceId,
-                paymentDetails: data,
-                status: 'paid'
-              });
-
-              console.log('✅ Booking status updated successfully');
-              // Clear cart and show success message
-              dispatch(clearCart());
-              toast.success('Payment successful! Your booking is confirmed.');
-
-              // Redirect to my-bookings page
-              navigate('/my-bookings');
-            } catch (updateError) {
-              console.error('❌ Error updating booking status:', updateError);
-              if (updateError.response?.status === 403) {
-                console.error('❌ Permission denied - booking may belong to different user');
-                toast.error('Payment successful but booking update failed due to permission issue. Please contact support.');
-              } else {
-                toast.error('Payment successful but booking update failed. Please contact support.');
-              }
-              // Still clear cart and redirect even if booking update fails
-              dispatch(clearCart());
-              navigate('/my-bookings');
-            }
-          } else {
-            // Payment status is not successful
-            console.warn('Payment status is not successful:', status);
-            toast.error(`Payment completed but status is: ${status}. Please contact support.`);
-            setIsPaymentProcessing(false);
-          }
-        } catch (error) {
-          console.error('Error verifying payment status:', error);
-          toast.error('Payment was processed, but there was an error verifying the status. Please contact support.');
-          setIsPaymentProcessing(false);
-        }
-      },
-      onFailure: (data) => {
-        console.error('Payment failed:', data);
-        toast.error('Payment failed. Please try again.');
-        setIsPaymentProcessing(false);
-      },
-      onClose: () => {
-        console.log('Payment window closed');
-        setIsPaymentProcessing(false);
-      }
-    };
-
-    cashfree.checkout(checkoutOptions).then((result) => {
-      console.log('Cashfree checkout result:', {
-        error: result.error,
-        redirect: result.redirect,
-        paymentDetails: result.paymentDetails,
-        status: result.status,
-        message: result.message,
-        fullResult: result
-      });
-
-      if (result.error) {
-        console.error("Payment error:", result.error);
-        toast.error('Payment initialization failed');
-        setIsPaymentProcessing(false);
-      }
-
-      if (result.redirect) {
-        console.log("Payment will be redirected");
-      }
-
-      if (result.paymentDetails) {
-        console.log("=== CASHFREE CHECKOUT RESULT DETAILS ===");
-        console.log("Full checkout result:", {
-          error: result.error,
-          redirect: result.redirect,
-          paymentDetails: result.paymentDetails,
-          status: result.status,
-          message: result.message,
-          fullResult: result
-        });
-
-        console.log("Payment completed:", result.paymentDetails);
-
-        // Use the stored bookingId for verification (since payment details doesn't contain it)
-        const bookingId = currentBookingIdRef.current;
-        const orderId = currentOrderIdRef.current;
-
-        if (bookingId && orderId) {
-          console.log("🔍 Verifying payment status for booking:", bookingId, "order:", orderId);
-
-          // Immediately verify payment status using the verification API
-          axios.get(`/api/payments/verify/${orderId}`)
-            .then(async (verifyResponse) => {
-              console.log("✅ Verification API response:", verifyResponse.data);
-
-              if (verifyResponse.data.success && verifyResponse.data.data.status === 'SUCCESS') {
-                console.log("✅ Payment verified as successful, updating booking status...");
-
-                try {
-                  // Update booking status to paid
-                  console.log('Attempting to update booking status for bookingId:', bookingId);
-                  await axios.put(`/api/guest-sightseeing-bookings/${bookingId}/payment-success`, {
-                    paymentId: verifyResponse.data.data.payments?.[0]?.paymentId || orderId,
-                    paymentDetails: verifyResponse.data,
-                    status: 'paid'
-                  });
-
-                  console.log("✅ Booking status updated successfully");
-                  toast.success('Payment successful! Your booking is confirmed.');
-
-                } catch (updateError) {
-                  console.error("❌ Error updating booking status:", updateError);
-                  if (updateError.response?.status === 403) {
-                    console.error('❌ Permission denied - booking may belong to different user');
-                    toast.error('Payment successful but booking update failed due to permission issue. Please contact support.');
-                  } else {
-                    toast.error('Payment successful but booking update failed. Please contact support.');
-                  }
-                  // Still redirect even if booking update fails
-                }
-
-                // Redirect to callback URL after updating booking
-                window.location.href = `/payment/callback?orderId=${orderId}&status=success`;
-              } else {
-                console.log("❌ Payment verification failed or not successful");
-                console.log("Verification response:", verifyResponse.data);
-                toast.error('Payment verification failed. Please contact support.');
-              }
-            })
-            .catch(verifyError => {
-              console.error("❌ Error verifying payment:", verifyError);
-              toast.error('Payment completed but verification failed. Please contact support.');
-            });
-        } else {
-          console.error("❌ No stored bookingId or orderId found for verification");
-          console.log("Current bookingId ref:", currentBookingIdRef.current);
-          console.log("Current orderId ref:", currentOrderIdRef.current);
-        }
-      }
-
-      // Check if payment was successful based on result
-      if (result.paymentDetails && (result.paymentDetails.paymentStatus === 'SUCCESS' || result.paymentDetails.status === 'SUCCESS')) {
-        console.log("Payment appears successful based on checkout result");
-      } else if (result.paymentDetails) {
-        console.log("Payment status from checkout result:", result.paymentDetails.paymentStatus || result.paymentDetails.status);
-      }
-
-      // Reset processing state since modal is closed
-      setIsPaymentProcessing(false);
-    });
-
   } catch (error) {
-    console.error('Error in payment process:', {
+    console.error('Error in createPaymentSession:', {
       message: error.message,
       response: error.response?.data,
-      error
+      error: error
     });
-    toast.error(error.response?.data?.message || 'Failed to process payment. Please try again.');
-    setIsPaymentProcessing(false);
+    toast.error(error.response?.data?.message || 'Failed to initialize payment. Please try again.');
+    throw error;
   }
 };
   // Handle form submission
@@ -527,12 +300,8 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
       return axios.post('/api/guest-sightseeing-bookings', bookingData);
     });
     
-    // Create all bookings sequentially to ensure they're committed before payment
-    const responses = [];
-    for (const bookingPromise of bookingPromises) {
-      const response = await bookingPromise;
-      responses.push(response);
-    }
+    // Create all bookings in parallel
+    const responses = await Promise.all(bookingPromises);
     
     if (responses && responses.length > 0 && responses[0]?.data?.data?._id) {
       const firstBooking = responses[0].data.data;
@@ -541,11 +310,11 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
         const price = hasOffer ? item.offerPrice : item.price;
         return total + (price * (item.pax || 1));
       }, 0);
-
+      
       // Create payment session with the first booking ID
       await createPaymentSession(
         firstBooking._id,
-        totalAmount, // ← Pass USD amount - conversion happens inside function
+        totalAmount,
         {
           name: values.leadPax.name,
           email: values.leadPax.email,
@@ -848,12 +617,11 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
                 {/* Submit Button */}
                 <div className="mt-6">
                   <button
-  type="submit"
-  disabled={!cashfree || isPaymentProcessing}
-  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
->
-  {isPaymentProcessing ? 'Processing Payment...' : 'Proceed to Payment'}
-</button>
+                    type="submit"
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Book Now
+                  </button>
                 </div>
               </div>
             </Form>
