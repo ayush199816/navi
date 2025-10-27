@@ -135,7 +135,6 @@ const routes = [
   { path: '/api/payment-tracking', route: require('./routes/paymentTracking') },
 ];
 // Mount routers
-app.use('/api/payments', require('./routes/payment'));
 // Register routes
 routes.forEach(({ path, route }) => {
   app.use(path, route);

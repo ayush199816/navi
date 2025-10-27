@@ -87,7 +87,7 @@ const createPaymentSession = async (req, res, next) => {
       data: {
         paymentSessionId: responseData.payment_session_id,
         orderId: orderId,
-        paymentUrl: responseData.payment_url || `https://sandbox.cashfree.com/pg/checkout/pay/${responseData.payment_session_id}`
+        paymentUrl: responseData.payment_url || `https://api.cashfree.com/pg/checkout/pay/${responseData.payment_session_id}`
       }
     });
   } catch (error) {

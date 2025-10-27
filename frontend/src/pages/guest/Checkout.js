@@ -20,7 +20,7 @@ const Checkout = () => {
     const initializeCashfree = async () => {
       try {
         const cashfreeInstance = await load({
-          mode: "sandbox" // or "production" for live
+          mode: "production" // or "production" for live
         });
         setCashfree(cashfreeInstance);
       } catch (error) {
