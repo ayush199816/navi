@@ -5,16 +5,12 @@ const GuestSightseeingBooking = require('../models/GuestSightseeingBooking');
 
 // Initialize Cashfree client
 const cashfree = new Cashfree(
-  CFEnvironment.SANDBOX,
+  CFEnvironment.PRODUCTION,
   process.env.CASHFREE_APP_ID,
+  //"10846339023bc7e033ee15533803364801",
   process.env.CASHFREE_SECRET_KEY
+  //"cfsk_ma_prod_0bb70536761ab5fc8cad5d5ac6bb22b1_c0fffe85"
 );
-
-console.log('Cashfree Config:', {
-  env: process.env.NODE_ENV,
-  appId: process.env.CASHFREE_APP_ID ? '***' + String(process.env.CASHFREE_APP_ID).slice(-4) : 'Not set',
-  secretKey: process.env.CASHFREE_SECRET_KEY ? '***' + String(process.env.CASHFREE_SECRET_KEY).slice(-4) : 'Not set'
-});
 
 // @desc    Create payment session
 // @route   POST /api/payments/create-session
@@ -57,14 +53,13 @@ const createPaymentSession = async (req, res, next) => {
         customer_email: customerDetails.email
       },
       order_meta: {
-        return_url: returnUrl || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/callback?orderId=${orderId}`,
-        notify_url: `${process.env.BACKEND_URL || `http://${req.headers.host}`}/api/payments/webhook` 
+        return_url: returnUrl || `${process.env.FRONTEND_URL || 'https://localhost:3000'}/payment/callback?orderId=${orderId}`,
+        notify_url: `${process.env.BACKEND_URL ? process.env.BACKEND_URL.replace(/\/api$/, '') : `https://${req.headers.host}`}/api/payments/webhook`
       }
     };
-
     console.log('Sending request to Cashfree:', JSON.stringify(paymentRequest, null, 2));
 
-    // Create payment session
+    // Create payment session using the original working method
     const response = await cashfree.PGCreateOrder({
       order_id: orderId,
       order_amount: paymentRequest.order_amount,
@@ -72,7 +67,6 @@ const createPaymentSession = async (req, res, next) => {
       customer_details: paymentRequest.customer_details,
       order_meta: paymentRequest.order_meta
     });
-    
     // Extract only the data we need to avoid circular references
     const responseData = response?.data ? {
       payment_session_id: response.data.payment_session_id,
@@ -99,8 +93,8 @@ const createPaymentSession = async (req, res, next) => {
       data: {
         paymentSessionId: responseData.payment_session_id,
         orderId: orderId,  // Make sure this is included
-        paymentUrl: responseData.payment_url || `https://sandbox.cashfree.com/pg/checkout/pay/${responseData.payment_session_id}`,
-        timestamp: new Date().toISOString()
+        //paymentUrl: responseData.payment_url || `https://sandbox.cashfree.com/pg/checkout/pay/${responseData.payment_session_id}`,
+        //timestamp: new Date().toISOString()
       }
     });
   } catch (error) {
@@ -359,7 +353,7 @@ const updatePaymentSession = async (req, res) => {
     const response = await cashfree.PGOrder.updatePaymentSession(paymentSessionId, {
       order_meta: {
         return_url: returnUrl,
-        notify_url: `${process.env.BACKEND_URL}/api/payments/webhook`
+        notify_url: `${process.env.BACKEND_URL ? process.env.BACKEND_URL.replace(/\/api$/, '') : `https://${req.headers.host}`}/api/payments/webhook`
       }
     });
 

@@ -5,7 +5,7 @@ import { load } from '@cashfree/pg-sdk-web';
 import axios from 'axios';
 
 const CASHFREE_CONFIG = {
-  mode: process.env.REACT_APP_CASHFREE_MODE || 'sandbox',
+  mode: process.env.REACT_APP_CASHFREE_MODE || 'production',
   returnUrl: `${window.location.origin}/payment/callback`
 };
 
