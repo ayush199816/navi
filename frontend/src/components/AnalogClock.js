@@ -7,26 +7,87 @@ const AnalogClock = ({ timeZone, city }) => {
     seconds: 0
   });
 
-  useEffect(() => {
-    const updateTime = () => {
+  const getTimeInTimeZone = (tz) => {
+    try {
       const now = new Date();
-      // Using toLocaleTimeString to get time in the specified timezone
-      const timeString = now.toLocaleTimeString('en-US', {
-        timeZone,
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+      
+      // Get time parts using Intl.DateTimeFormat for better timezone handling
+      const timeFormat = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        hour12: true,
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
       });
       
-      // Parse the time string to get hours, minutes, seconds
-      const [hours, minutes, seconds] = timeString.split(':').map(Number);
+      const parts = timeFormat.formatToParts(now);
+      let hours, minutes, seconds, period;
       
-      setTime({
-        hours: hours % 12,
+      parts.forEach(part => {
+        switch(part.type) {
+          case 'hour':
+            hours = parseInt(part.value, 10);
+            break;
+          case 'minute':
+            minutes = parseInt(part.value, 10);
+            break;
+          case 'second':
+            seconds = parseInt(part.value, 10);
+            break;
+          case 'dayPeriod':
+            period = part.value;
+            break;
+        }
+      });
+      
+      // For analog clock, we need to handle 12-hour format properly
+      // 12 AM = 0, 1 AM = 1, ..., 11 AM = 11, 12 PM = 12, 1 PM = 1, ..., 11 PM = 11
+      if (period === 'PM' && hours !== 12) {
+        hours += 12; // Convert to 24-hour for calculation
+        hours = hours % 12; // Then back to 12-hour (1-11)
+      } else if (period === 'AM' && hours === 12) {
+        hours = 0; // 12 AM is 0 in 24-hour format
+      }
+      
+      // For debugging
+      console.log(`[${tz}] Time: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`);
+      
+      return {
+        hours,
         minutes,
-        seconds
-      });
+        seconds,
+        isPM: period === 'PM'
+      };
+    } catch (error) {
+      console.error('Error getting time:', error);
+      // Return current local time as fallback
+      const now = new Date();
+      const hours = now.getHours() % 12 || 12;
+      return {
+        hours,
+        minutes: now.getMinutes(),
+        seconds: now.getSeconds()
+      };
+    }
+  };
+
+  useEffect(() => {
+    let lastLoggedTime = '';
+    
+    const updateTime = () => {
+      try {
+        const { hours, minutes, seconds } = getTimeInTimeZone(timeZone);
+        
+        // Only update and log if time has changed
+        const currentTimeStr = `${hours}:${minutes}:${seconds}`;
+        if (currentTimeStr !== lastLoggedTime) {
+          lastLoggedTime = currentTimeStr;
+          console.log(`[${city}] Current time: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+          setTime({ hours, minutes, seconds });
+        }
+      } catch (error) {
+        console.error(`Error updating time for ${timeZone}:`, error);
+      }
     };
 
     // Update immediately and then every second
@@ -35,18 +96,30 @@ const AnalogClock = ({ timeZone, city }) => {
     return () => clearInterval(timer);
   }, [timeZone]);
 
-  // Calculate rotation degrees for clock hands
-  const secondsDegrees = ((time.seconds / 60) * 360) + 90;
-  const minutesDegrees = ((time.minutes / 60) * 360) + ((time.seconds / 60) * 6) + 90;
-  const hoursDegrees = ((time.hours / 12) * 360) + ((time.minutes / 60) * 30) + 90;
+  // Log the current time for debugging
+  console.log('Current time:', {
+    hours: time.hours,
+    minutes: time.minutes,
+    seconds: time.seconds
+  });
 
-  // Format time for display
-  const displayTime = new Date().toLocaleTimeString('en-US', {
+  // Calculate rotation degrees for clock hands
+  const secondsDegrees = ((time.seconds * 6) + 90) % 360; // 360/60 = 6 degrees per second
+  const minutesDegrees = ((time.minutes * 6) + (time.seconds * 0.1) + 90) % 360; // 360/60 = 6 degrees per minute + smooth movement
+  // For 12-hour format: (hour % 12) * 30 + (minutes * 0.5) + 90
+  // The +90 is to account for the 12 o'clock position being at 90 degrees (top center)
+  const hoursDegrees = ((time.hours * 30) + (time.minutes * 0.5) + 90) % 360;
+
+  // Log the calculated degrees
+
+  // Format time for display using the same timezone
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
     hour: '2-digit',
     minute: '2-digit',
     hour12: true
   });
+  const displayTime = formatter.format(new Date());
 
   return (
     <div className="flex flex-col items-center p-1">
