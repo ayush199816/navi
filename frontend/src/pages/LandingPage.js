@@ -247,13 +247,20 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link to="/" className="flex flex-col items-start">
-              <span className={`text-2xl font-bold ${isScrolled ? 'text-gray-800' : 'text-white'}`}>
-                BookMySight.com 
-              </span>
-              <span className={`text-xs ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
-                Powered by Navigatio Connect Pvt. Ltd
-              </span>
+            <Link to="/" className="flex items-center space-x-2">
+              <img 
+                src="https://res.cloudinary.com/dqlcup2s7/image/upload/v1761654348/logo_1_b8pk5h.png" 
+                alt="BookmySight.com" 
+                className="h-20 w-auto"
+              />
+              <div className="flex flex-col">
+                <span className={`text-2xl font-bold ${isScrolled ? 'text-gray-800' : 'text-white'}`}>
+                  BookMySight.com 
+                </span>
+                <span className={`text-xs ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
+                  Powered by Navigatio Connect Pvt. Ltd
+                </span>
+              </div>
             </Link>
 
             {/* Currency Selector */}

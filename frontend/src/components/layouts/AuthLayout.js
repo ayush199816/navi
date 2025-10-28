@@ -8,11 +8,11 @@ const AuthLayout = () => {
         <Link to="/">
           <img
             className="mx-auto h-12 w-auto"
-            src="/logo.png"
-            alt="Navigatio"
+            src="https://res.cloudinary.com/dqlcup2s7/image/upload/v1761653226/logo_1_b8pk5h.png"
+            alt="BookmySight.com"
           />
         </Link>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Navigatio Travel Platform</h2>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">BookmySight.com Platform</h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -21,7 +21,7 @@ const AuthLayout = () => {
         </div>
         
         <div className="mt-6 text-center text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} Navigatio. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} BookmySight. All rights reserved.</p>
         </div>
       </div>
     </div>

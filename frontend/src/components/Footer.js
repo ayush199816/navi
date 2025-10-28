@@ -8,7 +8,14 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* About Section */}
           <div className="mb-8 md:mb-0">
-            <h3 className="text-2xl font-bold mb-6 text-white">BookMySight.com</h3>
+            <div className="flex flex-col items-start mb-6">
+              <img 
+                src="https://res.cloudinary.com/dqlcup2s7/image/upload/v1761654348/logo_1_b8pk5h.png" 
+                alt="BookmySight.com" 
+                className="h-26 w-auto mb-4"
+              />
+              <h3 className="text-2xl font-bold text-white">BookMySight.com</h3>
+            </div>
             <p className="text-blue-100 mb-6 leading-relaxed">
               Your trusted travel companion for discovering the world's most amazing destinations and experiences.
             </p>
