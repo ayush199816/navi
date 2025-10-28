@@ -81,76 +81,136 @@ const GuestBookings = () => {
     const doc = new jsPDF();
     
     // Title
-    doc.setFontSize(20);
-    doc.setTextColor(40, 62, 80);
-    doc.text('Booking Confirmation', 20, 25);
+    doc.setFontSize(22);
+    doc.setTextColor(29, 78, 216); // Blue-700
+    doc.setFont(undefined, 'bold');
+    doc.text('SIGHTSEEING TICKET', 105, 25, { align: 'center' });
     
-    // Booking details
-    doc.setFontSize(12);
+    // Add border around the entire ticket
+    doc.setDrawColor(200, 200, 200);
+    doc.rect(15, 15, 180, 260);
+    
+    let yPos = 45;
+    
+    // 1. Booking Details Section
+    doc.setFillColor(239, 246, 255); // Light blue background
+    doc.rect(20, yPos - 5, 170, 15, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(29, 78, 216); // Blue-700
+    doc.setFont(undefined, 'bold');
+    doc.text('BOOKING DETAILS', 25, yPos + 3);
+    
+    yPos += 8;
+    doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
     
-    let yPos = 40;
+    // Add booking details in a table-like format
+    const bookingDetails = [
+      { label: 'Confirmation Number', value: booking.bookingReference || booking.bookingId },
+      { label: 'Date of Booking', value: formatDate(booking.createdAt) },
+      { label: 'Status', value: (booking.status || booking.bookingStatus || 'pending').toUpperCase() },
+      { label: 'Payment Status', value: (booking.paymentStatus || 'pending').toUpperCase() }
+    ];
     
-    // Booking Info
+    bookingDetails.forEach((item, index) => {
+      doc.setFont(undefined, 'bold');
+      doc.text(item.label + ':', 25, yPos + (index * 7));
+      doc.setFont(undefined, 'normal');
+      doc.text(item.value, 75, yPos + (index * 7));
+    });
+    
+    yPos += (bookingDetails.length * 7) + 15;
+    
+    // 2. Sightseeing Details Section
+    doc.setFillColor(239, 246, 255);
+    doc.rect(20, yPos - 5, 170, 15, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(29, 78, 216);
     doc.setFont(undefined, 'bold');
-    doc.text('Booking ID:', 20, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(booking.bookingReference || booking.bookingId, 60, yPos);
+    doc.text('SIGHTSEEING DETAILS', 25, yPos + 3);
     
-    yPos += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text('Booking Date:', 20, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(formatDate(booking.createdAt), 60, yPos);
-    
-    yPos += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text('Status:', 20, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text((booking.status || booking.bookingStatus || 'pending').toUpperCase(), 60, yPos);
-    
-    yPos += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text('Payment Status:', 20, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text((booking.paymentStatus || 'pending').toUpperCase(), 60, yPos);
-    
-    // Guest Details
     yPos += 15;
-    doc.setFont(undefined, 'bold');
-    doc.text('Guest Details', 20, yPos);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
     
-    yPos += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text('Lead Guest:', 25, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(`${booking.leadGuest?.name || 'N/A'}`, 60, yPos);
+    // Sightseeing items
+    const sightseeingItems = [
+      { name: booking.sightseeingName || 'N/A', date: formatDate(booking.dateOfTravel) }
+      // Add more sightseeing items if available in booking.sightseeing array
+    ];
     
-    // Sightseeing Details
+    sightseeingItems.forEach((item, index) => {
+      doc.setFont(undefined, 'bold');
+      doc.text(`Sightseeing ${index + 1}:`, 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(item.name, 60, yPos);
+      yPos += 5;
+      doc.text(`Date: ${item.date}`, 60, yPos);
+      yPos += 8;
+    });
+    
+    yPos += 10;
+    
+    // 3. Passenger Details Section
+    doc.setFillColor(239, 246, 255);
+    doc.rect(20, yPos - 5, 170, 15, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(29, 78, 216);
+    doc.setFont(undefined, 'bold');
+    doc.text('PASSENGER DETAILS', 25, yPos + 3);
+    
     yPos += 15;
-    doc.setFont(undefined, 'bold');
-    doc.text('Sightseeing Details', 20, yPos);
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
     
-    yPos += 8;
+    // Lead Passenger
     doc.setFont(undefined, 'bold');
-    doc.text('Tour:', 25, yPos);
+    doc.text('Lead Passenger:', 25, yPos);
     doc.setFont(undefined, 'normal');
-    doc.text(booking.sightseeingName || 'N/A', 60, yPos);
+    doc.text(booking.leadGuest?.name || 'N/A', 70, yPos);
     
-    yPos += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text('Date of Travel:', 25, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(formatDate(booking.dateOfTravel), 60, yPos);
+    // Additional Passengers
+    if (booking.passengers && booking.passengers.length > 0) {
+      booking.passengers.forEach((passenger, index) => {
+        yPos += 5;
+        doc.text(`Passenger ${index + 1}:`, 25, yPos);
+        doc.text(passenger.name, 70, yPos);
+      });
+    }
     
-    yPos += 8;
+    yPos += 15;
+    
+    // 4. Terms and Conditions
+    doc.setFillColor(239, 246, 255);
+    doc.rect(20, yPos - 5, 170, 15, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(29, 78, 216);
     doc.setFont(undefined, 'bold');
-    doc.text('Number of Pax:', 25, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(String(booking.numberOfPax || 1), 60, yPos);
+    doc.text('TERMS AND CONDITIONS', 25, yPos + 3);
+    
+    yPos += 15;
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    
+    const terms = [
+      '• For refund contact our support',
+      '• This Ticket is only valid on the sightseeing booking date',
+      '• The Ticket is not transferable to other person',
+      '• Please carry a valid photo ID for verification',
+      '• No refund for no-shows or late arrivals'
+    ];
+    
+    terms.forEach((term, index) => {
+      doc.text(term, 25, yPos + (index * 5));
+    });
+    
+    // Add footer
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Thank you for choosing our service!', 105, 270, { align: 'center' });
     
     // Save the PDF
-    doc.save(`booking-${booking.bookingReference || booking.bookingId}.pdf`);
+    doc.save(`sightseeing-ticket-${booking.bookingReference || booking.bookingId}.pdf`);
   };
 
   if (loading || loadingBookings) {
