@@ -101,8 +101,8 @@ const MainLayout = () => {
           <div className="h-full flex flex-col overflow-y-auto bg-white shadow-xl">
             <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
               <div className="flex-shrink-0 flex items-center">
-                <img className="h-8 w-auto" src={process.env.PUBLIC_URL + '/logo.png'} alt="Navigatio" />
-                <span className="ml-2 text-xl font-bold text-primary-600">Navigatio</span>
+                <img className="h-8 w-auto" src="https://res.cloudinary.com/dqlcup2s7/image/upload/v1761653226/logo_1_b8pk5h.png" alt="BookmySight.com" />
+                <span className="ml-2 text-xl font-bold text-primary-600">BookmySight.com</span>
               </div>
               <button
                 type="button"
@@ -152,8 +152,8 @@ const MainLayout = () => {
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
         <div className="flex-1 flex flex-col min-h-0 bg-white border-r border-gray-200">
           <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-gray-200">
-            <img className="h-8 w-auto" src={process.env.PUBLIC_URL + '/logo.png'} alt="Navigatio" />
-            <span className="ml-2 text-xl font-bold text-primary-600">Navigatio</span>
+            <img className="h-8 w-auto" src="https://res.cloudinary.com/dqlcup2s7/image/upload/v1761653226/logo_1_b8pk5h.png" alt="BookmySight.com" />
+            <span className="ml-2 text-xl font-bold text-primary-600">BookmySight.com</span>
           </div>
           
           <div className="flex-1 flex flex-col overflow-y-auto">
@@ -198,8 +198,8 @@ const MainLayout = () => {
           <div className="h-full flex flex-col overflow-y-auto bg-white shadow-xl">
             <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
               <div className="flex-shrink-0 flex items-center">
-                <img className="h-8 w-auto" src={process.env.PUBLIC_URL + '/logo.png'} alt="Navigatio" />
-                <span className="ml-2 text-xl font-bold text-primary-600">Navigatio</span>
+                <img className="h-8 w-auto" src="https://res.cloudinary.com/dqlcup2s7/image/upload/v1761653226/logo_1_b8pk5h.png" alt="BookmySight.com" />
+                <span className="ml-2 text-xl font-bold text-primary-600">BookmySight.com</span>
               </div>
               <button
                 type="button"
