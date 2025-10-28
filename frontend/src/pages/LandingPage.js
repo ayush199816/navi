@@ -258,7 +258,7 @@ const LandingPage = () => {
                   BookMySight.com 
                 </span>
                 <span className={`text-xs ${isScrolled ? 'text-gray-600' : 'text-gray-300'}`}>
-                  Powered by Navigatio Connect Pvt. Ltd
+                  Powered by Navigatio.
                 </span>
               </div>
             </Link>
