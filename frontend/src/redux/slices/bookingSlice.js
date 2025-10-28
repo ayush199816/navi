@@ -81,12 +81,7 @@ export const updateBookingStatus = createAsyncThunk(
   'bookings/updateBookingStatus',
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      console.log(`Updating booking ${id} status to ${status}`);
-      console.log('Request payload:', { status });
-      
-      // Log the exact URL and payload being sent
       const url = `/api/bookings/${id}/status`;
-      console.log('Request URL:', url);
       
       // Make the API call with explicit content type
       const res = await axios.put(url, 
@@ -94,13 +89,9 @@ export const updateBookingStatus = createAsyncThunk(
         { headers: { 'Content-Type': 'application/json' } }
       );
       
-      console.log('Response received:', res.data);
       toast.success(`Booking status updated to ${status}!`);
       return res.data;
     } catch (err) {
-      console.error('Error updating booking status:', err);
-      console.error('Error response:', err.response?.data);
-      console.error('Error status:', err.response?.status);
       toast.error(err.response?.data?.message || 'Failed to update booking status');
       return rejectWithValue(err.response?.data?.message || 'Failed to update booking status');
     }

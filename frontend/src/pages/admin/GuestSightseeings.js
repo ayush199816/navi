@@ -17,28 +17,17 @@ import SearchBox from '../../components/common/SearchBox';
 import GuestSightseeingForm from './GuestSightseeingForm';
 
 const GuestSightseeings = () => {
-  console.log('GuestSightseeings component rendered');
   const dispatch = useDispatch();
   const store = useStore();
   const guestSightseeingsState = useSelector((state) => state.guestSightseeings);
   const { sightseeings = [], loading, error, success, total = 0, page = 1, pages = 1 } = guestSightseeingsState;
   
-  // Debug log
+  // State effect
   useEffect(() => {
-    console.log('Redux State:', {
-      sightseeings,
-      loading,
-      error,
-      success,
-      total,
-      page,
-      pages
-    });
-    
     if (error) {
-      console.error('Error in Redux state:', error);
+      // Error handling remains
     }
-  }, [sightseeings, loading, error, success, total, page, pages]);
+  }, [error]);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,12 +48,7 @@ const GuestSightseeings = () => {
       ...filters
     };
     
-    console.log('Fetching guest sightseeings with params:', params);
     const promise = dispatch(fetchGuestSightseeings(params));
-    
-    promise.unwrap()
-      .then(data => console.log('Fetched data:', data))
-      .catch(err => console.error('Error fetching data:', err));
     
     return () => {
       dispatch(clearGuestSightseeingState());
@@ -102,16 +86,11 @@ const GuestSightseeings = () => {
       const response = await api.get(`/guest-sightseeing/${sightseeing._id}`);
       const fullSightseeing = response.data.data;
       
-      // Log the full data for debugging
-      console.log('Full sightseeing data:', fullSightseeing);
-      
-      // Create a clean copy of the full sightseeing data
       const sightseeingData = { ...fullSightseeing };
       
       // Only set defaults for fields that are actually undefined or null
       const editingData = {
         ...sightseeingData,
-        // Only set default if the field is not present at all
         ...(sightseeingData.duration === undefined && { duration: 'Not specified' }),
         ...(sightseeingData.inclusions === undefined || 
            !Array.isArray(sightseeingData.inclusions) || 
@@ -121,7 +100,6 @@ const GuestSightseeings = () => {
         ...(sightseeingData.keywords === undefined || !Array.isArray(sightseeingData.keywords) ? { 
           keywords: [] 
         } : { keywords: sightseeingData.keywords }),
-        // Use the aboutTour field from the full data
         ...(sightseeingData.highlights === undefined || 
            !Array.isArray(sightseeingData.highlights) || 
            sightseeingData.highlights.length === 0 ? {
@@ -139,12 +117,9 @@ const GuestSightseeings = () => {
         ...(sightseeingData.offerPriceCurrency === undefined && { offerPriceCurrency: 'USD' }),
         ...(sightseeingData.isActive === undefined && { isActive: true })
       };
-      
-      console.log('Setting editing sightseeing data:', editingData);
       setEditingSightseeing(editingData);
       setShowEditModal(true);
     } catch (error) {
-      console.error('Error preparing edit form:', error);
       toast.error('Failed to prepare edit form');
     }
   };
@@ -181,11 +156,8 @@ const GuestSightseeings = () => {
     );
   }
 
-  console.log('Rendering with sightseeings:', sightseeings);
-  
   return (
     <div className="container mx-auto px-4 py-8">
-      {console.log('In JSX - sightseeings:', sightseeings)}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Guest Sightseeings</h1>

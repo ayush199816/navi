@@ -42,9 +42,7 @@ const Dashboard = () => {
               creditLimit: walletRes.data.data.creditLimit || 0
             };
           }
-          console.log('Wallet data:', walletData);
         } catch (err) {
-          console.error('Error fetching wallet:', err);
         }
         
         // Fetch quote stats
@@ -58,9 +56,7 @@ const Dashboard = () => {
               active: quotesRes.data.active || 0
             };
           }
-          console.log('Quotes data:', quotesData);
         } catch (err) {
-          console.error('Error fetching quotes:', err);
         }
         
         // Fetch booking stats
@@ -73,9 +69,7 @@ const Dashboard = () => {
               active: bookingsRes.data.active || 0
             };
           }
-          console.log('Bookings data:', bookingsData);
         } catch (err) {
-          console.error('Error fetching bookings:', err);
         }
         
         // Fetch lead stats
@@ -88,9 +82,7 @@ const Dashboard = () => {
               new: leadsRes.data.new || 0
             };
           }
-          console.log('Leads data:', leadsData);
         } catch (err) {
-          console.error('Error fetching leads:', err);
         }
         
         // Fetch itinerary stats
@@ -102,9 +94,7 @@ const Dashboard = () => {
               total: itinerariesRes.data.total || 0
             };
           }
-          console.log('Itineraries data:', itinerariesData);
         } catch (err) {
-          console.error('Error fetching itineraries:', err);
         }
         
         // Fetch package stats
@@ -118,9 +108,7 @@ const Dashboard = () => {
               active: packagesRes.data.active || 0
             };
           }
-          console.log('Packages data:', packagesData);
         } catch (err) {
-          console.error('Error fetching packages:', err);
         }
         
         // Fetch recent activity
@@ -131,7 +119,6 @@ const Dashboard = () => {
             recentActivityData = recentActivityRes.data.data;
           }
         } catch (err) {
-          console.error('Error fetching activity:', err);
         }
         
         setStats({
@@ -146,7 +133,6 @@ const Dashboard = () => {
         setRecentActivity(recentActivityData);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
         setLoading(false);
       }
     };

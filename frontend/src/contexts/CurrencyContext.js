@@ -99,24 +99,14 @@ export const CurrencyProvider = ({ children }) => {
     }
     
     const currency = exchangeRates[selectedCurrency];
-    console.log('formatPrice called with:', { 
-      priceInUSD, 
-      selectedCurrency, 
-      currency, 
-      exchangeRates,
-      allCurrencies: Object.keys(exchangeRates)
-    });
     
     if (!currency) {
-      console.error(`No currency found for: ${selectedCurrency}`);
       return `$${priceInUSD.toFixed(2)}`;
     }
     
     const convertedPrice = (priceInUSD * currency.rate).toFixed(2);
     const formattedNumber = convertedPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    const result = `${currency.symbol} ${formattedNumber}`;
-    console.log('formatPrice result:', result);
-    return result;
+    return `${currency.symbol} ${formattedNumber}`;
   };
 
   return (

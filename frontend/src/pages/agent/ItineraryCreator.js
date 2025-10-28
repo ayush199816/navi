@@ -44,7 +44,6 @@ const ItineraryCreator = (props) => {
       
       try {
         setLoading(true);
-        console.log('Fetching itinerary with ID:', id);
         const response = await api.get(`/v1/itinerary-creator/${id}`);
         
         if (!response.data || !response.data.data) {
@@ -52,7 +51,6 @@ const ItineraryCreator = (props) => {
         }
         
         const { data: itinerary } = response.data;
-        console.log('Fetched itinerary:', itinerary);
         
         // Format dates to ensure they're in the correct format for the form
         const formatDate = (date) => {
@@ -61,7 +59,6 @@ const ItineraryCreator = (props) => {
             const d = typeof date === 'string' ? new Date(date) : date;
             return format(d, 'yyyy-MM-dd');
           } catch (e) {
-            console.error('Error formatting date:', e);
             return '';
           }
         };
@@ -95,7 +92,6 @@ const ItineraryCreator = (props) => {
             : [{ flightNumber: '', from: '', to: '', departure: '', arrival: '' }]
         };
         
-        console.log('Setting form data:', newFormData);
         setFormData(newFormData);
         
         // Update itinerary days if needed
@@ -105,7 +101,6 @@ const ItineraryCreator = (props) => {
             date: day.date ? new Date(day.date) : new Date(),
             activities: Array.isArray(day.activities) ? day.activities : []
           }));
-          console.log('Formatted days:', formattedDays);
           setItineraryDays(formattedDays);
         } else {
           // If no days data, create days based on the date range
@@ -121,13 +116,7 @@ const ItineraryCreator = (props) => {
           setItineraryDays(defaultDays);
         }
       } catch (error) {
-        console.error('Error fetching itinerary:', error);
         toast.error(`Failed to load itinerary data: ${error.message || 'Unknown error'}`);
-        console.log('Error details:', {
-          error,
-          response: error.response?.data,
-          status: error.response?.status
-        });
       } finally {
         setLoading(false);
       }
