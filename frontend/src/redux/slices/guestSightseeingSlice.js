@@ -6,9 +6,7 @@ export const getGuestSightseeingById = createAsyncThunk(
   'guestSightseeings/getById',
   async (id, { rejectWithValue }) => {
     try {
-      console.log('Fetching sightseeing with ID:', id);
       const response = await api.get(`/guest-sightseeing/${id}`);
-      console.log('API Response:', response.data);
       
       // Handle different response formats
       const sightseeingData = response.data.data || response.data;
@@ -19,7 +17,6 @@ export const getGuestSightseeingById = createAsyncThunk(
       
       return sightseeingData;
     } catch (error) {
-      console.error('Error in getGuestSightseeingById:', error);
       return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch sightseeing');
     }
   }
@@ -41,20 +38,10 @@ export const fetchGuestSightseeings = createAsyncThunk(
         queryParams.excludeId = params.excludeId;
       }
       
-      console.log('Fetching guest sightseeings with params:', queryParams);
       const response = await api.get('/guest-sightseeing', { params: queryParams });
-      console.log('API Response:', response.data);
       
       // The backend now returns a consistent response format
       const { data = [], count = 0, page = 1, pages = 1, total = 0 } = response.data;
-      
-      console.log('Processed data:', { 
-        data: Array.isArray(data) ? data : [], 
-        count: count || 0, 
-        total: total || count || 0,
-        page: parseInt(page, 10000) || 1, 
-        pages: parseInt(pages, 10000) || 1 
-      });
       
       return {
         data: Array.isArray(data) ? data : [],
@@ -64,7 +51,6 @@ export const fetchGuestSightseeings = createAsyncThunk(
         pages: parseInt(pages, 10000) || 1
       };
     } catch (err) {
-      console.error('Error fetching guest sightseeings:', err);
       return rejectWithValue(err.response?.data?.message || 'Failed to fetch guest sightseeings');
     }
   }
@@ -147,7 +133,6 @@ const guestSightseeingSlice = createSlice({
       .addCase(fetchGuestSightseeings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch guest sightseeings';
-        console.error('Error in fetchGuestSightseeings:', state.error);
       })
 
     // Handle getGuestSightseeingById

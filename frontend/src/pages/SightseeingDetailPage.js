@@ -71,7 +71,6 @@ const SightseeingDetailPage = () => {
         }
         
         const result = await dispatch(getGuestSightseeingById(id)).unwrap();
-        console.log('Sightseeing loaded:', result);
         
         if (isMounted) {
           if (!result) {
@@ -79,7 +78,6 @@ const SightseeingDetailPage = () => {
           }
         }
       } catch (error) {
-        console.error('Error loading sightseeing:', error);
         if (isMounted) {
           toast.error(error || 'Failed to load sightseeing details');
           navigate('/tours');

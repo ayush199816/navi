@@ -9,7 +9,6 @@ import { PencilIcon, XMarkIcon as XIcon, ArrowDownTrayIcon as SaveIcon, Currency
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-console.log('BookingDetailModal mounted'); // DEBUG
 
 const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
   const dispatch = useDispatch();
@@ -63,17 +62,14 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
       .map(s => typeof s.seller === 'string' ? s.seller : (s.seller && s.seller._id))
       .filter(id => id && !sellers.some(sel => sel._id === id));
     if (missingIds.length === 0) return;
-    console.log('[BookingDetailModal] Missing supplier IDs:', missingIds);
     // Fetch missing suppliers in parallel
     Promise.all(missingIds.map(id =>
       fetch(`/api/sellers/${id}`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
-          console.log(`[BookingDetailModal] Fetched seller for ID ${id}:`, data);
           return data && (data.data || data);
         })
         .catch((err) => {
-          console.error(`[BookingDetailModal] Error fetching seller for ID ${id}:`, err);
           return null;
         })
     )).then(results => {
@@ -84,8 +80,6 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
 
   // Initialize itinerary text and statuses when booking changes
   useEffect(() => {
-    console.log('Booking data in useEffect:', booking);
-    console.log('Is admin?', isAdmin);
 
     if (booking && booking.finalItinerary) {
       setItineraryText(booking.finalItinerary);
@@ -105,15 +99,12 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
 
     // Debug seller information
     if (booking) {
-      console.log('Seller information in booking:', booking.seller);
     }
 
     // If booking has a seller assigned, set the selectedSellerId
     if (booking && booking.seller && booking.seller._id) {
-      console.log('Setting selectedSellerId to:', booking.seller._id);
       setSelectedSellerId(booking.seller._id);
     } else {
-      console.log('No seller found in booking, clearing selectedSellerId');
       setSelectedSellerId('');
     }
   }, [booking]);
@@ -127,11 +118,9 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
 
   // Function to fetch sellers
   const fetchSellers = async () => {
-    console.log('Fetching sellers...');
     setLoadingSellers(true);
     try {
       const response = await axios.get('/api/sellers');
-      console.log('Fetched sellers:', response.data);
 
       if (response.data && response.data.data) {
         setSellers(response.data.data);
@@ -141,7 +130,6 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
         toast.warning('No sellers found in the system');
       }
     } catch (error) {
-      console.error('Error fetching sellers:', error);
       toast.error('Failed to load sellers. Please try again.');
       setSellers([]);
     } finally {
