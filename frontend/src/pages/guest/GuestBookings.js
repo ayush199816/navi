@@ -143,8 +143,18 @@ const GuestBookings = () => {
       doc.setFont(undefined, 'bold');
       doc.text(`Sightseeing ${index + 1}:`, 25, yPos);
       doc.setFont(undefined, 'normal');
-      doc.text(item.name, 60, yPos);
-      yPos += 5;
+      
+      // Split long text into multiple lines
+      const maxWidth = 130; // Maximum width in points
+      const splitText = doc.splitTextToSize(item.name, maxWidth);
+      
+      // Add each line of text
+      splitText.forEach((line, i) => {
+        doc.text(line, 60, yPos + (i * 5));
+      });
+      
+      // Adjust yPos based on number of lines
+      yPos += (splitText.length * 5) + 3;
       doc.text(`Date: ${item.date}`, 60, yPos);
       yPos += 8;
     });
@@ -162,6 +172,13 @@ const GuestBookings = () => {
     yPos += 15;
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
+    
+    // Number of Pax
+    doc.setFont(undefined, 'bold');
+    doc.text('Number of Pax:', 25, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(String(booking.numberOfPax || 1), 70, yPos);
+    yPos += 7;
     
     // Lead Passenger
     doc.setFont(undefined, 'bold');
