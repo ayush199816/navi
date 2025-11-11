@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { 
+  fetchGuestSightseeings,
   deleteGuestSightseeing,
   clearGuestSightseeingState
 } from '../../redux/slices/guestSightseeingSlice';
@@ -39,21 +40,25 @@ const GuestSightseeings = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSightseeing, setEditingSightseeing] = useState(null);
 
-  const fetchGuestSightseeings = useCallback(() => {
+  // Memoize the filters to prevent unnecessary re-renders
+  const filtersMemoized = JSON.stringify(filters);
+  
+  const fetchSightseeingsData = useCallback(() => {
     const params = {
       page: currentPage,
-      ...filters
+      ...JSON.parse(filtersMemoized)
     };
     
-    dispatch(fetchGuestSightseeings(params));
-  }, [dispatch, currentPage, filters]);
+    return dispatch(fetchGuestSightseeings(params));
+  }, [dispatch, currentPage, filtersMemoized]);
 
   useEffect(() => {
     const loadGuestSightseeings = async () => {
       try {
-        await fetchGuestSightseeings();
+        await fetchSightseeingsData();
       } catch (error) {
         console.error('Error loading guest sightseeings:', error);
+        toast.error(error.message || 'Failed to load guest sightseeings');
       }
     };
     
@@ -62,7 +67,7 @@ const GuestSightseeings = () => {
     return () => {
       dispatch(clearGuestSightseeingState());
     };
-  }, [dispatch, fetchGuestSightseeings]);
+  }, [dispatch, fetchSightseeingsData]);
 
   useEffect(() => {
     if (error) {
