@@ -247,45 +247,73 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
       // Create FormData object
       const formDataToSubmit = new FormData();
       
-      // Add all form fields to FormData
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          // Handle array fields
-          if (Array.isArray(value)) {
-            // For arrays, append each item with the same key
-            value.forEach(item => {
-              formDataToSubmit.append(key, item);
-            });
-          } else {
-            // For regular fields, just append the value
-            formDataToSubmit.append(key, value);
-          }
-        }
-      });
+      // Prepare form data for submission
+      const formDataCopy = { ...formData };
       
       // Ensure required fields have default values
-      if (!formData.tourType) {
-        formDataToSubmit.set('tourType', 'shared');
+      if (!formDataCopy.tourType) {
+        formDataCopy.tourType = 'shared';
       }
       
-      if (!formData.duration) {
-        formDataToSubmit.set('duration', 'Not specified');
+      if (!formDataCopy.duration) {
+        formDataCopy.duration = 'Not specified';
       }
       
       // Convert price fields to numbers
-      if (formData.price) {
-        formDataToSubmit.set('price', Number(formData.price));
+      if (formDataCopy.price) {
+        formDataCopy.price = Number(formDataCopy.price);
       }
       
-      if (formData.offerPrice) {
-        formDataToSubmit.set('offerPrice', Number(formData.offerPrice));
+      if (formDataCopy.offerPrice) {
+        formDataCopy.offerPrice = Number(formDataCopy.offerPrice);
       }
       
-      // Handle empty arrays
-      if (!formData.inclusions || formData.inclusions.length === 0) {
-        formDataToSubmit.delete('inclusions');
-        formDataToSubmit.append('inclusions', 'No inclusions specified');
-      }
+      // Handle array fields
+      const arrayFields = ['inclusions', 'highlights', 'whatToBring', 'keywords'];
+      arrayFields.forEach(field => {
+        if (!Array.isArray(formDataCopy[field]) || formDataCopy[field].length === 0) {
+          formDataCopy[field] = field === 'keywords' ? [] : 
+                              field === 'whatToBring' ? ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'] : 
+                              field === 'highlights' ? ['No highlights available'] : 
+                              ['No inclusions specified'];
+        }
+      });
+      
+      // Add all form fields to FormData
+      Object.entries(formDataCopy).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          // Handle array fields
+          if (Array.isArray(value)) {
+            // First remove any existing entries with this key
+            formDataToSubmit.delete(key);
+            // Ensure we have a valid array of strings
+            const validArray = value.filter(item => {
+              if (item === null || item === undefined) return false;
+              const strItem = String(item).trim();
+              return strItem !== '' && strItem !== 'undefined' && strItem !== 'null';
+            });
+            
+            // If no valid items, use default for required arrays
+            if (validArray.length === 0) {
+              if (key === 'whatToBring') {
+                validArray.push('Comfortable walking shoes', 'camera', 'weather-appropriate clothing');
+              } else if (key === 'highlights') {
+                validArray.push('No highlights available');
+              } else if (key === 'inclusions') {
+                validArray.push('No inclusions specified');
+              }
+            }
+            
+            // Append each item with the same key
+            validArray.forEach(item => {
+              formDataToSubmit.append(key, String(item).trim());
+            });
+          } else {
+            // For regular fields, use set to avoid duplicates
+            formDataToSubmit.set(key, String(value).trim());
+          }
+        }
+      });
       
       if (isEditMode) {
         await dispatch(updateGuestSightseeing({ 
