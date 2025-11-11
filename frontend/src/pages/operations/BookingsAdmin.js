@@ -16,6 +16,7 @@ const BookingsAdmin = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [bookingToClaimPayment, setBookingToClaimPayment] = useState(null);
+  const [showClaimModal, setShowClaimModal] = useState(false);
   const pageSize = 10;
 
   useEffect(() => {
