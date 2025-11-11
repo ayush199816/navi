@@ -35,34 +35,35 @@ const MyLeads = () => {
   const [selectedLeadId, setSelectedLeadId] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchLeads({ page: currentPage, filters }));
-  }, [dispatch, currentPage]);
+    const fetchLeadsData = async () => {
+      try {
+        await dispatch(fetchLeads({ page: currentPage, filters }));
+      } catch (error) {
+        console.error('Error fetching leads:', error);
+      }
+    };
+    
+    fetchLeadsData();
+  }, [currentPage, filters, dispatch]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     dispatch(setFilters({ [name]: value }));
     setCurrentPage(1);
-    dispatch(fetchLeads({ page: 1, filters: { ...filters, [name]: value } }));
+    fetchLeads();
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    dispatch(fetchLeads({ page, filters }));
+    fetchLeads();
   };
 
   const handleCreateLead = () => {
     dispatch(openModal({
       modalType: 'CREATE_LEAD',
       modalData: {
-        onSuccess: () => dispatch(fetchLeads({ page: 1, filters }))
+        onSuccess: () => dispatch(fetchLeads({ page: currentPage, filters }))
       }
-    }));
-  };
-
-  const handleViewLead = (lead) => {
-    dispatch(openModal({
-      modalType: 'VIEW_LEAD',
-      modalData: { lead }
     }));
   };
 

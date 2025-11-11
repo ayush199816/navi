@@ -109,6 +109,7 @@ app.get('/api', (req, res) => {
 // Import and use routes
 const routes = [
   { path: '/api/v1/itinerary-creator', route: require('./routes/itineraryCreator') },
+  { path: '/api/v1/ai-itinerary', route: require('./routes/aiItineraryRoutes') },
   { path: '/api/auth', route: require('./routes/auth') },
   { path: '/api/users', route: require('./routes/user') },
   { path: '/api/quotes', route: require('./routes/quote') },

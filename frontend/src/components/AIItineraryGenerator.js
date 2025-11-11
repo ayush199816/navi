@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AIItineraryGenerator = ({
@@ -10,32 +10,86 @@ const AIItineraryGenerator = ({
   onItineraryGenerated
 }) => {
   const [destination, setDestination] = useState(defaultDestination);
-  const [dates, setDates] = useState(defaultDates);
+  const [dates, setDates] = useState({
+    startDate: defaultDates.startDate || '',
+    endDate: defaultDates.endDate || ''
+  });
+  const [selectedActivities, setSelectedActivities] = useState([]);
   const [preferences, setPreferences] = useState(defaultPreferences);
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState(null);
   const [error, setError] = useState(null);
+  const [step, setStep] = useState(1);
 
-  if (!open) return null;
+  // Reset form when opening the modal or when default values change
+  useEffect(() => {
+    if (open) {
+      setDestination(defaultDestination);
+      setDates({
+        startDate: defaultDates.startDate || '',
+        endDate: defaultDates.endDate || ''
+      });
+      setSelectedActivities([]);
+      setPreferences(defaultPreferences);
+      setItinerary(null);
+      setError(null);
+      setStep(1);
+    }
+  }, [open, defaultDestination, defaultDates.startDate, defaultDates.endDate, defaultPreferences, 
+      setDestination, setDates, setSelectedActivities, setPreferences, setItinerary, setError, setStep]);
 
   const handleGenerate = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setItinerary(null);
+    
     try {
-      const res = await axios.post('https://navi-1.onrender.com/api/ai/itinerary',{
-      //const res = await axios.post('http://localhost:5000/api/ai/itinerary', {
+      // Try to call the backend API
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/ai/generate-itinerary`, {
         destination,
         dates,
+        activities: selectedActivities,
         preferences,
       });
-      setItinerary(res.data.itinerary);
-      if (onItineraryGenerated) onItineraryGenerated(res.data.itinerary);
+      
+      if (response.data.success) {
+        setItinerary(response.data.data);
+        if (onItineraryGenerated) onItineraryGenerated(response.data.data);
+      } else {
+        throw new Error(response.data.message || 'Failed to generate itinerary');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate itinerary');
+      console.error('Error generating itinerary:', err);
+      
+      // Handle specific error cases
+      if (err.response?.data?.error?.includes('GoogleGenerativeAI') || 
+          err.response?.data?.message?.includes('overloaded')) {
+        // Show a user-friendly message for Google AI service overload
+        setError('The AI service is currently experiencing high demand. Please try again in a few minutes.');
+      } else if (err.response?.data?.message) {
+        // Use server-provided error message
+        setError(err.response.data.message);
+      } else if (err.message) {
+        // Fallback to generic error message
+        setError('Failed to generate itinerary. Please check your connection and try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
+      
+      // For development, log the full error
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Full error details:', err);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

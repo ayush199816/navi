@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../utils/api';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,18 +27,18 @@ const MyQuotes = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    fetchQuotes();
-  }, [filters, currentPage]);
-
-  const fetchQuotes = () => {
+  const fetchQuotes = useCallback(() => {
     dispatch(getMyQuotes({
       page: currentPage,
       limit: 10,
       status: filters.status || undefined,
       sortBy: filters.sortBy
     }));
-  };
+  }, [currentPage, dispatch, filters.status, filters.sortBy]);
+
+  useEffect(() => {
+    fetchQuotes();
+  }, [fetchQuotes]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -53,12 +53,13 @@ const MyQuotes = () => {
     setCurrentPage(page);
   };
 
-  const handleRespondToQuote = (quoteId, response) => {
-    dispatch(respondToQuote({ id: quoteId, response }))
-      .unwrap()
-      .then(() => {
-        fetchQuotes();
-      });
+  const handleRespondToQuote = async (quoteId, response) => {
+    try {
+      await dispatch(respondToQuote({ id: quoteId, response }));
+      fetchQuotes();
+    } catch (err) {
+      console.error('Error responding to quote:', err);
+    }
   };
 
   const handleViewQuote = (quote) => {
@@ -161,7 +162,7 @@ const MyQuotes = () => {
       }
 
       // Make the API call to submit the response
-      const response = await api.put(`/quotes/${selectedQuote._id}/response`, { 
+      await api.put(`/quotes/${selectedQuote._id}/response`, { 
         response: agentResponse,
         status: 'pending' // Set status to 'pending' to notify operations team
       });

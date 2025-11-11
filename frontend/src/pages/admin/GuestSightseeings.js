@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector, useStore } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { 
-  fetchGuestSightseeings, 
   deleteGuestSightseeing,
-  clearGuestSightseeingState,
-  getGuestSightseeingById
+  clearGuestSightseeingState
 } from '../../redux/slices/guestSightseeingSlice';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
@@ -18,9 +16,8 @@ import GuestSightseeingForm from './GuestSightseeingForm';
 
 const GuestSightseeings = () => {
   const dispatch = useDispatch();
-  const store = useStore();
   const guestSightseeingsState = useSelector((state) => state.guestSightseeings);
-  const { sightseeings = [], loading, error, success, total = 0, page = 1, pages = 1 } = guestSightseeingsState;
+  const { sightseeings = [], loading, error, success, total = 0, pages = 1 } = guestSightseeingsState;
   
   // State effect
   useEffect(() => {
@@ -42,18 +39,30 @@ const GuestSightseeings = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSightseeing, setEditingSightseeing] = useState(null);
 
-  useEffect(() => {
+  const fetchGuestSightseeings = useCallback(() => {
     const params = {
       page: currentPage,
       ...filters
     };
     
-    const promise = dispatch(fetchGuestSightseeings(params));
+    dispatch(fetchGuestSightseeings(params));
+  }, [dispatch, currentPage, filters]);
+
+  useEffect(() => {
+    const loadGuestSightseeings = async () => {
+      try {
+        await fetchGuestSightseeings();
+      } catch (error) {
+        console.error('Error loading guest sightseeings:', error);
+      }
+    };
+    
+    loadGuestSightseeings();
     
     return () => {
       dispatch(clearGuestSightseeingState());
     };
-  }, [dispatch, currentPage, filters]);
+  }, [dispatch, fetchGuestSightseeings]);
 
   useEffect(() => {
     if (error) {

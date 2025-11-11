@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import axios from 'axios';
 import RequireAuth from '../../components/RequireAuth';
 
 const MyWallet = () => {
-  const { user } = useSelector((state) => state.auth);
   const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);

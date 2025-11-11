@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
-import { FiCalendar, FiUsers, FiPlus, FiMinus, FiShoppingCart, FiCreditCard, FiMapPin, FiClock, FiInfo, FiStar, FiPackage, FiTag, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiCalendar, FiPlus, FiMinus, FiShoppingCart, FiMapPin, FiClock, FiStar, FiPackage, FiTag, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
-import { getGuestSightseeingById, clearCurrentSightseeing, fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
+import { getGuestSightseeingById, clearCurrentSightseeing } from '../redux/slices/guestSightseeingSlice';
 import { addToCart } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
@@ -26,17 +26,14 @@ const SightseeingDetailPage = () => {
     setSelectedCurrency,
     CURRENCY_SYMBOLS,
     formatPrice,
-    isLoadingRates
   } = useCurrency();
   
   const { 
     currentSightseeing, 
-    loading: sightseeingLoading, 
-    error, 
+    loading: sightseeingLoading
   } = useSelector((state) => ({
     currentSightseeing: state.guestSightseeings.currentSightseeing,
     loading: state.guestSightseeings.loading,
-    error: state.guestSightseeings.error,
   }));
   
   const sightseeing = currentSightseeing || {};
@@ -98,11 +95,6 @@ const SightseeingDetailPage = () => {
     // Create a unique ID that includes the date and pax to allow multiple entries of the same sightseeing
     const uniqueId = `${sightseeing._id}-${selectedDate.getTime()}-${pax}`;
     
-    // Use offerPrice if available, otherwise use regular price
-    const price = sightseeing.offerPrice !== null && sightseeing.offerPrice !== undefined 
-      ? sightseeing.offerPrice 
-      : sightseeing.price;
-      
     // Ensure we're storing prices in USD
     const priceInUSD = sightseeing.priceCurrency === 'USD' 
       ? sightseeing.price 
@@ -130,11 +122,6 @@ const SightseeingDetailPage = () => {
     
     dispatch(addToCart(cartItem));
     toast.success('Added to cart successfully!');
-  };
-
-  const handleBuyNow = () => {
-    handleAddToCart();
-    navigate('/checkout');
   };
 
   if (sightseeingLoading || !sightseeing || Object.keys(sightseeing).length === 0) {

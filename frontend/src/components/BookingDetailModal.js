@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateBookingStatus } from '../redux/slices/bookingSlice';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import BookingUpdateModal from './BookingUpdateModal';
 import HotelFlightEditModal from './HotelFlightEditModal';
 import ActivityEditModal from './ActivityEditModal';
@@ -9,20 +8,22 @@ import { PencilIcon, XMarkIcon as XIcon, ArrowDownTrayIcon as SaveIcon, Currency
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-
 const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
-  const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
-  const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [editingItinerary, setEditingItinerary] = useState(false);
   const [itineraryText, setItineraryText] = useState('');
   const [itineraryLoading, setItineraryLoading] = useState(false);
   const [itineraryError, setItineraryError] = useState(null);
   const [itinerarySuccess, setItinerarySuccess] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+  const [statusUpdateError, setStatusUpdateError] = useState(null);
+  const [statusUpdateSuccess, setStatusUpdateSuccess] = useState(false);
   const [fetchingQuoteItinerary, setFetchingQuoteItinerary] = useState(false);
   const [quoteItineraryError, setQuoteItineraryError] = useState(null);
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [selectedSellerId, setSelectedSellerId] = useState('');
 
   // State for hotel and flight details edit mode
   const [showHotelFlightModal, setShowHotelFlightModal] = useState(false);
@@ -30,39 +31,20 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
   // State for activities edit mode
   const [showActivitiesModal, setShowActivitiesModal] = useState(false);
 
-  // State for booking status update
-  const [editingStatus, setEditingStatus] = useState(false);
-
   // State for claim modal
   const [showClaimModal, setShowClaimModal] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
-  const [statusUpdateError, setStatusUpdateError] = useState(null);
-  const [statusUpdateSuccess, setStatusUpdateSuccess] = useState(false);
-
-  // State for payment status update
-  const [editingPaymentStatus, setEditingPaymentStatus] = useState(false);
-  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
-  const [paymentStatusUpdateLoading, setPaymentStatusUpdateLoading] = useState(false);
-  const [paymentStatusUpdateError, setPaymentStatusUpdateError] = useState(null);
-  const [paymentStatusUpdateSuccess, setPaymentStatusUpdateSuccess] = useState(false);
 
   // State for seller selection
   const [selectedSellers, setSelectedSellers] = useState([]);
-  const [selectedSellerId, setSelectedSellerId] = useState('');
-  const [sellers, setSellers] = useState([]);
   const [loadingSellers, setLoadingSellers] = useState(false);
   const [sellerServices, setSellerServices] = useState({});
-  const [sellerNotes, setSellerNotes] = useState({});
 
-  // Ensure all supplier objects for assigned sellers are loaded in sellers array
   useEffect(() => {
     if (!booking || !booking.sellers || !Array.isArray(booking.sellers)) return;
     const missingIds = booking.sellers
       .map(s => typeof s.seller === 'string' ? s.seller : (s.seller && s.seller._id))
-      .filter(id => id && !sellers.some(sel => sel._id === id));
+      .filter(id => id && !selectedSellers.some(sel => sel._id === id));
     if (missingIds.length === 0) return;
-    // Fetch missing suppliers in parallel
     Promise.all(missingIds.map(id =>
       fetch(`/api/sellers/${id}`, { credentials: 'include' })
         .then(res => res.json())
@@ -74,13 +56,11 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
         })
     )).then(results => {
       const found = results.filter(x => x && x._id);
-      if (found.length > 0) setSellers(prev => [...prev, ...found]);
+      if (found.length > 0) setSelectedSellers(prev => [...prev, ...found]);
     });
-  }, [booking, sellers]);
+  }, [booking, selectedSellers]);
 
-  // Initialize itinerary text and statuses when booking changes
   useEffect(() => {
-
     if (booking && booking.finalItinerary) {
       setItineraryText(booking.finalItinerary);
     } else {
@@ -91,17 +71,6 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
       setSelectedStatus(booking.bookingStatus);
     }
 
-    if (booking && booking.paymentStatus) {
-      setSelectedPaymentStatus(booking.paymentStatus);
-    } else {
-      setSelectedPaymentStatus('unpaid');
-    }
-
-    // Debug seller information
-    if (booking) {
-    }
-
-    // If booking has a seller assigned, set the selectedSellerId
     if (booking && booking.seller && booking.seller._id) {
       setSelectedSellerId(booking.seller._id);
     } else {
@@ -109,35 +78,32 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     }
   }, [booking]);
 
-  // Fetch sellers when editing status and status is 'booked'
-  useEffect(() => {
-    if (editingStatus && selectedStatus === 'booked' && sellers.length === 0) {
-      fetchSellers();
-    }
-  }, [editingStatus, selectedStatus]);
-
-  // Function to fetch sellers
-  const fetchSellers = async () => {
+  const fetchSellers = useCallback(async () => {
     setLoadingSellers(true);
     try {
       const response = await axios.get('/api/sellers');
 
       if (response.data && response.data.data) {
-        setSellers(response.data.data);
+        setSelectedSellers(response.data.data);
         toast.success(`Loaded ${response.data.data.length} sellers`);
       } else {
-        setSellers([]);
+        setSelectedSellers([]);
         toast.warning('No sellers found in the system');
       }
     } catch (error) {
       toast.error('Failed to load sellers. Please try again.');
-      setSellers([]);
+      console.error('Error fetching sellers:', error);
     } finally {
       setLoadingSellers(false);
     }
-  };
+  }, []);
 
-  // Function to handle itinerary update
+  useEffect(() => {
+    if (editingStatus && selectedStatus === 'booked' && selectedSellers.length === 0) {
+      fetchSellers();
+    }
+  }, [editingStatus, selectedStatus, selectedSellers.length, fetchSellers]);
+
   const handleItineraryUpdate = async () => {
     setItineraryLoading(true);
     setItineraryError(null);
@@ -151,10 +117,8 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
       if (response.data.success) {
         setItinerarySuccess(true);
         setEditingItinerary(false);
-        // Update the booking object with the new itinerary
         booking.finalItinerary = itineraryText;
 
-        // Reset success message after 3 seconds
         setTimeout(() => {
           setItinerarySuccess(false);
         }, 3000);
@@ -166,7 +130,6 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     }
   };
 
-  // Function to fetch and copy itinerary from the associated quote
   const fetchQuoteItinerary = async () => {
     if (!booking.quote) {
       setQuoteItineraryError('No associated quote found for this booking');
@@ -217,10 +180,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     customerDetails,
     travelDates,
     totalAmount,
-    agentCommission,
     bookingStatus = 'pending',
-    // paymentStatus is not destructured here to avoid the unused variable warning
-    // we access it directly via booking.paymentStatus when needed
     specialRequirements,
     finalItinerary,
     hotelDetails = [],
@@ -229,7 +189,6 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     createdAt,
     updatedAt,
     invoiceUrl,
-    travelers = []
   } = booking;
 
   const handleStatusUpdate = async () => {
@@ -260,7 +219,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
         const sellersData = selectedSellers.map(sellerId => ({
           seller: sellerId,
           services: sellerServices[sellerId] || '',
-          notes: sellerNotes[sellerId] || ''
+          notes: sellerServices[sellerId] || ''
         }));
 
         payload.sellers = sellersData;
@@ -316,7 +275,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
         // Show success message
         let successMessage = `Booking status updated to ${selectedStatus}`;
         if (selectedStatus === 'booked') {
-          const sellerName = sellers.find(s => s._id === selectedSellerId)?.name || 'selected seller';
+          const sellerName = selectedSellers.find(s => s._id === selectedSellerId)?.name || 'selected seller';
           successMessage += ` and assigned to ${sellerName}`;
         }
         toast.success(successMessage);
@@ -354,91 +313,6 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     } finally {
       setStatusUpdateLoading(false);
     }
-  };
-
-  const handlePaymentStatusUpdate = async () => {
-    setPaymentStatusUpdateLoading(true);
-    setPaymentStatusUpdateError(null);
-    setPaymentStatusUpdateSuccess(false);
-
-    console.log('Updating payment status to:', selectedPaymentStatus);
-    console.log('Booking ID:', booking._id);
-
-    try {
-      // Make a direct API call with only the paymentStatus field
-      const response = await axios.put(`/api/bookings/${booking._id}`, {
-        paymentStatus: selectedPaymentStatus
-      });
-
-      console.log('API Response:', response.data);
-
-      if (response.data.success) {
-        // Get the updated booking from the response
-        const updatedBooking = response.data.data;
-        console.log('Updated booking from server:', updatedBooking);
-
-        // Force update the booking object with the new status
-        if (booking) {
-          booking.paymentStatus = selectedPaymentStatus;
-        }
-
-        // Create a new booking object with updated status for the parent component
-        const updatedBookingWithStatus = {
-          ...booking,
-          paymentStatus: selectedPaymentStatus
-        };
-
-        console.log('Updated booking object to pass to parent:', updatedBookingWithStatus);
-
-        // Notify parent component about the update
-        if (onUpdate) {
-          console.log('Calling onUpdate with updated booking');
-          onUpdate(updatedBookingWithStatus);
-        } else {
-          console.log('onUpdate callback not provided');
-        }
-
-        setPaymentStatusUpdateSuccess(true);
-        setEditingPaymentStatus(false);
-
-        // Reset success message after 3 seconds
-        setTimeout(() => {
-          setPaymentStatusUpdateSuccess(false);
-        }, 3000);
-      } else {
-        console.error('API returned success: false', response.data);
-        setPaymentStatusUpdateError('Server returned an error: ' + (response.data.message || 'Unknown error'));
-      }
-    } catch (err) {
-      console.error('Error updating payment status:', err);
-      setPaymentStatusUpdateError(err.response?.data?.message || 'Failed to update payment status');
-    } finally {
-      setPaymentStatusUpdateLoading(false);
-    }
-  };
-
-  const handleDownloadInvoice = async () => {
-    setDownloading(true);
-    setDownloadError(null);
-    try {
-      const res = await fetch(`/api/bookings/${booking._id}/invoice`, {
-        method: 'GET',
-        headers: { 'Accept': 'application/pdf' },
-      });
-      if (!res.ok) throw new Error('Download failed');
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Invoice_${bookingId || booking._id.slice(-6)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-    } catch (err) {
-      setDownloadError('Failed to download invoice.');
-    }
-    setDownloading(false);
   };
 
   // Early return if modal is not open
@@ -517,9 +391,9 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                       <label className="block font-semibold mb-2">Suppliers <span className="text-red-500">*</span></label>
                       {loadingSellers ? (
                         <div className="text-sm text-gray-500">Loading suppliers...</div>
-                      ) : sellers.length > 0 ? (
+                      ) : selectedSellers.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
-                          {sellers.map(seller => (
+                          {selectedSellers.map(seller => (
                             <label key={seller._id} className="flex items-center space-x-2 border p-2 rounded">
                               <input
                                 type="checkbox"
@@ -584,13 +458,13 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                       </label>
                       {loadingSellers ? (
                         <div className="text-sm text-gray-500">Loading suppliers...</div>
-                      ) : sellers.length > 0 ? (
+                      ) : selectedSellers.length > 0 ? (
                         <div className="space-y-2">
                           <div className="text-xs text-blue-600 mb-1">
                             Select suppliers for this booking and specify their services
                           </div>
 
-                          {sellers.map(seller => (
+                          {selectedSellers.map(seller => (
                             <div key={seller._id} className="border border-gray-200 rounded p-2 bg-gray-50">
                               <div className="flex items-center">
                                 <input
@@ -633,9 +507,9 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                                   <div>
                                     <label className="block text-xs text-gray-600">Notes</label>
                                     <textarea
-                                      value={sellerNotes[seller._id] || ''}
-                                      onChange={(e) => setSellerNotes({
-                                        ...sellerNotes,
+                                      value={sellerServices[seller._id] || ''}
+                                      onChange={(e) => setSellerServices({
+                                        ...sellerServices,
                                         [seller._id]: e.target.value
                                       })}
                                       placeholder="Any special instructions or notes"
@@ -673,7 +547,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                         console.log('Edit status clicked, isAdmin:', isAdmin);
                         setEditingStatus(true);
                         // Fetch sellers when edit button is clicked
-                        if (!sellers.length) {
+                        if (!selectedSellers.length) {
                           fetchSellers();
                         }
                       }}
@@ -704,7 +578,7 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
                                 let sellerObj = sellerItem.seller;
                                 // If seller is just an ID, look up full details from sellers array
                                 if (typeof sellerObj === 'string') {
-                                  const found = sellers.find(s => s._id === sellerObj);
+                                  const found = selectedSellers.find(s => s._id === sellerObj);
                                   if (found) sellerObj = found;
                                 }
                                 console.log('[BookingDetailModal] Rendering assigned supplier:', sellerObj);

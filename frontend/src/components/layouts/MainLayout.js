@@ -15,7 +15,6 @@ import {
   AcademicCapIcon,
   MapIcon,
   PhoneIcon,
-  ShoppingBagIcon,
   CurrencyDollarIcon,
   GiftIcon,
   UserPlusIcon

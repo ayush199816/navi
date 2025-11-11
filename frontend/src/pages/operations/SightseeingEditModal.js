@@ -292,27 +292,35 @@ const SightseeingEditModal = ({ open, onClose, onEdit, sightseeing }) => {
 
 
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
-    
+    setError('');
+
     try {
       // Create FormData object
       const fd = new FormData();
       
       // Add all form fields to FormData
-      fd.append('name', form.name || '');
-      fd.append('type', form.type || 'activity');
-      fd.append('country', form.country || '');
-      fd.append('transferType', form.transferType || 'SIC');
-      fd.append('details', form.details || '');
-      fd.append('sellingPrice', form.sellingPrice !== '' ? String(form.sellingPrice) : '0');
-      fd.append('costPrice', form.costPrice !== '' ? String(form.costPrice) : '0');
+      const formFields = {
+        name: form.name || '',
+        type: form.type || 'activity',
+        country: form.country || '',
+        transferType: form.transferType || 'SIC',
+        details: form.details || '',
+        sellingPrice: form.sellingPrice !== '' ? String(form.sellingPrice) : '0',
+        costPrice: form.costPrice !== '' ? String(form.costPrice) : '0',
+        currency: form.currency || 'INR',
+        location: form.location || '',
+        duration: form.duration || ''
+      };
       
-      // Explicitly set the currency from the form state
-      const currencyToSave = form.currency || 'INR';
-      fd.append('currency', currencyToSave);
+      // Add all fields to FormData
+      Object.entries(formFields).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          fd.append(key, value);
+        }
+      });
       
       // Handle picture upload if a new file is selected
       if (form.picture && form.picture instanceof File) {
@@ -328,7 +336,7 @@ const SightseeingEditModal = ({ open, onClose, onEdit, sightseeing }) => {
         details: form.details,
         sellingPrice: form.sellingPrice,
         costPrice: form.costPrice,
-        currency: currencyToSave,
+        currency: form.currency,
         hasPicture: !!form.picture
       });
       

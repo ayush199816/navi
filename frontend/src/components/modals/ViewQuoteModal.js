@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { DocumentTextIcon, UserIcon, CalendarIcon, CurrencyRupeeIcon } from '@heroicons/react/24/outline';
 
 const ViewQuoteModal = ({ quote }) => {
-  const dispatch = useDispatch();
   const [showHistory, setShowHistory] = useState(false);
   
   if (!quote) return <div>Quote not found</div>;

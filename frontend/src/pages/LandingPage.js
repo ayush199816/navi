@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { Link } from 'react-router-dom';
 import { 
@@ -8,27 +8,14 @@ import {
   FiClock,
   FiGlobe,
   FiCompass,
-  FiMapPin as FiPin,
-  FiMail as FiMailIcon,
-  FiClock as FiClockIcon,
   FiShield,
   FiCreditCard,
-  FiArrowRight as FiArrowRightIcon,
   FiChevronDown,
-  FiHeart as FiHeartIcon,
-  FiCalendar as FiCalendarIcon,
-  FiClock as FiClockOutline,
-  FiUser as FiUserIcon,
-  FiAward as FiAwardIcon,
   FiMap,
-  FiEdit3,
-  FiCreditCard as FiCard,
-  FiMap as FiMapIcon
+  FiEdit3
 } from 'react-icons/fi';
-import { FaStar, FaMapMarkerAlt, FaQuoteLeft, FaStar as StarIcon } from 'react-icons/fa';
-import { FaGlobe } from 'react-icons/fa';
+import { FaStar, FaQuoteLeft } from 'react-icons/fa';
 import api from '../utils/api';
-import { motion } from 'framer-motion';
 import WorldClock from '../components/WorldClock';
 import CurrencyConverter from '../components/CurrencyConverter';
 import Footer from '../components/Footer';
@@ -52,48 +39,6 @@ const features = [
   }
 ];
 
-// Testimonials data
-const testimonials = [
-  {
-    quote: 'The sightseeing tour was absolutely amazing! The guides were knowledgeable and the itinerary was perfect.',
-    author: 'Sarah Johnson',
-    rating: 5
-  },
-  {
-    quote: 'Best travel experience ever! Everything was well-organized and exceeded our expectations.',
-    author: 'Michael Chen',
-    rating: 5
-  },
-  {
-    quote: 'Highly recommend! The booking process was smooth and the tour was fantastic.',
-    author: 'Emma Williams',
-    rating: 4
-  }
-];
-
-// How it works steps
-const howItWorks = [
-  {
-    step: '1',
-    title: 'Choose Your Sightseeing',
-    description: 'Browse our wide selection of sightseeings and find your perfect tour.'
-  },
-  {
-    step: '2',
-    title: 'Book & Pay Securely',
-    description: 'Complete your booking with our secure payment system.'
-  },
-  {
-    step: '3',
-    title: 'Prepare for Your Trip',
-    description: 'Receive all necessary information and get ready for your adventure.'
-  },
-  {
-    step: '4',
-    title: 'Enjoy Your Experience',
-    description: 'Embark on an unforgettable journey with our expert guides.'
-  }
-];
 
 // Currency symbols mapping
 const CURRENCY_SYMBOLS = {
@@ -114,79 +59,58 @@ const LandingPage = () => {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
-  const currencyDropdownRef = useRef(null);
   
   // Get currency context
   const {
     selectedCurrency,
     setSelectedCurrency,
-    formatPrice,
-    CURRENCY_SYMBOLS,
-    isLoadingRates
+    formatPrice
   } = useCurrency();
   
-  // Handle click outside to close currency dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target)) {
-        setShowCurrencyDropdown(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [currencyDropdownRef]);
 
   // Fetch guest sightseeing data
-  useEffect(() => {
-    const fetchDestinations = async () => {
-      try {
-        setLoading(true);
-        // Fetch 6 random active sightseeings
-        const response = await api.get('/guest-sightseeing?random=6&isActive=true');
-        setDestinations(response.data.data);
-      } catch (err) {
-        console.error('Error fetching destinations:', err);
-        setError('Failed to load destinations. Please try again later.');
-        // Fallback to sample data if API fails
-        setDestinations([
-          {
-            id: 'fallback-1',
-            name: 'BALI',
-            location: 'Indonesia',
-            images: ['https://source.unsplash.com/1920x1080/?bali'],
-            description: 'Experience the island of gods with its lush jungles, ancient temples, and pristine beaches that will take your breath away.',
-            rating: 4.8,
-            price: 99999,
-            priceCurrency: 'INR',
-            duration: '7 Days / 6 Nights',
-            highlights: ['Private guided tours', 'Luxury accommodations', 'Cultural experiences']
-          },
-          {
-            id: 'fallback-2',
-            name: 'PHUKET',
-            location: 'Thailand',
-            images: ['https://source.unsplash.com/1920x1080/?phuket'],
-            description: 'Discover the pearl of the Andaman with its crystal-clear waters, vibrant nightlife, and rich cultural heritage.',
-            rating: 4.7,
-            price: 129999,
-            priceCurrency: 'INR',
-            duration: '8 Days / 7 Nights',
-            highlights: ['Island hopping', 'Beachfront resorts', 'Local cuisine tours']
-          }
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDestinations();
+  const fetchDestinations = useCallback(async () => {
+    try {
+      const response = await api.get('/guest-sightseeing?random=6&isActive=true');
+      setDestinations(response.data.data);
+    } catch (err) {
+      console.error('Error fetching destinations:', err);
+      setError('Failed to load destinations. Please try again later.');
+      // Fallback to sample data if API fails
+      setDestinations([
+        {
+          id: 'fallback-1',
+          name: 'BALI',
+          location: 'Indonesia',
+          images: ['https://source.unsplash.com/1920x1080/?bali'],
+          description: 'Experience the island of gods with its lush jungles, ancient temples, and pristine beaches that will take your breath away.',
+          rating: 4.8,
+          price: 99999,
+          priceCurrency: 'INR',
+          duration: '7 Days / 6 Nights',
+          highlights: ['Private guided tours', 'Luxury accommodations', 'Cultural experiences']
+        },
+        {
+          id: 'fallback-2',
+          name: 'PHUKET',
+          location: 'Thailand',
+          images: ['https://source.unsplash.com/1920x1080/?phuket'],
+          description: 'Discover the pearl of the Andaman with its crystal-clear waters, vibrant nightlife, and rich cultural heritage.',
+          rating: 4.7,
+          price: 129999,
+          priceCurrency: 'INR',
+          duration: '8 Days / 7 Nights',
+          highlights: ['Island hopping', 'Beachfront resorts', 'Local cuisine tours']
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchDestinations();
+  }, [fetchDestinations]);
 
   // Handle scroll for navbar
   useEffect(() => {
@@ -211,17 +135,6 @@ const LandingPage = () => {
     }, 10000);
     return () => clearInterval(timer);
   }, [destinations.length]);
-
-  // Handle newsletter subscription
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    // In a real app, you would send this to your backend
-    console.log('Subscribing with email:', email);
-    setIsSubscribed(true);
-    setEmail('');
-    // Reset subscription message after 5 seconds
-    setTimeout(() => setIsSubscribed(false), 5000);
-  };
 
   // Minimal Navigation Bar Component
   const NavigationBar = React.memo(() => {
@@ -380,21 +293,30 @@ const LandingPage = () => {
             <div
               className="flex flex-col sm:flex-row justify-center gap-4"
             >
-              <Link 
-                to="/tours" 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300 transform hover:scale-105 inline-flex items-center justify-center"
-              >
-                <FiCompass className="mr-2" /> Explore Sightseeings
-              </Link>
-              
-              {currentExperience && (
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto">
                 <Link 
-                  to={`/sightseeing/${currentExperience._id}`}
-                  className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300 transform hover:scale-105 inline-flex items-center justify-center backdrop-blur-sm"
+                  to="/tours" 
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-colors duration-300 transform hover:scale-105 flex-1 flex items-center justify-center"
                 >
-                  <FiMapPin className="mr-2" /> View Experience
+                  <FiCompass className="mr-2" /> Explore Sightseeings
                 </Link>
-              )}
+                
+                <Link 
+                  to="/ai-itinerary-generator"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-all duration-300 transform hover:scale-105 flex-1 flex items-center justify-center"
+                >
+                  <FiMap className="mr-2" /> AI Itinerary Generator
+                </Link>
+                
+                {currentExperience && (
+                  <Link 
+                    to={`/sightseeing/${currentExperience._id}`}
+                    className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-colors duration-300 transform hover:scale-105 flex-1 flex items-center justify-center backdrop-blur-sm"
+                  >
+                    <FiMapPin className="mr-2" /> View Experience
+                  </Link>
+                )}
+              </div>
             </div>
             
             {/* Experience Highlights */}

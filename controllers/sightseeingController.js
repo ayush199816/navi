@@ -150,12 +150,53 @@ exports.updateSightseeing = async (req, res) => {
     console.log('Update request received. Body:', req.body);
     console.log('Files:', req.file);
     
+    // Get the existing sightseeing record
+    const existingSightseeing = await Sightseeing.findById(req.params.id);
+    if (!existingSightseeing) {
+      return res.status(404).json({ success: false, message: 'Sightseeing not found' });
+    }
+    
     // Helper function to get field from form data or body
     const getField = (field) => {
       if (req.body[field] !== undefined) {
         return req.body[field];
       }
-      return null;
+      return existingSightseeing[field];
+    };
+    
+    // Helper function to process array fields
+    const processArrayField = (value) => {
+      if (value === undefined || value === null) return [];
+      
+      // If it's a string, try to parse it as JSON
+      if (typeof value === 'string') {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          // If parsing fails, treat it as a single item array
+          return [value.trim()].filter(Boolean);
+        }
+      }
+      
+      // Ensure it's an array
+      if (!Array.isArray(value)) {
+        return [String(value).trim()].filter(Boolean);
+      }
+      
+      // Flatten nested arrays and process each item
+      const processItem = (item) => {
+        if (Array.isArray(item)) {
+          return item.flatMap(processItem);
+        } else if (item && typeof item === 'string') {
+          const trimmed = item.trim();
+          return trimmed ? [trimmed] : [];
+        } else if (item != null) {
+          return [String(item).trim()].filter(Boolean);
+        }
+        return [];
+      };
+      
+      return value.flatMap(processItem);
     };
     
     // Default currency mapping based on country
@@ -187,42 +228,49 @@ exports.updateSightseeing = async (req, res) => {
       return COUNTRY_CURRENCY_MAP[country] || 'USD';
     };
     
-    // Get the existing sightseeing to check current values
-    const existingSightseeing = await Sightseeing.findById(req.params.id);
-    if (!existingSightseeing) {
-      return res.status(404).json({ success: false, message: 'Sightseeing not found' });
-    }
+    // existingSightseeing is already declared at the beginning of the function
     
     // Determine the currency - use the one from form, or existing, or default based on country
     const country = getField('country') || existingSightseeing.country;
     const currency = getField('currency') || existingSightseeing.currency || getDefaultCurrency(country) || 'INR';
     
+    // Process array fields
+    const arrayFields = ['inclusions', 'highlights', 'keywords', 'whatToBring'];
+    const processedFields = {};
+    
+    arrayFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        processedFields[field] = processArrayField(req.body[field]);
+      }
+    });
+    
     // Create update object with all fields
-    const updateData = {
-      name: getField('name') !== null ? getField('name') : existingSightseeing.name,
-      type: getField('type') !== null ? getField('type') : (existingSightseeing.type || 'activity'),
+    const updateFields = {
+      name: getField('name') || existingSightseeing.name,
+      type: getField('type') || existingSightseeing.type || 'activity',
       country: country,
       transferType: getField('transferType') || existingSightseeing.transferType || 'SIC',
-      details: getField('details') !== null ? getField('details') : existingSightseeing.details,
-      description: getField('details') || getField('description') || existingSightseeing.description,
+      details: getField('details') || existingSightseeing.details || '',
       sellingPrice: getField('sellingPrice') !== null ? Number(getField('sellingPrice')) : existingSightseeing.sellingPrice,
       costPrice: getField('costPrice') !== null ? Number(getField('costPrice')) : existingSightseeing.costPrice,
-      currency: currency, // Always include the currency field
-      location: getField('location') !== null ? getField('location') : existingSightseeing.location,
-      duration: getField('duration') !== null ? Number(getField('duration')) : existingSightseeing.duration
+      currency: currency,
+      location: getField('location') || existingSightseeing.location || '',
+      duration: getField('duration') ? Number(getField('duration')) : existingSightseeing.duration,
+      // Add processed array fields
+      ...processedFields
     };
     
     // Handle file upload if present
     if (req.file) {
-      updateData.picture = `/uploads/${req.file.filename}`;
+      updateFields.picture = `/uploads/${req.file.filename}`;
     }
     
     // Log the final update data
-    console.log('Updating sightseeing with data:', JSON.stringify(updateData, null, 2));
+    console.log('Updating sightseeing with data:', JSON.stringify(updateFields, null, 2));
     
     const sightseeing = await Sightseeing.findByIdAndUpdate(
       req.params.id, 
-      { $set: updateData }, // Use $set to only update the fields that are provided
+      { $set: updateFields }, // Use $set to only update the fields that are provided
       { new: true, runValidators: true, context: 'query' }
     );
     

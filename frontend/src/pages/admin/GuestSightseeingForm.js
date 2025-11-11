@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   createGuestSightseeing, 
-  updateGuestSightseeing,
-  clearGuestSightseeingState
+  updateGuestSightseeing
 } from '../../redux/slices/guestSightseeingSlice';
 import { toast } from 'react-toastify';
 import { CheckIcon } from '@heroicons/react/24/outline';
@@ -13,12 +12,11 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   const dispatch = useDispatch();
   const isEditMode = !!propSightseeing?._id;
   
-  const { loading, error, success } = useSelector(
+  const { error, success } = useSelector(
     (state) => state.guestSightseeings
   );
 
   // Only USD is supported as per requirements
-  const currency = 'USD';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -50,14 +48,11 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initialize form data when propSightseeing changes
   useEffect(() => {
     if (propSightseeing) {
-      // Create a safe copy of propSightseeing without circular references
       const safeSightseeing = JSON.parse(JSON.stringify(propSightseeing));
       console.log('Raw propSightseeing in form:', safeSightseeing);
       
-      // Define default values
       const defaultValues = {
         name: '',
         country: '',
@@ -176,7 +171,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   };
 
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     
     // Convert price and offerPrice to numbers
     const processedValue = (name === 'price' || name === 'offerPrice') && value !== '' 
@@ -248,54 +243,54 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Log the form data before any processing
-    console.log('Form data before submission:', JSON.stringify(formData, null, 2));
-    console.log('Current tourType value:', formData.tourType);
-
     try {
-      console.log('Form data before submission:', formData);
-      console.log('Current tourType value:', formData.tourType);
-      // Prepare form data with proper types
-      const formDataToSubmit = { 
-        ...formData,
-        tourType: formData.tourType || 'shared' // Ensure tourType is always included with a default value
-      };
+      // Create FormData object
+      const formDataToSubmit = new FormData();
       
-      // Log the final data being submitted
-      console.log('Final data being submitted:', JSON.stringify(formDataToSubmit, null, 2));
+      // Add all form fields to FormData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          // Handle array fields
+          if (Array.isArray(value)) {
+            // For arrays, append each item with the same key
+            value.forEach(item => {
+              formDataToSubmit.append(key, item);
+            });
+          } else {
+            // For regular fields, just append the value
+            formDataToSubmit.append(key, value);
+          }
+        }
+      });
       
-      console.log('Submitting form data with tourType:', formDataToSubmit.tourType);
-      
-      // Ensure price and offerPrice are numbers
-      if (formDataToSubmit.price) {
-        formDataToSubmit.price = Number(formDataToSubmit.price);
+      // Ensure required fields have default values
+      if (!formData.tourType) {
+        formDataToSubmit.set('tourType', 'shared');
       }
       
-      if (formDataToSubmit.offerPrice) {
-        formDataToSubmit.offerPrice = Number(formDataToSubmit.offerPrice);
+      if (!formData.duration) {
+        formDataToSubmit.set('duration', 'Not specified');
       }
       
-      // Ensure inclusions is an array and handle default value
-      if (!Array.isArray(formDataToSubmit.inclusions) || formDataToSubmit.inclusions.length === 0) {
-        formDataToSubmit.inclusions = ['No inclusions specified'];
+      // Convert price fields to numbers
+      if (formData.price) {
+        formDataToSubmit.set('price', Number(formData.price));
       }
       
-      // Ensure duration has a default value
-      if (!formDataToSubmit.duration) {
-        formDataToSubmit.duration = 'Not specified';
+      if (formData.offerPrice) {
+        formDataToSubmit.set('offerPrice', Number(formData.offerPrice));
       }
       
-      // Ensure tourType has a default value
-      if (!formDataToSubmit.tourType) {
-        formDataToSubmit.tourType = 'shared';
+      // Handle empty arrays
+      if (!formData.inclusions || formData.inclusions.length === 0) {
+        formDataToSubmit.delete('inclusions');
+        formDataToSubmit.append('inclusions', 'No inclusions specified');
       }
       
-      console.log('Submitting form data:', formDataToSubmit);
-
       if (isEditMode) {
         await dispatch(updateGuestSightseeing({ 
           id: propSightseeing._id, 
-          ...formDataToSubmit 
+          data: formDataToSubmit
         })).unwrap();
         
         toast.success('Sightseeing updated successfully');

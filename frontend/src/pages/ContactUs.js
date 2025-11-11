@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiMail, FiPhone, FiMapPin, FiClock, FiArrowLeft } from 'react-icons/fi';
+import { FiMail, FiPhone, FiMapPin, FiArrowLeft } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 const ContactUs = () => {

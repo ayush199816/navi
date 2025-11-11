@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp, FiUsers } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
@@ -11,18 +10,17 @@ const ToursPage = () => {
   const [citySearch, setCitySearch] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
-  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
-  const currencyDropdownRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const currencyDropdownRef = useRef(null);
   
   // Get currency context
   const {
     selectedCurrency,
     setSelectedCurrency,
     formatPrice,
-    CURRENCY_SYMBOLS,
-    isLoadingRates
+    CURRENCY_SYMBOLS
   } = useCurrency();
   
   const { sightseeings, loading, error } = useSelector((state) => state.guestSightseeings);

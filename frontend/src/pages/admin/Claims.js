@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -10,7 +10,7 @@ const Claims = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState({
     status: '',
@@ -34,7 +34,7 @@ const Claims = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   // Fetch claims
-  const fetchClaims = async () => {
+  const fetchClaims = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -71,10 +71,10 @@ const Claims = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, filters]);
 
   // Fetch agents for filter dropdown
-  const fetchAgents = async () => {
+  const fetchAgents = useCallback(async () => {
     setLoadingAgents(true);
     
     try {
@@ -86,26 +86,25 @@ const Claims = () => {
     } finally {
       setLoadingAgents(false);
     }
-  };
+  }, []);
 
   // Fetch claim statistics
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await axios.get('/api/claims/stats');
       setStats(response.data.data);
     } catch (err) {
       console.error('Error fetching claim stats:', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchClaims();
-    fetchStats();
-  }, [page, limit, filters]);
+  }, [fetchClaims, page, limit, filters]);
 
   useEffect(() => {
     fetchAgents();
-  }, []);
+  }, [fetchAgents]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

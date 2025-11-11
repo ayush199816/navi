@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,7 +8,7 @@ import CartPage from './pages/CartPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
-import AuthLayout from './components/layouts/AuthLayout';
+// AuthLayout is imported but not used
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -23,6 +23,7 @@ import Login from './pages/auth/Login';
 import GuestLogin from './pages/auth/GuestLogin';
 import SimpleRegister from './pages/auth/SimpleRegister';
 import GuestRegister from './pages/auth/GuestRegister';
+import AIItineraryGeneratorPage from './pages/AIItineraryGeneratorPage';
 import Onboarding from './pages/auth/Onboarding';
 import PendingApproval from './pages/auth/PendingApproval';
 import Profile from './pages/Profile';
@@ -155,7 +156,7 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
       navigate('/unauthorized', { replace: true });
       return;
     }
-  }, [isAuthenticated, user, loading, requireApproval, navigate, location]);
+  }, [isAuthenticated, user, loading, requireApproval, navigate, location, roles]);
   
   if (loading) {
     return (
@@ -207,11 +208,12 @@ const AgentAuthWrapper = ({ children }) => {
 
 function App() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
-  const cart = useSelector((state) => state.cart);
-  const [showCart, setShowCart] = useState(false);
+  // These variables were unused but might be needed later
+  // const navigate = useNavigate();
+  // const location = useLocation();
+  // const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
+  // const cart = useSelector((state) => state.cart);
+  // const [showCart, setShowCart] = useState(false);
   
   useEffect(() => {
     dispatch(loadUser());
@@ -229,6 +231,7 @@ function App() {
         <Route path="/register" element={<GuestRegister />} />
         <Route path="/tours" element={<ToursPage />} />
         <Route path="/sightseeing/:id" element={<SightseeingDetailPage />} />
+        <Route path="/ai-itinerary-generator" element={<AIItineraryGeneratorPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/contact" element={<ContactUs />} />

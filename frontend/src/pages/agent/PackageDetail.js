@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,11 +14,7 @@ const PackageDetail = () => {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  useEffect(() => {
-    fetchPackageDetails();
-  }, [id]);
-
-  const fetchPackageDetails = async () => {
+  const fetchPackageDetails = useCallback(async () => {
     setLoading(true);
     try {
       const res = await axios.get(`/api/packages/${id}`);
@@ -27,9 +23,14 @@ const PackageDetail = () => {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch package details');
       toast.error('Failed to load package details');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchPackageDetails();
+  }, [fetchPackageDetails]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';

@@ -83,8 +83,6 @@ const BookingsAdmin = () => {
     setSelectedBooking(updatedBooking);
   };
 
-  const [claimingPayment, setClaimingPayment] = useState(false);
-  const [claimError, setClaimError] = useState(null);
 
   const handleClaimPayment = (booking) => {
     if (!booking || booking.bookingStatus === 'cancelled') {

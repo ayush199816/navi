@@ -3,8 +3,7 @@ import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { format, formatDistanceToNow } from 'date-fns';
-import { ArrowDownIcon, ArrowUpIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { format } from 'date-fns';
 
 const AdminClaimModal = ({ isOpen, onClose, booking, onSuccess }) => {
   // Log the booking object to see its structure
@@ -21,9 +20,8 @@ const AdminClaimModal = ({ isOpen, onClose, booking, onSuccess }) => {
   });
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [agents, setAgents] = useState([]);
   const [finalAmount, setFinalAmount] = useState(0);
+  const [error, setError] = useState(null);
 
   // Calculate total amount and remaining balance
   const totalAmount = booking?.totalAmount || 0;
@@ -69,8 +67,8 @@ const AdminClaimModal = ({ isOpen, onClose, booking, onSuccess }) => {
               });
             }
           }
-          
-          setAgents(agentsList);
+          // Remove this line
+          // setAgents(agentsList);
         }
       } catch (err) {
         console.error('Error fetching agents:', err);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaInstagram, FaLinkedin, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -33,21 +33,31 @@ const Footer = () => {
           <div className="mb-8 md:mb-0">
             <h4 className="text-lg font-semibold mb-6 text-white border-b border-white/20 pb-2">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#home" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Home
-              </a></li>
-              <li><a href="#popular-sightseeings" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Popular Sightseeings
-              </a></li>
-              <li><a href="#world-clock" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> World Clock
-              </a></li>
-              <li><a href="#currency-converter" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Currency Converter
-              </a></li>
-              <li><a href="/terms" className="text-blue-100 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Terms & Conditions
-              </a></li>
+              <li>
+                <a href="/" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                  <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Home
+                </a>
+              </li>
+              <li>
+                <a href="#popular-sightseeings" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                  <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Popular Sightseeings
+                </a>
+              </li>
+              <li>
+                <a href="#world-clock" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                  <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> World Clock
+                </a>
+              </li>
+              <li>
+                <a href="#currency-converter" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                  <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Currency Converter
+                </a>
+              </li>
+              <li>
+                <a href="/terms" className="text-blue-100 hover:text-white transition-colors flex items-center">
+                  <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span> Terms & Conditions
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -94,7 +104,7 @@ const Footer = () => {
                 <div className="bg-white/10 p-2 rounded-lg mr-3">
                   <FaPhone className="text-white" />
                 </div>
-                <a href="tel:+1234567890" className="text-blue-100 hover:text-white transition-colors">+91 9628912345<br></ br>+91 929755463</a>
+                <a href="tel:+1234567890" className="text-blue-100 hover:text-white transition-colors">+91 9628912345<br></ br>+91 9219755463</a>
               </li>
               <li className="flex items-start">
                 <div className="bg-white/10 p-2 rounded-lg mr-3 mt-1">
@@ -163,7 +173,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-blue-100 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} BookMySight.com. All rights reserved. <br></br>Powered by <a>Navigatio Connect Pvt. Ltd</a>
+            &copy; {new Date().getFullYear()} BookMySight.com. All rights reserved. <br />Powered by <a href="https://navigatio.asia" target="_blank" rel="noopener noreferrer" className="hover:underline">Navigatio Connect Pvt. Ltd</a>
           </p>
         </div>
       </div>
