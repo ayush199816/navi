@@ -277,6 +277,13 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                               field === 'highlights' ? ['No highlights available'] : 
                               ['No inclusions specified'];
         }
+        
+        // Ensure whatToBring is a flat array of strings
+        if (field === 'whatToBring') {
+          formDataCopy[field] = formDataCopy[field].flatMap(item => 
+            Array.isArray(item) ? item : [item]
+          ).filter(Boolean);
+        }
       });
       
       // Add all form fields to FormData
