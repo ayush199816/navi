@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 
 const MyClaims = () => {
-  const { user } = useSelector(state => state.auth);
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // Keep the limit constant since it's not being modified
   const [filters, setFilters] = useState({
     status: '',
     startDate: '',

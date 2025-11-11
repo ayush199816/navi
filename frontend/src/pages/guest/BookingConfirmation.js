@@ -1,12 +1,10 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { FiCheckCircle } from 'react-icons/fi';
 import axios from '../../utils/axiosConfig';
 
 const BookingConfirmation = () => {
   const { bookingId } = useParams();
-  const user = useSelector(state => state.auth.user);
   const [booking, setBooking] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -16,8 +14,9 @@ const BookingConfirmation = () => {
         const response = await axios.get(`/api/bookings/guest/${bookingId}`);
         setBooking(response.data.data);
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching booking:', error);
+      } catch (err) {
+        console.error('Error fetching booking:', err);
+        setLoading(false);
       }
     };
     fetchBooking();

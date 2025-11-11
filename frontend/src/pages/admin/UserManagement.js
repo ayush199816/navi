@@ -6,16 +6,16 @@ import {
 } from 'antd';
 import { 
   SearchOutlined, CheckOutlined, CloseOutlined, 
-  EditOutlined, DeleteOutlined, UserAddOutlined, UserOutlined,
-  MailOutlined, LockOutlined, PhoneOutlined, ShopOutlined,
-  EnvironmentOutlined, GlobalOutlined, IdcardOutlined,
-  ReloadOutlined
+  UserAddOutlined, UserOutlined, MailOutlined, LockOutlined, 
+  PhoneOutlined, EnvironmentOutlined, GlobalOutlined, IdcardOutlined,
+  ReloadOutlined,
+  ShopOutlined
 } from '@ant-design/icons';
 import { fetchUsers, updateUserApproval, createUser } from '../../redux/slices/userSlice';
 
 const { Search } = Input;
 const { Option } = Select;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const UserManagement = () => {
   const dispatch = useDispatch();
@@ -26,10 +26,6 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [form] = Form.useForm();
-
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -49,9 +45,13 @@ const UserManagement = () => {
       console.error('Unexpected error in loadUsers:', err);
       message.error(err.message || 'An unexpected error occurred');
     } finally {
-      setIsLoading(false);
+setIsLoading(false);
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   // Handle create new user
   const handleCreateUser = async (values) => {

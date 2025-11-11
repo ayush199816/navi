@@ -180,7 +180,6 @@ const BookingDetailModal = ({ open, onClose, booking, isAdmin, onUpdate }) => {
     customerDetails,
     travelDates,
     totalAmount,
-    agentCommission,
     bookingStatus = 'pending',
     specialRequirements,
     finalItinerary,

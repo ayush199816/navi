@@ -26,7 +26,6 @@ const SightseeingDetailPage = () => {
     setSelectedCurrency,
     CURRENCY_SYMBOLS,
     formatPrice,
-    isLoadingRates
   } = useCurrency();
   
   const { 
@@ -35,7 +34,6 @@ const SightseeingDetailPage = () => {
   } = useSelector((state) => ({
     currentSightseeing: state.guestSightseeings.currentSightseeing,
     loading: state.guestSightseeings.loading,
-    error: state.guestSightseeings.error,
   }));
   
   const sightseeing = currentSightseeing || {};
@@ -97,11 +95,6 @@ const SightseeingDetailPage = () => {
     // Create a unique ID that includes the date and pax to allow multiple entries of the same sightseeing
     const uniqueId = `${sightseeing._id}-${selectedDate.getTime()}-${pax}`;
     
-    // Use offerPrice if available, otherwise use regular price
-    const price = sightseeing.offerPrice !== null && sightseeing.offerPrice !== undefined 
-      ? sightseeing.offerPrice 
-      : sightseeing.price;
-      
     // Ensure we're storing prices in USD
     const priceInUSD = sightseeing.priceCurrency === 'USD' 
       ? sightseeing.price 
@@ -129,11 +122,6 @@ const SightseeingDetailPage = () => {
     
     dispatch(addToCart(cartItem));
     toast.success('Added to cart successfully!');
-  };
-
-  const handleBuyNow = () => {
-    handleAddToCart();
-    navigate('/checkout');
   };
 
   if (sightseeingLoading || !sightseeing || Object.keys(sightseeing).length === 0) {

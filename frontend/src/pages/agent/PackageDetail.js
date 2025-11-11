@@ -14,10 +14,6 @@ const PackageDetail = () => {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  useEffect(() => {
-    fetchPackageDetails();
-  }, [fetchPackageDetails]);
-
   const fetchPackageDetails = useCallback(async () => {
     setLoading(true);
     try {
@@ -31,6 +27,10 @@ const PackageDetail = () => {
       setLoading(false);
     }
   }, [id]);
+
+  useEffect(() => {
+    fetchPackageDetails();
+  }, [fetchPackageDetails]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';

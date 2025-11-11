@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
@@ -9,7 +9,7 @@ import { updateProfile } from '../../redux/slices/authSlice';
 const Onboarding = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   // Validation schema
   const validationSchema = Yup.object({

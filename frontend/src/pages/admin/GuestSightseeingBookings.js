@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -9,11 +8,7 @@ const GuestSightseeingBookings = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ status: '' });
   
-  useEffect(() => {
-    fetchBookings();
-  }, [filters]);
-
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -65,7 +60,12 @@ const GuestSightseeingBookings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.status]);
+  
+  // Fetch bookings when component mounts and when filters change
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
   const updateBookingStatus = async (bookingId, status) => {
     try {

@@ -36,7 +36,6 @@ const Checkout = () => {
   useParams(); // We're not using the id parameter, but keeping the hook call
   const cart = useSelector(state => state.cart);
   const user = useSelector(state => state.auth.user);
-  const [sightseeings, setSightseeings] = useState({});
   const [loading, setLoading] = useState(true);
   const currentOrderIdRef = useRef(null);
   const currentBookingIdRef = useRef(null);
@@ -124,25 +123,14 @@ const Checkout = () => {
         const results = await Promise.all(sightseeingPromises);
         
         // Process successful and failed requests
-        const sightseeingsMap = {};
-        const failedItems = [];
-        
-        results.forEach(result => {
-          if (result.success) {
-            sightseeingsMap[result.data._id] = result.data;
-          } else {
-            failedItems.push(result.id);
-          }
-        });
-        
-        setSightseeings(sightseeingsMap);
+        const failedItems = results.filter(result => !result.success).map(result => result.id);
         setLoading(false);
         
         if (failedItems.length > 0) {
           toast.error(`Failed to load ${failedItems.length} item(s) from your cart`);
         }
         
-        if (Object.keys(sightseeingsMap).length === 0) {
+        if (results.every(result => !result.success)) {
           toast.error('Could not load any items from your cart');
           navigate('/guest-dashboard');
         }
@@ -520,7 +508,6 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
             ) : (
               <div className="space-y-6">
                 {cart.items.map((item, index) => {
-                  // Sightseeings data is available in sightseeings state if needed
                   const itemDate = item.date ? new Date(item.date).toLocaleDateString() : 'Date not specified';
                   const itemPax = item.pax || 1;
                   const hasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);

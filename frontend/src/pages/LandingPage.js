@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { Link } from 'react-router-dom';
 import { 
@@ -15,7 +15,6 @@ import {
   FiEdit3
 } from 'react-icons/fi';
 import { FaStar, FaQuoteLeft } from 'react-icons/fa';
-import { message } from 'antd';
 import api from '../utils/api';
 import WorldClock from '../components/WorldClock';
 import CurrencyConverter from '../components/CurrencyConverter';
@@ -40,29 +39,6 @@ const features = [
   }
 ];
 
-// How it works steps
-const howItWorks = [
-  {
-    step: '1',
-    title: 'Choose Your Sightseeing',
-    description: 'Browse our wide selection of sightseeings and find your perfect tour.'
-  },
-  {
-    step: '2',
-    title: 'Book & Pay Securely',
-    description: 'Complete your booking with our secure payment system.'
-  },
-  {
-    step: '3',
-    title: 'Prepare for Your Trip',
-    description: 'Receive all necessary information and get ready for your adventure.'
-  },
-  {
-    step: '4',
-    title: 'Enjoy Your Experience',
-    description: 'Embark on an unforgettable journey with our expert guides.'
-  }
-];
 
 // Currency symbols mapping
 const CURRENCY_SYMBOLS = {
@@ -83,7 +59,6 @@ const LandingPage = () => {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [email, setEmail] = useState('');
   
   // Get currency context
   const {
@@ -94,50 +69,48 @@ const LandingPage = () => {
   
 
   // Fetch guest sightseeing data
-  useEffect(() => {
-    const fetchDestinations = async () => {
-      try {
-        setLoading(true);
-        // Fetch 6 random active sightseeings
-        const response = await api.get('/guest-sightseeing?random=6&isActive=true');
-        setDestinations(response.data.data);
-      } catch (err) {
-        console.error('Error fetching destinations:', err);
-        setError('Failed to load destinations. Please try again later.');
-        // Fallback to sample data if API fails
-        setDestinations([
-          {
-            id: 'fallback-1',
-            name: 'BALI',
-            location: 'Indonesia',
-            images: ['https://source.unsplash.com/1920x1080/?bali'],
-            description: 'Experience the island of gods with its lush jungles, ancient temples, and pristine beaches that will take your breath away.',
-            rating: 4.8,
-            price: 99999,
-            priceCurrency: 'INR',
-            duration: '7 Days / 6 Nights',
-            highlights: ['Private guided tours', 'Luxury accommodations', 'Cultural experiences']
-          },
-          {
-            id: 'fallback-2',
-            name: 'PHUKET',
-            location: 'Thailand',
-            images: ['https://source.unsplash.com/1920x1080/?phuket'],
-            description: 'Discover the pearl of the Andaman with its crystal-clear waters, vibrant nightlife, and rich cultural heritage.',
-            rating: 4.7,
-            price: 129999,
-            priceCurrency: 'INR',
-            duration: '8 Days / 7 Nights',
-            highlights: ['Island hopping', 'Beachfront resorts', 'Local cuisine tours']
-          }
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDestinations();
+  const fetchDestinations = useCallback(async () => {
+    try {
+      const response = await api.get('/guest-sightseeing?random=6&isActive=true');
+      setDestinations(response.data.data);
+    } catch (err) {
+      console.error('Error fetching destinations:', err);
+      setError('Failed to load destinations. Please try again later.');
+      // Fallback to sample data if API fails
+      setDestinations([
+        {
+          id: 'fallback-1',
+          name: 'BALI',
+          location: 'Indonesia',
+          images: ['https://source.unsplash.com/1920x1080/?bali'],
+          description: 'Experience the island of gods with its lush jungles, ancient temples, and pristine beaches that will take your breath away.',
+          rating: 4.8,
+          price: 99999,
+          priceCurrency: 'INR',
+          duration: '7 Days / 6 Nights',
+          highlights: ['Private guided tours', 'Luxury accommodations', 'Cultural experiences']
+        },
+        {
+          id: 'fallback-2',
+          name: 'PHUKET',
+          location: 'Thailand',
+          images: ['https://source.unsplash.com/1920x1080/?phuket'],
+          description: 'Discover the pearl of the Andaman with its crystal-clear waters, vibrant nightlife, and rich cultural heritage.',
+          rating: 4.7,
+          price: 129999,
+          priceCurrency: 'INR',
+          duration: '8 Days / 7 Nights',
+          highlights: ['Island hopping', 'Beachfront resorts', 'Local cuisine tours']
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchDestinations();
+  }, [fetchDestinations]);
 
   // Handle scroll for navbar
   useEffect(() => {
@@ -162,16 +135,6 @@ const LandingPage = () => {
     }, 10000);
     return () => clearInterval(timer);
   }, [destinations.length]);
-
-  // Handle newsletter subscription
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    // In a real app, you would send this to your backend
-    console.log('Subscribing with email:', email);
-    setEmail('');
-    // Show success message
-    message.success('Thank you for subscribing!');
-  };
 
   // Minimal Navigation Bar Component
   const NavigationBar = React.memo(() => {

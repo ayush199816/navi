@@ -171,7 +171,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   };
 
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     
     // Convert price and offerPrice to numbers
     const processedValue = (name === 'price' || name === 'offerPrice') && value !== '' 

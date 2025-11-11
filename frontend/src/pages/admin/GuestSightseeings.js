@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { 
-  fetchGuestSightseeings, 
   deleteGuestSightseeing,
   clearGuestSightseeingState
 } from '../../redux/slices/guestSightseeingSlice';
@@ -40,18 +39,30 @@ const GuestSightseeings = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSightseeing, setEditingSightseeing] = useState(null);
 
-  useEffect(() => {
+  const fetchGuestSightseeings = useCallback(() => {
     const params = {
       page: currentPage,
       ...filters
     };
     
     dispatch(fetchGuestSightseeings(params));
+  }, [dispatch, currentPage, filters]);
+
+  useEffect(() => {
+    const loadGuestSightseeings = async () => {
+      try {
+        await fetchGuestSightseeings();
+      } catch (error) {
+        console.error('Error loading guest sightseeings:', error);
+      }
+    };
+    
+    loadGuestSightseeings();
     
     return () => {
       dispatch(clearGuestSightseeingState());
     };
-  }, [dispatch, currentPage, filters]);
+  }, [dispatch, fetchGuestSightseeings]);
 
   useEffect(() => {
     if (error) {

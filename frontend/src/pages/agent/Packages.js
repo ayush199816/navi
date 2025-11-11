@@ -17,10 +17,6 @@ const Packages = () => {
     hasOffers: false
   });
 
-  useEffect(() => {
-    fetchPackages();
-  }, [fetchPackages]);
-
   const fetchPackages = useCallback(async () => {
     setLoading(true);
     try {
@@ -45,6 +41,10 @@ const Packages = () => {
       setLoading(false);
     }
   }, [filters.search, filters.destination, filters.hasOffers]);
+
+  useEffect(() => {
+    fetchPackages();
+  }, [fetchPackages]);
 
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;
