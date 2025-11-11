@@ -23,6 +23,7 @@ import Login from './pages/auth/Login';
 import GuestLogin from './pages/auth/GuestLogin';
 import SimpleRegister from './pages/auth/SimpleRegister';
 import GuestRegister from './pages/auth/GuestRegister';
+import AIItineraryGeneratorPage from './pages/AIItineraryGeneratorPage';
 import Onboarding from './pages/auth/Onboarding';
 import PendingApproval from './pages/auth/PendingApproval';
 import Profile from './pages/Profile';
@@ -229,6 +230,7 @@ function App() {
         <Route path="/register" element={<GuestRegister />} />
         <Route path="/tours" element={<ToursPage />} />
         <Route path="/sightseeing/:id" element={<SightseeingDetailPage />} />
+        <Route path="/ai-itinerary-generator" element={<AIItineraryGeneratorPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/contact" element={<ContactUs />} />

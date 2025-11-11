@@ -377,24 +377,45 @@ const LandingPage = () => {
               {currentExperience?.description || "Discover the world's most iconic landmarks and hidden gems with our expert-guided sightseeing experiences."}
             </p>
             
-            <div
-              className="flex flex-col sm:flex-row justify-center gap-4"
-            >
-              <Link 
-                to="/tours" 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300 transform hover:scale-105 inline-flex items-center justify-center"
-              >
-                <FiCompass className="mr-2" /> Explore Sightseeings
-              </Link>
-              
-              {currentExperience && (
+            <div className="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-4xl mx-auto px-4">
+              <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Link 
-                  to={`/sightseeing/${currentExperience._id}`}
-                  className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300 transform hover:scale-105 inline-flex items-center justify-center backdrop-blur-sm"
+                  to="/tours" 
+                  className="group relative overflow-hidden bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-6 rounded-xl text-sm sm:text-base transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 flex items-center justify-center"
                 >
-                  <FiMapPin className="mr-2" /> View Experience
+                  <span className="relative z-10 flex items-center">
+                    <FiCompass className="mr-2 text-lg" /> 
+                    <span>Explore Sightseeings</span>
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 </Link>
-              )}
+                
+                <Link 
+                  to="/ai-itinerary-generator"
+                  className="group relative overflow-hidden bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-6 rounded-xl text-sm sm:text-base transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-pink-500/20 flex items-center justify-center"
+                >
+                  <span className="relative z-10 flex items-center">
+                    <FiMap className="mr-2 text-lg" /> 
+                    <span>AI Itinerary</span>
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                </Link>
+                
+                {currentExperience ? (
+                  <Link 
+                    to={`/sightseeing/${currentExperience._id}`}
+                    className="group relative overflow-hidden bg-white/10 hover:bg-white/20 text-white font-bold py-4 px-6 rounded-xl text-sm sm:text-base transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-white/10 backdrop-blur-sm flex items-center justify-center"
+                  >
+                    <span className="relative z-10 flex items-center">
+                      <FiMapPin className="mr-2 text-lg" /> 
+                      <span>View Experience</span>
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  </Link>
+                ) : (
+                  <div className="opacity-0 pointer-events-none"></div>
+                )}
+              </div>
             </div>
             
             {/* Experience Highlights */}

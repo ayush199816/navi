@@ -739,51 +739,135 @@ const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
       updates.offerPrice = undefined;
     }
     
-    // Ensure inclusions is an array
-    if (updates.inclusions !== undefined) {
-      if (!Array.isArray(updates.inclusions)) {
-        updates.inclusions = [updates.inclusions];
-      }
-      // Remove empty strings from inclusions
-      updates.inclusions = updates.inclusions.filter(incl => incl && incl.trim() !== '');
-      
-      // If no valid inclusions, set default
-      if (updates.inclusions.length === 0) {
-        updates.inclusions = ['No inclusions specified'];
-      }
-    }
-    
-    // Ensure duration has a value
-    if (updates.duration === '') {
-      updates.duration = 'Not specified';
-    }
-    
-    console.log('Updating sightseeing with data:', JSON.stringify(updates, null, 2));
+     // Ensure inclusions is an array and handle nested arrays
+    if (updates.inclusions !== undefined) {
+      if (!Array.isArray(updates.inclusions)) {
+        updates.inclusions = [updates.inclusions];
+      }
+      
+      // Flatten the array and process each item
+      const processInclusion = (item) => {
+        if (Array.isArray(item)) {
+          // If it's an array, process each element
+          return item.flatMap(processInclusion);
+        } else if (typeof item === 'string') {
+          // If it's a string, trim it and return if not empty
+          const trimmed = item.trim();
+          return trimmed !== '' ? [trimmed] : [];
+        }
+        // For any other type, convert to string and process
+        return processInclusion(String(item));
+      };
+      
+      // Process all inclusions and flatten the result
+      updates.inclusions = updates.inclusions.flatMap(processInclusion);
+      
+      // If no valid inclusions, set default
+      if (updates.inclusions.length === 0) {
+        updates.inclusions = ['No inclusions specified'];
+      }
+    }
 
-    // Update the document
-    sightseeing = await GuestSightseeing.findByIdAndUpdate(
-      req.params.id, 
-      updates,
-      {
-        new: true,
-        runValidators: true,
-        context: 'query'
-      }
-    );
+    // Ensure duration has a value
+    if (updates.duration === '') {
+      updates.duration = 'Not specified';
+    }
 
-    if (!sightseeing) {
-      throw new Error('Failed to update sightseeing');
-    }
+    // Helper function to process array fields and flatten nested arrays
+    const processArrayField = (value) => {
+      if (value === undefined || value === null) return [];
+      
+      // If it's a string, try to parse it as JSON
+      if (typeof value === 'string') {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          // If parsing fails, treat it as a single item array
+          return [value.trim()].filter(Boolean);
+        }
+      }
+      
+      // Ensure it's an array
+      if (!Array.isArray(value)) {
+        return [String(value).trim()].filter(Boolean);
+      }
+      
+      // Flatten nested arrays and process each item
+      const processItem = (item) => {
+        if (Array.isArray(item)) {
+          return item.flatMap(processItem);
+        } else if (item && typeof item === 'string') {
+          const trimmed = item.trim();
+          return trimmed ? [trimmed] : [];
+        } else if (item != null) {
+          return [String(item).trim()].filter(Boolean);
+        }
+        return [];
+      };
+      
+      return value.flatMap(processItem);
+    };
 
-    res.status(200).json({ 
-      success: true, 
-      data: sightseeing 
-    });
-    
-  } catch (error) {
-    console.error('Update error:', error);
-    next(new ErrorResponse(error.message || 'Failed to update guest sightseeing', 500));
-  }
+    try {
+      // Process keywords field
+      if (updates.keywords !== undefined) {
+        updates.keywords = processArrayField(updates.keywords);
+        
+        // Remove duplicates and ensure we have at least one keyword
+        updates.keywords = [...new Set(updates.keywords)];
+        if (updates.keywords.length === 0) {
+          updates.keywords = ['general'];
+        }
+      }
+      
+      // Process highlights field
+      if (updates.highlights !== undefined) {
+        updates.highlights = processArrayField(updates.highlights);
+        
+        // Ensure we have at least one highlight
+        if (updates.highlights.length === 0) {
+          updates.highlights = ['No highlights specified'];
+        }
+      }
+      
+      // Process inclusions field
+      if (updates.inclusions !== undefined) {
+        updates.inclusions = processArrayField(updates.inclusions);
+        
+        // Ensure we have at least one inclusion
+        if (updates.inclusions.length === 0) {
+          updates.inclusions = ['No inclusions specified'];
+        }
+      }
+      
+      // Process whatToBring field
+      if (updates.whatToBring !== undefined) {
+        updates.whatToBring = processArrayField(updates.whatToBring);
+        
+        // Ensure we have at least one item
+        if (updates.whatToBring.length === 0) {
+          updates.whatToBring = ['No items specified'];
+        }
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      return next(new ErrorResponse(error.message || 'Failed to update guest sightseeing', 500));
+    }
+
+    // Update sightseeing document
+    sightseeing = await GuestSightseeing.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({
+      success: true,
+      data: sightseeing
+    });
+  } catch (error) {
+    console.error('Update error:', error);
+    next(new ErrorResponse(error.message || 'Failed to update guest sightseeing', 500));
+  }
 });
 
 // @desc    Delete guest sightseeing

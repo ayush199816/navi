@@ -13,7 +13,7 @@ router.get('/', sightseeingController.getSightseeing);
 // Protected routes (admin/operations only)
 router.use(authorize('admin', 'operations'));
 router.post('/', upload.single('picture'), sightseeingController.createSightseeing);
-router.put('/:id', sightseeingController.updateSightseeing);
+router.put('/:id', upload.single('picture'), sightseeingController.updateSightseeing);
 router.delete('/:id', sightseeingController.deleteSightseeing);
 
 module.exports = router;

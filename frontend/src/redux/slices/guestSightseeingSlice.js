@@ -60,9 +60,20 @@ export const createGuestSightseeing = createAsyncThunk(
   'guestSightseeings/create',
   async (sightseeingData, { rejectWithValue }) => {
     try {
-      const response = await api.post('/guest-sightseeing', sightseeingData);
+      const config = {};
+      
+      // If data is FormData, we don't set Content-Type header
+      // Let the browser set it with the correct boundary
+      if (!(sightseeingData instanceof FormData)) {
+        config.headers = {
+          'Content-Type': 'application/json'
+        };
+      }
+      
+      const response = await api.post('/guest-sightseeing', sightseeingData, config);
       return response.data;
     } catch (err) {
+      console.error('Error creating guest sightseeing:', err);
       return rejectWithValue(err.response?.data?.message || 'Failed to create guest sightseeing');
     }
   }
@@ -70,11 +81,22 @@ export const createGuestSightseeing = createAsyncThunk(
 
 export const updateGuestSightseeing = createAsyncThunk(
   'guestSightseeings/update',
-  async ({ id, ...updates }, { rejectWithValue }) => {
+  async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/guest-sightseeing/${id}`, updates);
+      const config = {};
+      
+      // If data is FormData, we don't set Content-Type header
+      // Let the browser set it with the correct boundary
+      if (!(data instanceof FormData)) {
+        config.headers = {
+          'Content-Type': 'application/json'
+        };
+      }
+      
+      const response = await api.put(`/guest-sightseeing/${id}`, data, config);
       return response.data;
     } catch (err) {
+      console.error('Error updating guest sightseeing:', err);
       return rejectWithValue(err.response?.data?.message || 'Failed to update guest sightseeing');
     }
   }

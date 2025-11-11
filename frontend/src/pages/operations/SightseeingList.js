@@ -53,11 +53,46 @@ const SightseeingList = () => {
   const handleEditSightseeing = async (formData) => {
     try {
       if (!selectedSightseeing) return;
-      await axios.put(`/api/sightseeing/${selectedSightseeing._id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      
+      // Convert FormData to a plain object for logging
+      const formDataObj = {};
+      for (let [key, value] of formData.entries()) {
+        formDataObj[key] = value;
+      }
+      console.log('Sending form data:', formDataObj);
+      
+      // Create a new FormData instance to ensure proper serialization
+      const formDataToSend = new FormData();
+      
+      // Add all fields to the new FormData
+      Object.entries(formDataObj).forEach(([key, value]) => {
+        formDataToSend.append(key, value);
       });
+      
+      const response = await axios.put(
+        `/api/sightseeing/${selectedSightseeing._id}`,
+        formDataToSend,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json'
+          },
+          transformRequest: (data, headers) => {
+            // Don't modify the FormData object
+            return data;
+          }
+        }
+      );
+      
       fetchSightseeing();
+      return response.data;
     } catch (err) {
+      console.error('Error updating sightseeing:', err);
+      if (err.response) {
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+        console.error('Response headers:', err.response.headers);
+      }
       throw err;
     }
   };
