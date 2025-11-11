@@ -235,6 +235,34 @@ const SightseeingAddModal = ({ open, onClose, onAdd }) => {
     picture: null
   });
   
+  // List of countries for the dropdown
+  const countries = [
+    'India',
+    'United Arab Emirates',
+    'Dubai',
+    'Singapore',
+    'Thailand',
+    'Indonesia',
+    'Malaysia',
+    'Vietnam',
+    'Sri Lanka',
+    'Maldives',
+    'Mauritius',
+    'Nepal',
+    'Bhutan',
+    'France',
+    'Italy',
+    'Spain',
+    'United Kingdom',
+    'United States',
+    'Canada',
+    'Australia',
+    'New Zealand',
+    'Japan',
+    'South Korea',
+    'China',
+    'Russia'
+  ].sort();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 

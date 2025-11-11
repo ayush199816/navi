@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -20,7 +20,7 @@ const MyClaims = () => {
   });
 
   // Fetch claims
-  const fetchClaims = async () => {
+  const fetchClaims = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -53,11 +53,11 @@ const MyClaims = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, filters]);
 
   useEffect(() => {
     fetchClaims();
-  }, [page, limit, filters]);
+  }, [fetchClaims]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

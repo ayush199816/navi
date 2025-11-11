@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-  Table, Button, Space, Badge, message, Modal, Input, Select, Tag, Card, 
-  Row, Col, Typography, Popconfirm, Form, InputNumber, Switch, Divider 
+  Table, Button, Space, Badge, message, Modal, Input, Select, Card, Tag,
+  Row, Col, Typography, Popconfirm, Form, Switch, Divider 
 } from 'antd';
 import { 
   SearchOutlined, CheckOutlined, CloseOutlined, 
-  EditOutlined, DeleteOutlined, UserAddOutlined, UserOutlined, ReloadOutlined,
+  EditOutlined, DeleteOutlined, UserAddOutlined, UserOutlined,
   MailOutlined, LockOutlined, PhoneOutlined, ShopOutlined,
-  EnvironmentOutlined, GlobalOutlined, IdcardOutlined
+  EnvironmentOutlined, GlobalOutlined, IdcardOutlined,
+  ReloadOutlined
 } from '@ant-design/icons';
 import { fetchUsers, updateUserApproval, createUser } from '../../redux/slices/userSlice';
 
@@ -18,7 +19,7 @@ const { Title, Text } = Typography;
 
 const UserManagement = () => {
   const dispatch = useDispatch();
-  const { users, loading, error } = useSelector((state) => state.users);
+  const { users } = useSelector((state) => state.users);
   const [searchText, setSearchText] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [approvalFilter, setApprovalFilter] = useState('all');
@@ -28,9 +29,9 @@ const UserManagement = () => {
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       console.log('Loading users...');
       setIsLoading(true);
@@ -50,7 +51,7 @@ const UserManagement = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [dispatch]);
 
   // Handle create new user
   const handleCreateUser = async (values) => {
@@ -258,7 +259,7 @@ const UserManagement = () => {
           columns={columns}
           dataSource={filteredUsers}
           rowKey="_id"
-          loading={loading}
+          loading={isLoading}
           pagination={{ pageSize: 10 }}
           scroll={{ x: true }}
         />

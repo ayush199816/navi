@@ -8,27 +8,15 @@ import {
   FiClock,
   FiGlobe,
   FiCompass,
-  FiMapPin as FiPin,
-  FiMail as FiMailIcon,
-  FiClock as FiClockIcon,
   FiShield,
   FiCreditCard,
-  FiArrowRight as FiArrowRightIcon,
   FiChevronDown,
-  FiHeart as FiHeartIcon,
-  FiCalendar as FiCalendarIcon,
-  FiClock as FiClockOutline,
-  FiUser as FiUserIcon,
-  FiAward as FiAwardIcon,
   FiMap,
-  FiEdit3,
-  FiCreditCard as FiCard,
-  FiMap as FiMapIcon
+  FiEdit3
 } from 'react-icons/fi';
-import { FaStar, FaMapMarkerAlt, FaQuoteLeft, FaStar as StarIcon } from 'react-icons/fa';
-import { FaGlobe } from 'react-icons/fa';
+import { FaStar, FaQuoteLeft } from 'react-icons/fa';
+import { message } from 'antd';
 import api from '../utils/api';
-import { motion } from 'framer-motion';
 import WorldClock from '../components/WorldClock';
 import CurrencyConverter from '../components/CurrencyConverter';
 import Footer from '../components/Footer';
@@ -49,25 +37,6 @@ const features = [
     icon: <FiShield className="w-12 h-12 text-blue-600 mb-6" />,
     title: 'Secure & Safe',
     description: 'Your safety is our priority with secure payments and verified partners.'
-  }
-];
-
-// Testimonials data
-const testimonials = [
-  {
-    quote: 'The sightseeing tour was absolutely amazing! The guides were knowledgeable and the itinerary was perfect.',
-    author: 'Sarah Johnson',
-    rating: 5
-  },
-  {
-    quote: 'Best travel experience ever! Everything was well-organized and exceeded our expectations.',
-    author: 'Michael Chen',
-    rating: 5
-  },
-  {
-    quote: 'Highly recommend! The booking process was smooth and the tour was fantastic.',
-    author: 'Emma Williams',
-    rating: 4
   }
 ];
 
@@ -115,32 +84,14 @@ const LandingPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
-  const currencyDropdownRef = useRef(null);
   
   // Get currency context
   const {
     selectedCurrency,
     setSelectedCurrency,
-    formatPrice,
-    CURRENCY_SYMBOLS,
-    isLoadingRates
+    formatPrice
   } = useCurrency();
   
-  // Handle click outside to close currency dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target)) {
-        setShowCurrencyDropdown(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [currencyDropdownRef]);
 
   // Fetch guest sightseeing data
   useEffect(() => {
@@ -217,10 +168,9 @@ const LandingPage = () => {
     e.preventDefault();
     // In a real app, you would send this to your backend
     console.log('Subscribing with email:', email);
-    setIsSubscribed(true);
     setEmail('');
-    // Reset subscription message after 5 seconds
-    setTimeout(() => setIsSubscribed(false), 5000);
+    // Show success message
+    message.success('Thank you for subscribing!');
   };
 
   // Minimal Navigation Bar Component
@@ -377,43 +327,31 @@ const LandingPage = () => {
               {currentExperience?.description || "Discover the world's most iconic landmarks and hidden gems with our expert-guided sightseeing experiences."}
             </p>
             
-            <div className="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-4xl mx-auto px-4">
-              <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div
+              className="flex flex-col sm:flex-row justify-center gap-4"
+            >
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto">
                 <Link 
                   to="/tours" 
-                  className="group relative overflow-hidden bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-6 rounded-xl text-sm sm:text-base transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/20 flex items-center justify-center"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-colors duration-300 transform hover:scale-105 flex-1 flex items-center justify-center"
                 >
-                  <span className="relative z-10 flex items-center">
-                    <FiCompass className="mr-2 text-lg" /> 
-                    <span>Explore Sightseeings</span>
-                  </span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <FiCompass className="mr-2" /> Explore Sightseeings
                 </Link>
                 
                 <Link 
                   to="/ai-itinerary-generator"
-                  className="group relative overflow-hidden bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-6 rounded-xl text-sm sm:text-base transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-pink-500/20 flex items-center justify-center"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-all duration-300 transform hover:scale-105 flex-1 flex items-center justify-center"
                 >
-                  <span className="relative z-10 flex items-center">
-                    <FiMap className="mr-2 text-lg" /> 
-                    <span>AI Itinerary</span>
-                  </span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <FiMap className="mr-2" /> AI Itinerary Generator
                 </Link>
                 
-                {currentExperience ? (
+                {currentExperience && (
                   <Link 
                     to={`/sightseeing/${currentExperience._id}`}
-                    className="group relative overflow-hidden bg-white/10 hover:bg-white/20 text-white font-bold py-4 px-6 rounded-xl text-sm sm:text-base transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-white/10 backdrop-blur-sm flex items-center justify-center"
+                    className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-colors duration-300 transform hover:scale-105 flex-1 flex items-center justify-center backdrop-blur-sm"
                   >
-                    <span className="relative z-10 flex items-center">
-                      <FiMapPin className="mr-2 text-lg" /> 
-                      <span>View Experience</span>
-                    </span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                    <FiMapPin className="mr-2" /> View Experience
                   </Link>
-                ) : (
-                  <div className="opacity-0 pointer-events-none"></div>
                 )}
               </div>
             </div>

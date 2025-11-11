@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   createGuestSightseeing, 
-  updateGuestSightseeing,
-  clearGuestSightseeingState
+  updateGuestSightseeing
 } from '../../redux/slices/guestSightseeingSlice';
 import { toast } from 'react-toastify';
 import { CheckIcon } from '@heroicons/react/24/outline';
@@ -13,12 +12,11 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   const dispatch = useDispatch();
   const isEditMode = !!propSightseeing?._id;
   
-  const { loading, error, success } = useSelector(
+  const { error, success } = useSelector(
     (state) => state.guestSightseeings
   );
 
   // Only USD is supported as per requirements
-  const currency = 'USD';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -50,14 +48,11 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initialize form data when propSightseeing changes
   useEffect(() => {
     if (propSightseeing) {
-      // Create a safe copy of propSightseeing without circular references
       const safeSightseeing = JSON.parse(JSON.stringify(propSightseeing));
       console.log('Raw propSightseeing in form:', safeSightseeing);
       
-      // Define default values
       const defaultValues = {
         name: '',
         country: '',

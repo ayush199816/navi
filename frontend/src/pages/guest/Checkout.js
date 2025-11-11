@@ -5,7 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { removeFromCart, clearCart } from '../../redux/slices/cartSlice';
 import { useCurrency } from '../../contexts/CurrencyContext';
-import { convertUSDToINR, formatPrice } from '../../utils/currencyConverter';
+import { convertUSDToINR } from '../../utils/currencyConverter';
 import axios from '../../utils/axiosConfig';
 import { toast } from 'react-toastify';
 import { load } from "@cashfreepayments/cashfree-js";
@@ -33,7 +33,7 @@ const Checkout = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { id } = useParams();
+  useParams(); // We're not using the id parameter, but keeping the hook call
   const cart = useSelector(state => state.cart);
   const user = useSelector(state => state.auth.user);
   const [sightseeings, setSightseeings] = useState({});
@@ -73,7 +73,7 @@ const Checkout = () => {
     };
   };
   
-  const { totalPax, displayPax, allSamePax } = calculatePaxCounts();
+  const { displayPax, totalPax } = calculatePaxCounts();
   
   // Alias for paxCount to match the template
   const paxCount = displayPax;
@@ -520,7 +520,7 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
             ) : (
               <div className="space-y-6">
                 {cart.items.map((item, index) => {
-                  const sightseeing = sightseeings[item.originalId || item.id] || {};
+                  // Sightseeings data is available in sightseeings state if needed
                   const itemDate = item.date ? new Date(item.date).toLocaleDateString() : 'Date not specified';
                   const itemPax = item.pax || 1;
                   const hasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);

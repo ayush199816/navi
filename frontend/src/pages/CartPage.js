@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
-import { removeFromCart, updateQuantity } from '../redux/slices/cartSlice';
+import { removeFromCart } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import { useCurrency } from '../contexts/CurrencyContext';
 

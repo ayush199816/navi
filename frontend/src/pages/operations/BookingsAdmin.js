@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import RequireAuth from '../auth/RequireAuth';
 import { EyeIcon } from '@heroicons/react/24/outline';
@@ -15,15 +15,16 @@ const BookingsAdmin = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [bookingToClaimPayment, setBookingToClaimPayment] = useState(null);
   const [showClaimModal, setShowClaimModal] = useState(false);
+  const [bookingToClaimPayment, setBookingToClaimPayment] = useState(null);
   const pageSize = 10;
 
   useEffect(() => {
     fetchBookings();
-  }, [fetchBookings]);
+    // eslint-disable-next-line
+  }, [page, search, status]);
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = async () => {
     setLoading(true);
     try {
       let url = `/api/bookings?page=${page}&limit=${pageSize}`;
@@ -55,7 +56,7 @@ const BookingsAdmin = () => {
       setError(err.response?.data?.message || 'Failed to fetch bookings');
     }
     setLoading(false);
-  }, [page, search, status, pageSize]);
+  };
 
   const handleView = (booking) => {
     setSelectedBooking(booking);
@@ -82,7 +83,6 @@ const BookingsAdmin = () => {
     setSelectedBooking(updatedBooking);
   };
 
-  const [claimingPayment] = useState(false);
 
   const handleClaimPayment = (booking) => {
     if (!booking || booking.bookingStatus === 'cancelled') {

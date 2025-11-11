@@ -30,8 +30,7 @@ const QuoteDetailModal = ({ open, onClose, quote, isAdmin, children }) => {
     updatedAt,
     response,
     packageSuggestion,
-    itinerary,
-    respondedBy
+    itinerary
   } = quote;
   
   const handleUpdatePrice = async () => {

@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { format, addDays, differenceInDays, parseISO, isValid } from 'date-fns';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
-import api from '../../utils/api';
+import { format, parseISO, isValid, addDays, differenceInDays, format as safeFormat } from 'date-fns';
 import { toast } from 'react-toastify';
-import { formatPrice } from '../../utils/currencyFormatter';
+import api from '../../utils/api';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
+// Format price function since the format utility is missing
+const formatPrice = (amount, currency = 'INR') => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+};
 
 const ItineraryCreator = (props) => {
-  const { user } = useSelector((state) => state.auth);
   const { id: itineraryId } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(!!props.editMode);
+  const user = useSelector(state => state.auth.user);
   const [itineraryDays, setItineraryDays] = useState([]);
   const [activityModal, setActivityModal] = useState(null);
-  // Helper function to safely format dates
-  const safeFormat = (date, formatStr, fallback = '') => {
-    if (!date) return fallback;
-    const d = typeof date === 'string' ? parseISO(date) : date;
-    return isValid(d) ? format(d, formatStr) : fallback;
-  };
+  const [, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     customerName: '',
@@ -31,8 +34,7 @@ const ItineraryCreator = (props) => {
     departureDate: safeFormat(addDays(new Date(), 7), 'yyyy-MM-dd'),
     adults: 1,
     children: 0,
-    hotels: [{ name: '', checkIn: '', checkOut: '', confirmationNumber: '' }],
-    flights: [{ flightNumber: '', from: '', to: '', departure: '', arrival: '' }]
+    notes: ''
   });
 
   // Fetch itinerary data when in edit mode
@@ -57,66 +59,47 @@ const ItineraryCreator = (props) => {
           if (!date) return '';
           try {
             const d = typeof date === 'string' ? new Date(date) : date;
-            return format(d, 'yyyy-MM-dd');
+            return safeFormat(d, 'yyyy-MM-dd');
           } catch (e) {
+            console.error('Error formatting date:', e);
             return '';
           }
         };
         
-        // Update form data with fetched itinerary
-        const newFormData = {
-          ...formData,
-          // Customer information might be in different fields or not present
-          customerName: itinerary.customerName || itinerary.travelerName || '',
-          customerEmail: itinerary.customerEmail || itinerary.travelerEmail || '',
-          customerPhone: itinerary.customerPhone || itinerary.travelerPhone || '',
+        const formattedData = {
+          customerName: itinerary.customerName || '',
+          customerEmail: itinerary.customerEmail || '',
+          customerPhone: itinerary.customerPhone || '',
           destination: itinerary.destination || '',
-          arrivalDate: formatDate(itinerary.arrivalDate) || formData.arrivalDate,
-          departureDate: formatDate(itinerary.departureDate) || formData.departureDate,
+          arrivalDate: formatDate(itinerary.arrivalDate),
+          departureDate: formatDate(itinerary.departureDate),
           adults: itinerary.adults || 1,
           children: itinerary.children || 0,
-          notes: itinerary.notes || '',
-          hotels: Array.isArray(itinerary.hotels) && itinerary.hotels.length > 0 
-            ? itinerary.hotels.map(hotel => ({
-                ...hotel,
-                checkIn: safeFormat(hotel.checkIn, "yyyy-MM-dd'T'HH:mm") || '',
-                checkOut: safeFormat(hotel.checkOut, "yyyy-MM-dd'T'HH:mm") || ''
-              }))
-            : [{ name: '', checkIn: '', checkOut: '', confirmationNumber: '' }],
-          flights: Array.isArray(itinerary.flights) && itinerary.flights.length > 0
-            ? itinerary.flights.map(flight => ({
-                ...flight,
-                departure: safeFormat(flight.departure, "yyyy-MM-dd'T'HH:mm") || '',
-                arrival: safeFormat(flight.arrival, "yyyy-MM-dd'T'HH:mm") || ''
-              }))
-            : [{ flightNumber: '', from: '', to: '', departure: '', arrival: '' }]
+          notes: itinerary.notes || ''
         };
         
-        setFormData(newFormData);
+        setFormData(formattedData);
         
-        // Update itinerary days if needed
-        if (itinerary.days && Array.isArray(itinerary.days)) {
-          const formattedDays = itinerary.days.map(day => ({
-            ...day,
-            date: day.date ? new Date(day.date) : new Date(),
-            activities: Array.isArray(day.activities) ? day.activities : []
-          }));
-          setItineraryDays(formattedDays);
+        // Set itinerary days if they exist
+        if (itinerary.days && itinerary.days.length > 0) {
+          setItineraryDays(itinerary.days);
         } else {
-          // If no days data, create days based on the date range
-          const startDate = new Date(itinerary.arrivalDate || Date.now());
-          const endDate = new Date(itinerary.departureDate || Date.now() + 7 * 24 * 60 * 60 * 1000);
-          const daysCount = differenceInDays(endDate, startDate) + 1;
+          // Initialize with empty days if none exist
+          const daysCount = differenceInDays(
+            new Date(itinerary.departureDate),
+            new Date(itinerary.arrivalDate)
+          ) + 1;
           
-          const defaultDays = Array.from({ length: Math.max(1, daysCount) }, (_, i) => ({
-            date: addDays(startDate, i),
+          const initialDays = Array.from({ length: daysCount }, (_, i) => ({
+            date: addDays(new Date(itinerary.arrivalDate), i),
             activities: []
           }));
           
-          setItineraryDays(defaultDays);
+          setItineraryDays(initialDays);
         }
-      } catch (error) {
-        toast.error(`Failed to load itinerary data: ${error.message || 'Unknown error'}`);
+      } catch (err) {
+        console.error('Error fetching itinerary:', err);
+        toast.error('Failed to load itinerary');
       } finally {
         setLoading(false);
       }
@@ -311,8 +294,6 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
 
   const addActivity = (dayIndex, sightseeing) => {
     const updatedDays = [...itineraryDays];
-    // Get the current time in HH:MM format
-    const currentTime = new Date().toTimeString().slice(0, 5);
     
     const activityToAdd = {
       name: sightseeing.name || newActivity.name || 'Untitled Activity',
@@ -413,7 +394,8 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
       console.log('Saving itinerary data:', itineraryData);
 
       // Send the data to the new backend endpoint
-      const response = await api.post('/v1/itinerary-creator', itineraryData);
+      // Removed unused response variable
+  await api.post('/v1/itinerary-creator', itineraryData);
       
       // Show success message
       alert('Itinerary saved successfully!');
@@ -599,14 +581,16 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
               <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
                 <h4 style="margin-top: 0; margin-bottom: 10px; color: #2c3e50;">${hotel.name || `Hotel ${index + 1}`}</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                  <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 10px; background: #f8f9fa; padding: 10px; border-radius: 6px;">
-                    <div style="flex: 1; text-align: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
-                      <div style="font-size: 11px; color: #6c757d; margin-bottom: 3px;">CHECK-IN</div>
-                      <div style="font-weight: 600; color: #2c3e50;">${hotel.checkIn ? format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy') : 'N/A'}</div>
-                    </div>
-                    <div style="flex: 1; text-align: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
-                      <div style="font-size: 11px; color: #6c757d; margin-bottom: 3px;">CHECK-OUT</div>
-                      <div style="font-weight: 600; color: #2c3e50;">${hotel.checkOut ? format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy') : 'N/A'}</div>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 10px; background: #f8f9fa; padding: 10px; border-radius: 6px;">
+                      <div style="flex: 1; text-align: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
+                        <div style="font-size: 11px; color: #6c757d; margin-bottom: 3px;">CHECK-IN</div>
+                        <div style="font-weight: 600; color: #2c3e50;">${hotel.checkIn ? format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy') : 'N/A'}</div>
+                      </div>
+                      <div style="flex: 1; text-align: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e9ecef;">
+                        <div style="font-size: 11px; color: #6c757d; margin-bottom: 3px;">CHECK-OUT</div>
+                        <div style="font-weight: 600; color: #2c3e50;">${hotel.checkOut ? format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy') : 'N/A'}</div>
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -834,7 +818,7 @@ ${inclusions.map(item => `• ${item}`).join('\n')}
       };
       
       // Function to split text into lines that fit the page width
-      const getLines = (text, maxWidth) => {
+      const _getLines = (text, maxWidth) => {
         const words = text.split(' ');
         const lines = [];
         let currentLine = words[0];

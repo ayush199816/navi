@@ -1,5 +1,4 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { 
   ShoppingBagIcon, 
   UserIcon, 
@@ -12,7 +11,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 const ViewBookingModal = ({ booking }) => {
-  const dispatch = useDispatch();
   
   if (!booking) return <div>Booking not found</div>;
 

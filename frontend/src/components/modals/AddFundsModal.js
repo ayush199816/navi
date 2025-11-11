@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { CurrencyRupeeIcon, CreditCardIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { closeModal } from '../../redux/slices/uiSlice';
 

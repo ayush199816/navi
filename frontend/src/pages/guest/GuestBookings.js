@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { FaCalendarAlt, FaMapMarkerAlt, FaFilePdf, FaDownload, FaUsers } from 'react-icons/fa';
-import { FiDollarSign, FiCheckCircle, FiXCircle, FiClock } from 'react-icons/fi';
+import { FaCalendarAlt, FaFilePdf, FaUsers } from 'react-icons/fa';
+import { FiCheckCircle, FiXCircle, FiClock } from 'react-icons/fi';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 const GuestBookings = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
 

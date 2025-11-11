@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon as XIcon, PlusIcon as Plus, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon as Plus, TrashIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
 const HotelFlightEditModal = ({ open, onClose, booking, onUpdate }) => {

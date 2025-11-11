@@ -41,16 +41,6 @@ const AnalogClockHands = ({ timeZone }) => {
   const minutesDegrees = (time.minutes * 6 + time.seconds * 0.1) % 360;
   const hoursDegrees = (time.hours * 30 + time.minutes * 0.5) % 360;
 
-  // Format time for digital display
-  const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', {
-      timeZone,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
-    });
-  };
 
   return (
     <div className="relative w-full h-full">
@@ -98,26 +88,6 @@ const timeZones = [
 ];
 
 const WorldClock = () => {
-  const [currentTime, setCurrentTime] = useState('');
-
-  // Update current UTC time every second
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const utcTime = now.toLocaleTimeString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      });
-      setCurrentTime(utcTime);
-    };
-
-    updateTime();
-    const timer = setInterval(updateTime, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Function to get timezone offset string
   const getTimezoneOffset = (timeZone) => {

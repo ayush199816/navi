@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -19,9 +19,9 @@ const Packages = () => {
 
   useEffect(() => {
     fetchPackages();
-  }, [filters]);
+  }, [fetchPackages]);
 
-  const fetchPackages = async () => {
+  const fetchPackages = useCallback(async () => {
     setLoading(true);
     try {
       let url = '/api/packages?isActive=true';
@@ -41,9 +41,10 @@ const Packages = () => {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch packages');
       toast.error('Failed to load packages');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [filters.search, filters.destination, filters.hasOffers]);
 
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;

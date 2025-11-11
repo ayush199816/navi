@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
-import { FiCalendar, FiUsers, FiPlus, FiMinus, FiShoppingCart, FiCreditCard, FiMapPin, FiClock, FiInfo, FiStar, FiPackage, FiTag, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiCalendar, FiPlus, FiMinus, FiShoppingCart, FiMapPin, FiClock, FiStar, FiPackage, FiTag, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
-import { getGuestSightseeingById, clearCurrentSightseeing, fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
+import { getGuestSightseeingById, clearCurrentSightseeing } from '../redux/slices/guestSightseeingSlice';
 import { addToCart } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
@@ -31,8 +31,7 @@ const SightseeingDetailPage = () => {
   
   const { 
     currentSightseeing, 
-    loading: sightseeingLoading, 
-    error, 
+    loading: sightseeingLoading
   } = useSelector((state) => ({
     currentSightseeing: state.guestSightseeings.currentSightseeing,
     loading: state.guestSightseeings.loading,

@@ -93,13 +93,12 @@ const SightseeingCard = ({ sightseeing, tripDays, isSightseeingInDay, toggleSigh
 const ItineraryBuilder = () => {
   const { user } = useSelector((state) => state.auth);
   const [sightseeings, setSightseeings] = useState([]);
-  const [filteredSightseeings, setFilteredSightseeings] = useState([]);
   const [itinerary, setItinerary] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [title, setTitle] = useState('My Itinerary');
-  const [description, setDescription] = useState('');
+  const [title] = useState('');
+  const [description] = useState('');
   const [formData, setFormData] = useState({
     guestName: '',
     guestEmail: '',
@@ -119,7 +118,6 @@ const ItineraryBuilder = () => {
     country: ''
   });
   
-  const [formErrors, setFormErrors] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   
@@ -281,7 +279,7 @@ const ItineraryBuilder = () => {
       
       const quoteData = {
         title: title || `Itinerary for ${formData.guestName}`,
-        description: description || 'Custom travel package',
+        description: 'Custom travel package',
         customerName: formData.guestName,
         customerEmail: formData.guestEmail,
         customerPhone: formData.guestPhone,
@@ -319,7 +317,7 @@ const ItineraryBuilder = () => {
       // Create the final payload with all required fields
       const finalPayload = {
         title: title || `Itinerary for ${formData.guestName}`,
-        description: description || 'Custom travel package',
+        description: 'Custom travel package',
         customerName: formData.guestName.trim(),
         customerEmail: formData.guestEmail.trim(),
         customerPhone: formData.guestPhone.trim(),

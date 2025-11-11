@@ -36,13 +36,8 @@ const AddSeller = () => {
     commissionRate: 0
   });
   
-  // Fetch sellers on component mount
-  useEffect(() => {
-    fetchSellers();
-  }, []);
-  
   // Fetch all sellers
-  const fetchSellers = async () => {
+  const fetchSellers = React.useCallback(async () => {
     setLoading(true);
     try {
       const config = {
@@ -59,7 +54,12 @@ const AddSeller = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+  
+  // Fetch sellers on component mount
+  useEffect(() => {
+    fetchSellers();
+  }, [fetchSellers]);
   
   // Handle form input change
   const handleChange = (e) => {

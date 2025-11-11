@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector, useStore } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { 
   fetchGuestSightseeings, 
   deleteGuestSightseeing,
-  clearGuestSightseeingState,
-  getGuestSightseeingById
+  clearGuestSightseeingState
 } from '../../redux/slices/guestSightseeingSlice';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
@@ -18,9 +17,8 @@ import GuestSightseeingForm from './GuestSightseeingForm';
 
 const GuestSightseeings = () => {
   const dispatch = useDispatch();
-  const store = useStore();
   const guestSightseeingsState = useSelector((state) => state.guestSightseeings);
-  const { sightseeings = [], loading, error, success, total = 0, page = 1, pages = 1 } = guestSightseeingsState;
+  const { sightseeings = [], loading, error, success, total = 0, pages = 1 } = guestSightseeingsState;
   
   // State effect
   useEffect(() => {
@@ -48,7 +46,7 @@ const GuestSightseeings = () => {
       ...filters
     };
     
-    const promise = dispatch(fetchGuestSightseeings(params));
+    dispatch(fetchGuestSightseeings(params));
     
     return () => {
       dispatch(clearGuestSightseeingState());

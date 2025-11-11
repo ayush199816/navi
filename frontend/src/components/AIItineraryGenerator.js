@@ -1,37 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Destination-specific activities
-const DESTINATION_ACTIVITIES = {
-  'Krabi': [
-    '4 Island Tour by Speedboat',
-    '7 Island Sunset Tour',
-    'Railay Beach & Phra Nang Cave',
-    'Hong Islands Tour',
-    'Emerald Pool & Hot Springs',
-    'Tiger Cave Temple',
-    'Kayaking in Ao Thalane'
-  ],
-  'Phuket': [
-    'Phi Phi Islands Day Trip',
-    'James Bond Island Tour',
-    'Phang Nga Bay by Speedboat',
-    'Similan Islands Diving',
-    'Phuket Old Town Tour',
-    'Big Buddha & Viewpoints',
-    'Elephant Sanctuary Visit'
-  ],
-  'Pattaya': [
-    'Coral Island Day Trip',
-    'Koh Larn Island Hopping',
-    'Floating Market Tour',
-    'Sanctuary of Truth',
-    'Nong Nooch Tropical Garden',
-    'Pattaya Viewpoints',
-    'Underwater World'
-  ]
-};
-
 const AIItineraryGenerator = ({
   open,
   onClose,
@@ -52,7 +21,7 @@ const AIItineraryGenerator = ({
   const [error, setError] = useState(null);
   const [step, setStep] = useState(1);
 
-  // Reset form when opening the modal
+  // Reset form when opening the modal or when default values change
   useEffect(() => {
     if (open) {
       setDestination(defaultDestination);
@@ -66,15 +35,8 @@ const AIItineraryGenerator = ({
       setError(null);
       setStep(1);
     }
-  }, [open]);
-
-  const handleActivityToggle = (activity) => {
-    setSelectedActivities(prev => 
-      prev.includes(activity)
-        ? prev.filter(a => a !== activity)
-        : [...prev, activity]
-    );
-  };
+  }, [open, defaultDestination, defaultDates.startDate, defaultDates.endDate, defaultPreferences, 
+      setDestination, setDates, setSelectedActivities, setPreferences, setItinerary, setError, setStep]);
 
   const handleGenerate = async (e) => {
     if (e) e.preventDefault();
@@ -89,37 +51,42 @@ const AIItineraryGenerator = ({
     setItinerary(null);
     
     try {
-      // In a real implementation, you would call your backend API here
-      // For example:
-      // const res = await axios.post('http://localhost:5000/api/ai/itinerary', {
-      //   destination,
-      //   dates,
-      //   activities: selectedActivities,
-      //   preferences,
-      // });
-      
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock response - in a real app, this would come from the API
-      const mockItinerary = {
+      // Try to call the backend API
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/ai/generate-itinerary`, {
         destination,
-        duration: `${dates.startDate} to ${dates.endDate}`,
-        activities: selectedActivities.map(activity => ({
-          day: 1,
-          time: '09:00 AM',
-          activity,
-          duration: '4-6 hours',
-          description: `Experience the best of ${activity} in ${destination}.`
-        })),
-        notes: preferences ? `Special preferences: ${preferences}` : ''
-      };
+        dates,
+        activities: selectedActivities,
+        preferences,
+      });
       
-      setItinerary(mockItinerary);
-      if (onItineraryGenerated) onItineraryGenerated(mockItinerary);
+      if (response.data.success) {
+        setItinerary(response.data.data);
+        if (onItineraryGenerated) onItineraryGenerated(response.data.data);
+      } else {
+        throw new Error(response.data.message || 'Failed to generate itinerary');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate itinerary');
       console.error('Error generating itinerary:', err);
+      
+      // Handle specific error cases
+      if (err.response?.data?.error?.includes('GoogleGenerativeAI') || 
+          err.response?.data?.message?.includes('overloaded')) {
+        // Show a user-friendly message for Google AI service overload
+        setError('The AI service is currently experiencing high demand. Please try again in a few minutes.');
+      } else if (err.response?.data?.message) {
+        // Use server-provided error message
+        setError(err.response.data.message);
+      } else if (err.message) {
+        // Fallback to generic error message
+        setError('Failed to generate itinerary. Please check your connection and try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
+      
+      // For development, log the full error
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Full error details:', err);
+      }
     } finally {
       setLoading(false);
     }

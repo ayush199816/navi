@@ -1,9 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { saveAs } from 'file-saver';
-import { FiDownload, FiShare2, FiMessageSquare } from 'react-icons/fi';
-import MainLayout from '../components/layouts/MainLayout';
+import { FiDownload, FiMessageSquare } from 'react-icons/fi';
 
 const AIItineraryGeneratorPage = () => {
   const navigate = useNavigate();
@@ -16,7 +14,7 @@ const AIItineraryGeneratorPage = () => {
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState('');
   const [error, setError] = useState('');
-  const itineraryRef = useRef(null);
+  // Removed unused itineraryRef
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -342,20 +340,19 @@ const AIItineraryGeneratorPage = () => {
   const itineraryDays = parseItinerary(itinerary);
 
   return (
-    <MainLayout>
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <button
-              onClick={() => navigate('/')}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-            >
-              <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Back to Home
-            </button>
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Back to Home
+          </button>
+        </div>
         <div className="text-center mb-10">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-3">
             AI Itinerary Generator
@@ -589,7 +586,6 @@ const AIItineraryGeneratorPage = () => {
         )}
       </div>
     </div>
-  </MainLayout>
   );
 };
 

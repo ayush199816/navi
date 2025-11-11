@@ -101,11 +101,11 @@ const Claims = () => {
   useEffect(() => {
     fetchClaims();
     fetchStats();
-  }, [page, limit, filters]);
+  }, [page, limit, filters, fetchClaims, fetchStats]);
 
   useEffect(() => {
     fetchAgents();
-  }, []);
+  }, [fetchAgents]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

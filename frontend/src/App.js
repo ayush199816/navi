@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,7 +8,7 @@ import CartPage from './pages/CartPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
-import AuthLayout from './components/layouts/AuthLayout';
+// AuthLayout is imported but not used
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -156,7 +156,7 @@ const ProtectedRoute = ({ children, roles, requireApproval = true }) => {
       navigate('/unauthorized', { replace: true });
       return;
     }
-  }, [isAuthenticated, user, loading, requireApproval, navigate, location]);
+  }, [isAuthenticated, user, loading, requireApproval, navigate, location, roles]);
   
   if (loading) {
     return (
@@ -208,11 +208,12 @@ const AgentAuthWrapper = ({ children }) => {
 
 function App() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
-  const cart = useSelector((state) => state.cart);
-  const [showCart, setShowCart] = useState(false);
+  // These variables were unused but might be needed later
+  // const navigate = useNavigate();
+  // const location = useLocation();
+  // const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
+  // const cart = useSelector((state) => state.cart);
+  // const [showCart, setShowCart] = useState(false);
   
   useEffect(() => {
     dispatch(loadUser());

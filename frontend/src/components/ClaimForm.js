@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
 const ClaimForm = ({ booking, onSuccess }) => {
-  const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
-  const [currencies, setCurrencies] = useState([
+  const [currencies] = useState([
     { code: 'USD', name: 'US Dollar', rate: 1 },
     { code: 'EUR', name: 'Euro', rate: 0.91 },
     { code: 'GBP', name: 'British Pound', rate: 0.78 },
@@ -61,12 +59,6 @@ const ClaimForm = ({ booking, onSuccess }) => {
     });
   };
 
-  const handleNumberChange = (name, value) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
 
   const validateForm = () => {
     const newErrors = {};

@@ -1,12 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-  Table, Button, Space, Badge, message, Card, Typography, 
-  Row, Col, Tag, Descriptions, Popconfirm, Divider 
+  Table, Button, Space, message, Card, Typography, Tag, Popconfirm 
 } from 'antd';
 import { 
-  CheckOutlined, CloseOutlined, 
-  UserOutlined, MailOutlined, PhoneOutlined, IdcardOutlined 
+  CheckOutlined, CloseOutlined 
 } from '@ant-design/icons';
 import { ReloadOutlined } from '@ant-design/icons';
 import { getPendingAgentApprovals, updateUserApproval } from '../../redux/slices/userSlice';
@@ -26,11 +24,7 @@ const AgentApprovals = () => {
     });
   }, [pendingAgentApprovals, loading, error]);
 
-  useEffect(() => {
-    loadPendingApprovals();
-  }, []);
-
-  const loadPendingApprovals = async () => {
+  const loadPendingApprovals = useCallback(async () => {
     try {
       console.log('Loading pending approvals...');
       const resultAction = await dispatch(getPendingAgentApprovals());
@@ -51,14 +45,14 @@ const AgentApprovals = () => {
         });
       }
     } catch (err) {
-      console.error('Unexpected error in loadPendingApprovals:', err);
-      message.error({
-        content: `Unexpected error: ${err.message || 'Unknown error occurred'}`,
-        duration: 5,
-        style: { marginTop: '50px' }
-      });
+      console.error('Error in loadPendingApprovals:', err);
+      message.error('An unexpected error occurred while loading pending approvals');
     }
-  };
+  }, [dispatch]);
+
+  useEffect(() => {
+    loadPendingApprovals();
+  }, [loadPendingApprovals]);
 
   const handleApprove = async (userId) => {
     try {
