@@ -28,19 +28,53 @@ const AIItineraryGeneratorPage = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setItinerary(''); // Reset itinerary before making a new request
     
     try {
-      const response = await axios.post('/api/v1/ai-itinerary/generate', {
+      const response = await axios.post('/api/ai/itinerary', {
         destination: formData.destination,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        requirements: formData.requirements,
+        dates: {
+          startDate: formData.startDate,
+          endDate: formData.endDate
+        },
+        preferences: formData.requirements
       });
       
-      setItinerary(response.data.itinerary);
+      console.log('API Response:', response.data); // Debug log
+      
+      // Handle the response based on its structure
+      let itineraryText = '';
+      
+      if (typeof response.data === 'string') {
+        // If the response is a string, use it directly
+        itineraryText = response.data;
+      } else if (response.data && response.data.itinerary) {
+        // If the response has an itinerary field
+        itineraryText = response.data.itinerary;
+      } else if (response.data && response.data.message) {
+        // If the response has a message field
+        itineraryText = response.data.message;
+      } else if (response.data) {
+        // If the response is an object, try to stringify it
+        itineraryText = JSON.stringify(response.data, null, 2);
+      }
+      
+      // Clean up the itinerary text
+      if (itineraryText) {
+        // Remove any markdown code blocks if present
+        itineraryText = itineraryText.replace(/```(?:markdown)?\n?([\s\S]*?)\n?```/g, '$1');
+        // Trim any extra whitespace
+        itineraryText = itineraryText.trim();
+      }
+      
+      setItinerary(itineraryText);
+      
     } catch (err) {
       console.error('Error generating itinerary:', err);
-      setError('Failed to generate itinerary. Please try again.');
+      const errorMessage = err.response?.data?.message || 
+                         err.response?.data?.error || 
+                         'Failed to generate itinerary. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -177,72 +211,106 @@ const AIItineraryGeneratorPage = () => {
     };
   };
   
-  const shareOnWhatsApp = () => {
-    // Create a text version of the itinerary
-    let text = `*${formData.destination} Travel Itinerary*\n\n`;
+  const handleShareOnWhatsApp = () => {
+    if (!itinerary) return;
     
-    // Add dates
-    text += `*Dates:* ${formData.startDate} to ${formData.endDate}\n\n`;
-    
-    // Add itinerary days
-    const days = parseItinerary(itinerary);
-    days.forEach(day => {
-      text += `*${day.day}: ${day.title}*\n`;
-      // Convert HTML to plain text for WhatsApp
-      const plainText = day.content
-        .replace(/<[^>]*>?/gm, '') // Remove HTML tags
-        .replace(/&nbsp;/g, ' ')   // Replace HTML spaces
-        .replace(/\s+/g, ' ')      // Collapse multiple spaces
-        .trim();
+    try {
+      // Format the message with proper line breaks and formatting
+      let text = `*Your Travel Itinerary for ${formData.destination}*\n\n`;
+      text += `*Dates:* ${formData.startDate} to ${formData.endDate}\n\n`;
       
-      text += `${plainText}\n\n`;
-    });
-    
-    // Encode the text for URL
-    const encodedText = encodeURIComponent(text);
-    
-    // Open WhatsApp with the text
-    window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+      // Add itinerary days if we can parse them
+      const days = parseItinerary(itinerary);
+      if (days && days.length > 0) {
+        days.forEach(day => {
+          if (day && day.day && day.title) {
+            text += `*${day.day}: ${day.title}*\n`;
+            if (day.content) {
+              // Convert HTML to plain text for WhatsApp
+              const plainText = String(day.content)
+                .replace(/<[^>]*>?/gm, '') // Remove HTML tags
+                .replace(/&nbsp;/g, ' ')   // Replace HTML spaces
+                .replace(/\s+/g, ' ')      // Collapse multiple spaces
+                .trim();
+              
+              text += `${plainText}\n\n`;
+            }
+          }
+        });
+      } else {
+        // If we couldn't parse days, just use the raw itinerary
+        text += String(itinerary)
+          .replace(/<[^>]*>?/gm, '') // Remove HTML tags
+          .replace(/&nbsp;/g, ' ')   // Replace HTML spaces
+          .replace(/\s+/g, ' ')      // Collapse multiple spaces
+          .trim();
+      }
+      
+      // Encode the text for URL
+      const encodedText = encodeURIComponent(text);
+      
+      // Open WhatsApp with the text
+      window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+    } catch (e) {
+      console.error('Error sharing on WhatsApp:', e);
+      alert('Failed to share on WhatsApp. Please try again.');
+    }
   };
 
   const parseItinerary = (itineraryText) => {
     if (!itineraryText) return [];
     
-    // First, try to split by day sections
-    let daySections = [];
+    // Convert to string in case it's not
+    const text = String(itineraryText);
     
-    // Try different patterns to split days
-    const dayPatterns = [
-      /(###?\s*Day\s+\d+[\s\-:].*?(?=\n###?\s*Day\s+\d+[\s\-:]|$))/gis,  // Markdown style with Day X: or Day X -
-      /(Day\s+\d+[\s\-:].*?(?=\nDay\s+\d+[\s\-:]|$))/gis,           // Plain text with Day X:
-      /(###?\s*\d+[\s\-:].*?(?=\n###?\s*\d+[\s\-:]|$))/gis,          // Just numbers with : or -
-    ];
+    // Look for the main itinerary pattern (starts with Day 1 or ## Day 1)
+    const mainItineraryMatch = text.match(/(##?\s*Day\s+1[\s\S]*?)(?=##?\s*Travel Tips|$)/i);
+    const mainItineraryText = mainItineraryMatch ? mainItineraryMatch[0] : text;
     
-    // Try each pattern until we find a good split
-    for (const pattern of dayPatterns) {
-      const matches = [...itineraryText.matchAll(pattern)];
-      if (matches.length > 1) {
-        daySections = matches.map(match => match[0].trim());
-        break;
+    // Split by day sections (## Day X)
+    const daySections = [];
+    const dayPattern = /(##?\s*Day\s+\d+[\s\S]*?)(?=##?\s*Day\s+\d+|##?\s*Travel Tips|$)/gi;
+    
+    let dayMatch;
+    while ((dayMatch = dayPattern.exec(mainItineraryText)) !== null) {
+      const section = dayMatch[1].trim();
+      // Only add if it's a valid day section (contains time-based activities)
+      if (section.match(/(morning|afternoon|evening)/i)) {
+        daySections.push(section);
       }
     }
     
-    // If no day sections found, try to split by date patterns
-    if (daySections.length <= 1) {
-      const datePattern = /(\w+,\s+\d{4}-\d{2}-\d{2}.*?(?=\n\w+,\s+\d{4}-\d{2}-\d{2}|$))/gis;
-      const dateMatches = [...itineraryText.matchAll(datePattern)];
-      if (dateMatches.length > 1) {
-        daySections = dateMatches.map(match => match[0].trim());
+    // If no day sections found, try to find any date patterns
+    if (daySections.length === 0) {
+      const datePattern = /(\w+,\s+\d{4}-\d{2}-\d{2}[\s\S]*?)(?=\w+,\s+\d{4}-\d{2}-\d{2}|##?\s*Travel Tips|$)/gi;
+      let dateMatch;
+      while ((dateMatch = datePattern.exec(text)) !== null) {
+        daySections.push(dateMatch[1].trim());
       }
     }
     
     // If still no sections found, try to split by double newlines
-    if (daySections.length <= 1) {
-      daySections = itineraryText.split(/\n\s*\n+/).filter(section => 
-        section.trim().length > 0 && 
-        !section.trim().startsWith('---') &&
-        !section.trim().startsWith('# Important Travel Tips')
-      );
+    if (daySections.length === 0) {
+      const sections = text.split(/\n\s*\n+/).filter(section => {
+        const trimmed = section.trim();
+        return (
+          trimmed.length > 0 && 
+          !trimmed.startsWith('---') &&
+          !trimmed.match(/^#+\s*Itinerary for/i) &&
+          !trimmed.match(/^Travel Dates?:/i) &&
+          !trimmed.match(/^Preferences?:/i) &&
+          trimmed !== 'Day 1' &&
+          !trimmed.match(/^Day \d+$/) // Skip standalone "Day X" lines
+        );
+      });
+      
+      // Group sections into days (assuming 3 sections per day: morning, afternoon, evening)
+      if (sections.length > 0) {
+        for (let i = 0; i < sections.length; i += 3) {
+          const daySectionsGroup = sections.slice(i, i + 3).join('\n\n');
+          daySections.push(`## Day ${Math.floor(i / 3) + 1}\n\n${daySectionsGroup}`);
+        }
+      }
     }
     
     // If no sections at all, return the whole text as one section
@@ -256,85 +324,111 @@ const AIItineraryGeneratorPage = () => {
           </div>`
       }];
     }
+
+    // Process each day section
+    const processedDays = [];
+    let dayNumber = 1;
     
-    return daySections.map((section, index) => {
-      // Extract day number and title
-      let dayNumber = index + 1;
+    for (const section of daySections) {
       let title = `Day ${dayNumber}`;
+      let content = section;
       
-      // Try to extract day number and title from section
-      const dayMatch = section.match(/###?\s*(?:Day\s*)?(\d+)[\s\-:](.*?)(?=\n|###|$)/i) || 
-                     section.match(/(?:Day\s*)?(\d+)[\s\-:](.*?)(?=\n|###|$)/i);
-      
+      // Extract day number and date from section
+      const dayMatch = section.match(/^##?\s*Day\s+(\d+)(?:\s*\(([^)]+)\))?/i);
       if (dayMatch) {
-        dayNumber = dayMatch[1] || dayNumber;
-        title = (dayMatch[2] || `Day ${dayNumber}`).trim();
-      } 
-      // Try to extract date from section
-      else {
-        const dateMatch = section.match(/(\w+,\s+\d{4}-\d{2}-\d{2})(?:\s*-\s*(.*?))?(?=\n|$)/i);
-        if (dateMatch) {
-          title = dateMatch[2] ? `${dateMatch[1].trim()} - ${dateMatch[2].trim()}` : dateMatch[1].trim();
-        }
+        dayNumber = parseInt(dayMatch[1]) || dayNumber;
+        title = dayMatch[2] ? `Day ${dayNumber} (${dayMatch[2]})` : `Day ${dayNumber}`;
+        // Remove the day header from content
+        content = content.replace(/^##?\s*Day\s+\d+\s*(?:\([^)]+\))?\s*\n?/i, '').trim();
       }
       
-      // Clean up the content
-      let content = section
-        // Remove day/date headers
-        .replace(/^###?\s*(?:Day\s*)?\d+[\s\-:].*?\n/i, '')
-        .replace(/^\w+,\s+\d{4}-\d{2}-\d{2}(?:\s*-\s*.*?)?\n?/i, '')
-        .trim();
-      
       // Format the content with proper HTML structure
-      const formattedContent = content
-        // Handle time-based sections (e.g., "Morning (08:00 - 10:00):")
-        .replace(/^(\w+)\s*\(?(\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})\)?\s*:?/gim, 
-          (match, timeOfDay, timeRange) => {
-            return `</p><h3 class="text-md font-semibold mt-4 mb-2 text-blue-700">${timeOfDay}${timeRange ? ` (${timeRange})` : ''}</h3><p>`;
+      let formattedContent = content
+        // Handle time-based sections (e.g., "### Morning" or "Morning:")
+        .replace(/^###?\s*(Morning|Afternoon|Evening)\s*:?/gim, 
+          (match, timeOfDay) => {
+            return `</p><h3 class="text-md font-semibold mt-4 mb-2 text-blue-700">${timeOfDay}</h3><p>`;
           })
+        // Handle bullet points
+        .replace(/^[-•*]\s+(.+)$/gm, '<li>$1</li>')
+        // Handle numbered lists
+        .replace(/^(\d+)\.\s+(.+)$/gm, '<li>$2</li>')
         // Handle bold text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         // Handle italic text
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        // Handle lists with bullet points
-        .replace(/^\s*[-*•]\s+(.+)$/gm, '<li>$1</li>')
-        // Handle numbered lists
-        .replace(/^\s*\d+\.\s+(.+)$/gm, '<li>$1</li>')
-        // Handle travel tips
-        .replace(/Travel Tip:/g, '<strong class="text-blue-600">Travel Tip:</strong>')
-        // Split into paragraphs
-        .split(/\n\s*\n+/)
-        .filter(para => {
-          // Skip empty paragraphs and section dividers
-          const trimmed = para.trim();
-          return trimmed.length > 0 && 
-                 !trimmed.startsWith('---') && 
-                 !trimmed.startsWith('###') &&
-                 !trimmed.match(/^Day\s+\d+/i) &&
-                 !trimmed.match(/^\w+,\s+\d{4}-\d{2}-\d{2}/i);
-        })
-        .map(para => {
-          // If paragraph contains list items, wrap in ul
-          if (para.includes('<li>')) {
-            return `<ul class="space-y-2 mb-4 pl-5 list-disc">${para}</ul>`;
-          }
-          // If it's a heading
-          if (para.match(/^#+\s/)) {
-            const level = para.match(/^#+/)[0].length;
-            const text = para.replace(/^#+\s*/, '');
-            return `<h${Math.min(level + 1, 6)} class="text-lg font-semibold mt-6 mb-3">${text}</h${Math.min(level + 1, 6)}>`;
-          }
-          // Regular paragraph
-          return `<p class="mb-4">${para}</p>`;
-        })
-        .join('');
+        // Convert remaining newlines to line breaks
+        .replace(/\n/g, '<br>');
       
-      return {
+      // Split into paragraphs based on double line breaks
+      const paragraphs = [];
+      const lines = formattedContent.split('<br>');
+      let currentParagraph = [];
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed === '') {
+          if (currentParagraph.length > 0) {
+            paragraphs.push(currentParagraph.join(' '));
+            currentParagraph = [];
+          }
+        } else if (trimmed.startsWith('<li>') || trimmed.startsWith('<h3>')) {
+          if (currentParagraph.length > 0) {
+            paragraphs.push(currentParagraph.join(' '));
+            currentParagraph = [];
+          }
+          paragraphs.push(trimmed);
+        } else {
+          currentParagraph.push(trimmed);
+        }
+      }
+      
+      if (currentParagraph.length > 0) {
+        paragraphs.push(currentParagraph.join(' '));
+      }
+      
+      // Final formatting of paragraphs
+      const finalContent = paragraphs.map(para => {
+        if (para.startsWith('<li>') || para.startsWith('<h3>')) {
+          return para;
+        }
+        return `<p class="mb-3">${para}</p>`;
+      }).join('');
+      
+      // Add to processed days
+      processedDays.push({
         day: `Day ${dayNumber}`,
         title: title,
-        content: formattedContent
-      };
-    });
+        content: finalContent
+      });
+      
+      dayNumber++;
+    }
+    
+    // Add travel tips if found
+    const tipsMatch = text.match(/##?\s*Travel Tips[\s\S]*/i);
+    if (tipsMatch) {
+      const tipsContent = tipsMatch[0]
+        .replace(/##?\s*Travel Tips\s*/i, '')
+        .trim()
+        .split('\n')
+        .filter(line => line.trim().length > 0)
+        .map(tip => `<li>${tip.trim().replace(/^[-•*]\s*/, '')}</li>`)
+        .join('');
+      
+      if (tipsContent) {
+        processedDays.push({
+          day: 'Tips',
+          title: 'Travel Tips',
+          content: `<div class="mt-6">
+            <h3 class="text-lg font-semibold mb-3 text-blue-800">Travel Tips</h3>
+            <ul class="list-disc pl-5 space-y-2">${tipsContent}</ul>
+          </div>`
+        });
+      }
+    }
+    
+    return processedDays;
   };
 
   const itineraryDays = parseItinerary(itinerary);
@@ -523,7 +617,7 @@ const AIItineraryGeneratorPage = () => {
                   Download PDF
                 </button>
                 <button
-                  onClick={shareOnWhatsApp}
+                  onClick={handleShareOnWhatsApp}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#25D366] hover:bg-[#128C7E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#25D366]"
                 >
                   <FiMessageSquare className="mr-2 h-4 w-4" />

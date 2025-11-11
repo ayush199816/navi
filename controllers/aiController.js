@@ -104,10 +104,13 @@ Format the itinerary in Markdown with clear headings and bullet points.`;
     // Post-process the itinerary to remove any budget information
     itinerary = removeBudgetInformation(itinerary);
 
-    // Return the generated itinerary
+    // Return the generated itinerary in the expected format
     res.status(200).json({
       success: true,
-      itinerary
+      itinerary: `# ${tripDuration}-Day Itinerary for ${destination}\n\n` +
+        `**Travel Dates:** ${startDate} to ${endDate}\n\n` +
+        (preferences ? `**Preferences:** ${preferences}\n\n` : '') +
+        itinerary
     });
   } catch (err) {
     console.error('Error generating AI itinerary:', err);
