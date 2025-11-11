@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { 
   fetchSalesLeads, 
   createSalesLead,
-  updateSalesLead,
   deleteSalesLead,
   resetCurrentLead
 } from '../../../redux/slices/salesLeadSlice';
@@ -25,7 +24,7 @@ const SalesLeads = () => {
   const error = leadsState?.error;
   
   console.log('Leads data:', leads);
-  const [filters, setFilters] = useState({
+  const [filters] = useState({
     status: '',
     source: '',
     assignedTo: '',
