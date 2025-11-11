@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { ExclamationCircleIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import ClaimForm from './ClaimForm';
@@ -10,13 +10,9 @@ const ClaimModal = ({ isOpen, onClose, booking }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (isOpen && booking?._id) {
-      checkExistingClaim();
-    }
-  }, [isOpen, booking]);
-
-  const checkExistingClaim = async () => {
+  const checkExistingClaim = useCallback(async () => {
+    if (!booking?._id) return;
+    
     setLoading(true);
     setError(null);
     
@@ -32,10 +28,17 @@ const ClaimModal = ({ isOpen, onClose, booking }) => {
     } catch (err) {
       console.error('Error checking existing claim:', err);
       setError('Failed to check for existing claims');
+      setExistingClaim(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [booking]);
+
+  useEffect(() => {
+    if (isOpen && booking?._id) {
+      checkExistingClaim();
+    }
+  }, [isOpen, booking, checkExistingClaim]);
 
   const handleClaimSuccess = (claim) => {
     setExistingClaim(claim);
