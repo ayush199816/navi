@@ -68,10 +68,10 @@ Format the itinerary in Markdown with clear headings and bullet points.`;
     
     // Define models to try in order of preference
     const modelsToTry = [
+      'gemini-1.5-pro',
       'gemini-1.5-flash',
-      'gemini-1.5-flash-8b',
-      'gemini-pro',
-      'gemini-1.0-pro',
+      'gemini-pro-vision',
+      'gemini-1.0-pro-vision-latest',
       'gemini-1.0-pro-latest'
     ];
     
