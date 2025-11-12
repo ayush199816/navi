@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, isValid, addDays, differenceInDays } from 'date-fns';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import api from '../../utils/api';
 
 // Utility function to format currency
 const formatPrice = (amount, currency = 'INR') => {
@@ -97,11 +99,81 @@ const ItineraryCreator = (props) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logic to save the itinerary via API (e.g., api.post('/itineraries', formData))
-    toast.info("Itinerary save logic executed! (Placeholder) LOL");
-    // navigate('/itineraries');
+    setIsSubmitting(true);
+    
+    try {
+      // Set a default title if not provided
+      if (!formData.title) {
+        const customerName = formData.customerName || 'Customer';
+        const destination = formData.destination || 'Destination';
+        formData.title = `${customerName}'s ${destination} Itinerary`;
+      }
+
+      // Ensure required fields are present
+      if (!formData.destination) {
+        throw new Error('Please specify a destination for the itinerary');
+      }
+
+      // Prepare the data to send
+      const itineraryData = {
+        ...formData,
+        title: formData.title, // Ensure title is included
+        days: itineraryDays,
+        // Ensure dates are in ISO format
+        arrivalDate: formData.arrivalDate ? new Date(formData.arrivalDate).toISOString() : new Date().toISOString(),
+        departureDate: formData.departureDate 
+          ? new Date(formData.departureDate).toISOString() 
+          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        // Set default status if not provided
+        status: formData.status || 'draft',
+      };
+
+      // Make the API call
+      await api.post('/itineraries', itineraryData);
+      
+      // Handle success
+      toast.success('Itinerary saved successfully!');
+      
+      // Redirect to the itineraries list or view page
+      navigate('/agent/itineraries');
+      
+    } catch (error) {
+      console.error('Error saving itinerary:', error);
+      
+      // Handle different types of errors
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        if (error.response.status === 401) {
+          toast.error('Session expired. Please log in again.');
+          navigate('/login');
+          return;
+        }
+        
+        // Check if the response is HTML instead of JSON
+        const contentType = error.response.headers['content-type'] || '';
+        if (contentType.includes('text/html')) {
+          toast.error('Server error: Received an unexpected response. Please try again later.');
+          return;
+        }
+        
+        // Show error message from server if available
+        const errorMessage = error.response.data?.message || 'Failed to save itinerary';
+        toast.error(errorMessage);
+      } else if (error.request) {
+        // The request was made but no response was received
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        // Something happened in setting up the request
+        toast.error('An error occurred. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleHotelChange = (index, field, value) => {
@@ -663,6 +735,16 @@ const ItineraryCreator = (props) => {
 
       {/* Customer Information */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {isSubmitting && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <p className="text-lg font-medium">Saving itinerary...</p>
+              <div className="mt-4 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            </div>
+          </div>
+        )}
         <section className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Customer Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
