@@ -112,18 +112,39 @@ const ItineraryCreator = (props) => {
           // Set itinerary days if available
           if (itinerary.days?.length) {
             // Sort days by date to ensure they're in order
-            const sortedDays = [...itinerary.days].sort((a, b) => 
-              new Date(a.date || a.day) - new Date(b.date || b.day)
-            );
+            const sortedDays = [...itinerary.days].sort((a, b) => {
+              const dateA = new Date(a.date || a.day || itinerary.arrivalDate);
+              const dateB = new Date(b.date || b.day || itinerary.arrivalDate);
+              return dateA - dateB;
+            });
             
             // Format the days data for the UI
-            const formattedDays = sortedDays.map((day, index) => ({
-              ...day,
-              day: index + 1, // Ensure day number is sequential
-              date: day.date || day.day || new Date(itinerary.arrivalDate).toISOString(),
-              activities: Array.isArray(day.activities) ? day.activities : []
-            }));
+            const formattedDays = sortedDays.map((day, index) => {
+              // Ensure we have a valid date for each day
+              let dayDate;
+              try {
+                dayDate = day.date || day.day || new Date(itinerary.arrivalDate);
+                if (typeof dayDate === 'string') {
+                  dayDate = new Date(dayDate);
+                }
+                // Ensure the date is valid, if not use the arrival date
+                if (isNaN(dayDate.getTime())) {
+                  dayDate = new Date(itinerary.arrivalDate);
+                }
+              } catch (e) {
+                console.error('Error parsing date:', e);
+                dayDate = new Date(itinerary.arrivalDate);
+              }
+              
+              return {
+                ...day,
+                day: index + 1, // Ensure day number is sequential
+                date: dayDate.toISOString(),
+                activities: Array.isArray(day.activities) ? day.activities : []
+              };
+            });
             
+            console.log('Formatted days:', formattedDays); // Debug log
             setItineraryDays(formattedDays);
           } else if (itinerary.arrivalDate && itinerary.departureDate) {
             // If no days data but we have dates, create days array
