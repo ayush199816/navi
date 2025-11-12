@@ -86,9 +86,12 @@ publicRouter.get('/test', async (req, res) => {
 // Mount public routes first
 router.use(publicRouter);
 
+// Public GET routes
+router.get('/', advancedResults(GuestSightseeing), getGuestSightseeings);
+router.get('/:id', getGuestSightseeing);
+
 // Protected routes
 router.route('/')
-  .get(advancedResults(GuestSightseeing), getGuestSightseeings)
   .post(
     protect, 
     authorize('admin'),
@@ -104,9 +107,6 @@ router.post(
   uploadMiddleware,
   uploadGuestSightseeingImages
 );
-
-// Get single guest sightseeing by ID
-router.get('/:id', getGuestSightseeing);
 
 // Update and delete routes with proper authorization
 router.route('/:id')

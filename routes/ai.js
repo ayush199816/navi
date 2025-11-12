@@ -3,10 +3,12 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
 const { generateAIItinerary } = require('../controllers/aiController');
 
-// Protected routes
+// Public route - AI Itinerary generation endpoint
+router.post('/itinerary', generateAIItinerary);
+
+// Protected routes (all routes below this will require authentication)
 router.use(protect);
 
-// AI Itinerary generation endpoint - accessible to admin, operations, and agents
-router.post('/itinerary', authorize('admin', 'operations', 'agent'), generateAIItinerary);
+// Add other protected routes here if needed
 
 module.exports = router;

@@ -25,8 +25,8 @@ exports.generateAIItinerary = async (req, res) => {
 
     // Log the request
     console.log('Generating AI itinerary for:', {
-      user: req.user.name,
-      role: req.user.role,
+      user: req.user ? req.user.name : 'guest',
+      role: req.user ? req.user.role : 'guest',
       destination,
       dates,
       preferences
@@ -52,15 +52,49 @@ exports.generateAIItinerary = async (req, res) => {
     // Create a prompt for Gemini AI
     const prompt = `Create a detailed travel itinerary for a ${tripDuration}-day trip to ${destination} from ${startDate} to ${endDate}.
 
-${preferences ? `Traveler preferences: ${preferences}\n\n` : ''}Please include ONLY the following:
-1. Daily activities broken down by morning, afternoon, and evening
-2. Recommended attractions to visit
-3. Restaurant suggestions for meals
-4. Travel tips specific to the destination
+${preferences ? `**Traveler Preferences:** ${preferences}\n\n` : ''}Please structure the itinerary with the following sections for EACH DAY:
 
-IMPORTANT: DO NOT include any budget information, cost estimates, or prices in the itinerary. The client has specifically requested NO financial information in the itinerary.
+# [Day X] [Date if available] - [Brief highlight of the day]
 
-Format the itinerary in Markdown with clear headings and bullet points.`;
+## Morning
+- [Activity 1] - [Brief description or interesting fact]
+- [Activity 2] - [Brief description or interesting fact]
+- [Breakfast/Lunch Suggestion] - [Restaurant name] (Cuisine type)
+
+## Afternoon
+- [Activity 1] - [Brief description or interesting fact]
+- [Activity 2] - [Brief description or interesting fact]
+- [Lunch Suggestion] - [Restaurant name] (Cuisine type)
+
+## Evening
+- [Activity 1] - [Brief description or interesting fact]
+- [Dinner Suggestion] - [Restaurant name] (Cuisine type)
+- [Evening Activity] - [Brief description]
+
+---
+
+**Traveler Tips for the Day:**
+- [Tip 1]
+- [Tip 2]
+
+**Estimated Time for Activities:**
+- [Activity]: [Duration]
+- [Travel Time]: [Duration] (if applicable)
+
+**Additional Notes:**
+- [Any important information about the day]
+
+IMPORTANT RULES:
+1. DO NOT include any prices, costs, or budget information
+2. Keep descriptions concise but informative (1-2 sentences max per bullet point)
+3. Include opening hours for major attractions if possible
+4. Suggest local transportation options between locations
+5. Highlight any dress codes or cultural considerations
+6. Include a mix of popular attractions and hidden gems
+7. Note any time needed for rest or travel between locations
+8. Include a variety of experiences (cultural, historical, culinary, etc.)
+
+Format the entire response in clean Markdown with proper headings (##, ###) and bullet points.`;
 
     // We'll try multiple models in sequence
 
@@ -68,11 +102,11 @@ Format the itinerary in Markdown with clear headings and bullet points.`;
     
     // Define models to try in order of preference
     const modelsToTry = [
+      'gemini-2.5-flash',
+      'gemini-2.5-flash-lite',
       'gemini-1.5-pro',
       'gemini-1.5-flash',
-      'gemini-pro-vision',
-      'gemini-1.0-pro-vision-latest',
-      'gemini-1.0-pro-latest'
+      'gemini-pro-vision'
     ];
     
     // Try each model until one works
@@ -104,13 +138,30 @@ Format the itinerary in Markdown with clear headings and bullet points.`;
     // Post-process the itinerary to remove any budget information
     itinerary = removeBudgetInformation(itinerary);
 
-    // Return the generated itinerary in the expected format
+    // Post-process the itinerary for consistent formatting
+    let formattedItinerary = itinerary
+      // Clean up excessive line breaks
+      .replace(/\n{3,}/g, '\n\n')
+      // Ensure consistent heading levels
+      .replace(/^#\s+(Day \d+)/gm, '## $1')
+      .replace(/^##\s+(Morning|Afternoon|Evening)/gm, '### $1')
+      // Add spacing before headings
+      .replace(/([^\n])\n\s*##/g, '$1\n\n##')
+      // Ensure consistent bullet points
+      .replace(/^\s*[-•*]\s*/gm, '- ')
+      // Remove any remaining price information
+      .replace(/\$\d+(\.\d{2})?/g, '')
+      .replace(/\d+\s*(?:USD|INR|EUR|GBP)/gi, '');
+
+    // Return the formatted itinerary
     res.status(200).json({
       success: true,
       itinerary: `# ${tripDuration}-Day Itinerary for ${destination}\n\n` +
-        `**Travel Dates:** ${startDate} to ${endDate}\n\n` +
-        (preferences ? `**Preferences:** ${preferences}\n\n` : '') +
-        itinerary
+        `**Destination:** ${destination}\n` +
+        `**Travel Dates:** ${startDate} to ${endDate}\n` +
+        (preferences ? `**Traveler Preferences:** ${preferences}\n\n` : '\n') +
+        '---\n\n' +
+        formattedItinerary
     });
   } catch (err) {
     console.error('Error generating AI itinerary:', err);
@@ -253,15 +304,18 @@ function getRandomRestaurant(destination) {
  * Get a random evening activity for the destination
  */
 function getRandomEveningActivity(destination) {
-  const activities = {
-    'Goa': ['Visit a beach shack', 'Enjoy a sunset cruise', 'Experience the nightlife at Tito\'s Lane', 'Attend a beach party', 'Visit a casino'],
-    'Mumbai': ['Watch sunset at Marine Drive', 'Visit a rooftop bar', 'Watch a Bollywood movie', 'Shop at Colaba Causeway', 'Attend a cultural performance'],
-    'Delhi': ['Visit Connaught Place', 'Shop at Janpath Market', 'Attend a cultural show at Dilli Haat', 'Experience the nightlife at Hauz Khas Village', 'Visit India Gate at night'],
-    'Jaipur': ['Watch a cultural show at Chokhi Dhani', 'Shop at Johari Bazaar', 'Visit Nahargarh Fort for night views', 'Attend a puppet show', 'Explore the night markets'],
-    'Agra': ['Attend the Taj Mahal light show', 'Visit Sadar Bazaar', 'Enjoy a cultural performance', 'Dine at a rooftop restaurant with Taj views', 'Shop for marble crafts'],
-    'default': ['Enjoy local entertainment', 'Visit a popular nightspot', 'Attend a cultural event', 'Explore night markets', 'Relax at a cafe or bar']
-  };
+  const activities = [
+    `Enjoy a sunset at a local viewpoint in ${destination}`,
+    `Take a night walking tour of ${destination}'s old town`,
+    `Experience ${destination}'s nightlife in the city center`,
+    `Attend a cultural show or performance in ${destination}`,
+    `Go stargazing in ${destination}'s countryside`,
+    `Take a night cruise in ${destination}`,
+    `Visit a night market in ${destination}`,
+    `Enjoy a rooftop bar with views of ${destination}`,
+    `Take a ghost tour of ${destination}`,
+    `Relax at a traditional spa in ${destination}`
+  ];
   
-  const locationActivities = activities[destination] || activities['default'];
-  return locationActivities[Math.floor(Math.random() * locationActivities.length)];
+  return activities[Math.floor(Math.random() * activities.length)];
 }
