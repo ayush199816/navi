@@ -111,7 +111,30 @@ const ItineraryCreator = (props) => {
 
           // Set itinerary days if available
           if (itinerary.days?.length) {
-            setItineraryDays(itinerary.days);
+            // Ensure each day has a date and activities array
+            const formattedDays = itinerary.days.map(day => ({
+              ...day,
+              date: day.date || day.day || new Date().toISOString(),
+              activities: day.activities || []
+            }));
+            setItineraryDays(formattedDays);
+          } else if (itinerary.arrivalDate && itinerary.departureDate) {
+            // If no days data but we have dates, create days array
+            const startDate = new Date(itinerary.arrivalDate);
+            const endDate = new Date(itinerary.departureDate);
+            const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            const generatedDays = [];
+            for (let i = 0; i < daysCount; i++) {
+              const currentDate = new Date(startDate);
+              currentDate.setDate(startDate.getDate() + i);
+              generatedDays.push({
+                day: i + 1,
+                date: currentDate.toISOString(),
+                activities: []
+              });
+            }
+            setItineraryDays(generatedDays);
           }
           
           setIsEditMode(true);
