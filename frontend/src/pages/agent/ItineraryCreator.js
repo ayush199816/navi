@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, isValid, addDays, differenceInDays } from 'date-fns';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import api from '../../utils/api';
@@ -28,6 +28,9 @@ const formatFlightTime = (dateTimeString) => {
 const ItineraryCreator = (props) => {
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [itineraryId, setItineraryId] = useState(null);
+  const { id } = useParams();
   
   // --- State Initialization ---
 
@@ -53,20 +56,77 @@ const ItineraryCreator = (props) => {
   });
 
   const [formData, setFormData] = useState({
+    title: '',
     customerName: '',
     customerEmail: '',
     customerPhone: '',
     destination: '',
-    arrivalDate: format(new Date(), 'yyyy-MM-dd'),
-    departureDate: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+    arrivalDate: '',
+    departureDate: '',
     adults: 1,
     children: 0,
+    budget: '',
     notes: '',
-    pickupLocation: '', // Added from PDF section logic
-    dropLocation: '',   // Added from PDF section logic
-    hotels: [{ name: '', checkIn: '', checkOut: '', confirmationNumber: '', roomType: '', address: '' }],
-    flights: [{ flightNumber: '', from: '', to: '', departure: '', arrival: '', airline: '', flightType: 'oneway', confirmationNumber: '' }]
+    hotels: [
+      { name: '', checkIn: '', checkOut: '', roomType: '', confirmation: '' }
+    ],
+    flights: [
+      { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmation: '' }
+    ]
   });
+
+  // Fetch itinerary data when in edit mode
+  useEffect(() => {
+    const fetchItinerary = async () => {
+      if (id) {
+        try {
+          setLoading(true);
+          const response = await api.get(`/itineraries/${id}`);
+          const itinerary = response.data.data;
+          
+          // Update form data with fetched itinerary
+          setFormData({
+            title: itinerary.title || '',
+            customerName: itinerary.customerName || '',
+            customerEmail: itinerary.customerEmail || '',
+            customerPhone: itinerary.customerPhone || '',
+            destination: itinerary.destination || '',
+            arrivalDate: itinerary.arrivalDate ? format(new Date(itinerary.arrivalDate), 'yyyy-MM-dd') : '',
+            departureDate: itinerary.departureDate ? format(new Date(itinerary.departureDate), 'yyyy-MM-dd') : '',
+            adults: itinerary.adults || 1,
+            children: itinerary.children || 0,
+            budget: itinerary.budget || '',
+            notes: itinerary.notes || '',
+            hotels: itinerary.hotels?.length ? itinerary.hotels : [
+              { name: '', checkIn: '', checkOut: '', roomType: '', confirmation: '' }
+            ],
+            flights: itinerary.flights?.length ? itinerary.flights.map(flight => ({
+              ...flight,
+              departure: flight.departure ? format(new Date(flight.departure), "yyyy-MM-dd'T'HH:mm") : '',
+              arrival: flight.arrival ? format(new Date(flight.arrival), "yyyy-MM-dd'T'HH:mm") : ''
+            })) : [
+              { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmation: '' }
+            ]
+          });
+
+          // Set itinerary days if available
+          if (itinerary.days?.length) {
+            setItineraryDays(itinerary.days);
+          }
+          
+          setIsEditMode(true);
+          setItineraryId(id);
+        } catch (error) {
+          console.error('Error fetching itinerary:', error);
+          toast.error('Failed to load itinerary data');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchItinerary();
+  }, [id]);
 
   // --- Utility Functions (Placeholders for full code) ---
 
@@ -133,8 +193,12 @@ const ItineraryCreator = (props) => {
         status: formData.status || 'draft',
       };
 
-      // Make the API call
-      await api.post('/itineraries', itineraryData);
+      // Make the API call (POST for create, PUT for update)
+      if (isEditMode && itineraryId) {
+        await api.put(`/itineraries/${itineraryId}`, itineraryData);
+      } else {
+        await api.post('/itineraries', itineraryData);
+      }
       
       // Handle success
       toast.success('Itinerary saved successfully!');
