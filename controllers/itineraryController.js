@@ -113,19 +113,56 @@ exports.createItinerary = async (req, res, next) => {
 
     // Check for published agent
     if (req.user.role === 'agent' && !req.user.isApproved) {
-      return next(
-        new ErrorResponse('Please get your account approved before creating itineraries', 400)
-      );
+      return res.status(400).json({
+        success: false,
+        error: 'Please get your account approved before creating itineraries'
+      });
     }
 
+    // Validate required fields
+    if (!req.body.title || !req.body.destination || !req.body.arrivalDate || !req.body.departureDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide title, destination, arrival date, and departure date'
+      });
+    }
+
+    // Create the itinerary
     const itinerary = await Itinerary.create(req.body);
+
+    // Populate the createdBy field with user details
+    await itinerary.populate('createdBy', 'name email companyName');
 
     res.status(201).json({
       success: true,
       data: itinerary
     });
   } catch (err) {
-    next(err);
+    console.error('Error creating itinerary:', err);
+    
+    // Handle validation errors
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map(val => val.message);
+      return res.status(400).json({
+        success: false,
+        error: messages.join(', ')
+      });
+    }
+    
+    // Handle duplicate key errors
+    if (err.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Duplicate field value entered'
+      });
+    }
+    
+    // Default error response
+    res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 
