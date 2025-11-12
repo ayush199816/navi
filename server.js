@@ -108,9 +108,13 @@ app.get('/api', (req, res) => {
 
 // Import and use routes
 const routes = [
-  { path: '/api/v1/itinerary-creator', route: require('./routes/itineraryCreator') },
+  // Public routes
+  { path: '/api/ai', route: require('./routes/ai') }, // AI routes (including public itinerary generation)
   { path: '/api/v1/ai-itinerary', route: require('./routes/aiItineraryRoutes') },
   { path: '/api/auth', route: require('./routes/auth') },
+  
+  // Protected routes (will go through the protect middleware)
+  { path: '/api/v1/itinerary-creator', route: require('./routes/itineraryCreator') },
   { path: '/api/users', route: require('./routes/user') },
   { path: '/api/quotes', route: require('./routes/quote') },
   { path: '/api/leads', route: require('./routes/lead') },
@@ -130,16 +134,38 @@ const routes = [
   { path: '/api', route: require('./routes/stats') },
   { path: '/api/wallets', route: require('./routes/wallet') },
   { path: '/api/lms', route: require('./routes/lms') },
-  { path: '/api/ai', route: require('./routes/ai') },
   { path: '/api/test', route: require('./routes/test') },
   { path: '/api/payments', route: require('./routes/payment') },
   { path: '/api/payment-tracking', route: require('./routes/paymentTracking') },
 ];
-// Mount routers
-// Register routes
+
+// Apply protect middleware to all routes except public ones
+app.use((req, res, next) => {
+  // List of public paths that don't require authentication
+  const publicPaths = [
+    '/api/ai',
+    '/api/v1/ai-itinerary',
+    '/api/auth',
+    '/api/guest-sightseeing',
+    '/api/guest-sightseeing-test'
+  ];
+  
+  // Check if the current path starts with any public path
+  const isPublicPath = publicPaths.some(path => req.path.startsWith(path));
+  
+  if (isPublicPath) {
+    return next();
+  }
+  
+  // Apply protect middleware to protected routes
+  const { protect } = require('./middleware/auth');
+  return protect(req, res, next);
+});
+
+// Register all routes
 routes.forEach(({ path, route }) => {
   app.use(path, route);
-  console.log(`Registered route: ${path}`);
+  console.log(`Registered route: ${path} (${path.startsWith('/api/ai') || path.startsWith('/api/v1/ai-itinerary') || path.startsWith('/api/auth') ? 'Public' : 'Protected'})`);
 });
 
 // Root route

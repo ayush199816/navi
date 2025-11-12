@@ -291,29 +291,29 @@ const LandingPage = () => {
             </p>
             
             <div
-              className="flex flex-col sm:flex-row justify-center gap-4"
+              className="flex flex-col sm:flex-row justify-center gap-6 w-full px-4"
             >
-              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto">
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-4xl mx-auto">
                 <Link 
                   to="/tours" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-colors duration-300 transform hover:scale-105 flex-1 flex items-center justify-center"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-base sm:text-lg transition-all duration-300 transform hover:scale-105 flex-1 flex items-center justify-center shadow-lg hover:shadow-xl min-w-[180px] sm:min-w-[220px]"
                 >
-                  <FiCompass className="mr-2" /> Explore Sightseeings
+                  <FiCompass className="mr-2 w-5 h-5" /> Explore Sightseeings
                 </Link>
                 
                 <Link 
                   to="/ai-itinerary-generator"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-all duration-300 transform hover:scale-105 flex-1 flex items-center justify-center"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-full text-base sm:text-lg transition-all duration-300 transform hover:scale-105 flex-1 flex items-center justify-center shadow-lg hover:shadow-xl min-w-[180px] sm:min-w-[220px]"
                 >
-                  <FiMap className="mr-2" /> AI Itinerary Generator
+                  <FiMap className="mr-2 w-5 h-5" /> AI Itinerary Generator
                 </Link>
                 
                 {currentExperience && (
                   <Link 
                     to={`/sightseeing/${currentExperience._id}`}
-                    className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-full text-sm sm:text-base transition-colors duration-300 transform hover:scale-105 flex-1 flex items-center justify-center backdrop-blur-sm"
+                    className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-full text-base sm:text-lg transition-all duration-300 transform hover:scale-105 flex-1 flex items-center justify-center backdrop-blur-sm border-2 border-white/20 hover:border-white/30 shadow-lg hover:shadow-xl min-w-[180px] sm:min-w-[220px]"
                   >
-                    <FiMapPin className="mr-2" /> View Experience
+                    <FiMapPin className="mr-2 w-5 h-5" /> View Experience
                   </Link>
                 )}
               </div>

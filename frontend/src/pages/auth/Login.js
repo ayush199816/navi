@@ -141,11 +141,17 @@ const Login = () => {
                     </label>
                   </div>
 
-                  <div className="text-sm">
-                    <a href="/home" className="font-medium text-blue-600 hover:text-blue-500">
-                      Forgot your password?
-                    </a>
-                  </div>
+                  <div className="mt-4 text-center space-y-3">
+            <div>
+              <Link to="/" className="inline-block px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">
+                ← Go to Home
+              </Link>
+            </div>
+            <p>Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Register here</Link></p>
+            <p>
+              <Link to="/forgot-password" className="text-blue-600 hover:underline">Forgot password?</Link>
+            </p>
+          </div>
                 </div>
 
                 <div>
