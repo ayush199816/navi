@@ -6,6 +6,7 @@ import { FiDownload, FiMessageSquare } from 'react-icons/fi';
 const AIItineraryGeneratorPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: '',
     destination: '',
     startDate: '',
     endDate: '',
@@ -82,119 +83,341 @@ const AIItineraryGeneratorPage = () => {
 
   const downloadItinerary = () => {
     // Create a new window with the itinerary content
-    const printWindow = window.open('', '', 'width=800,height=600');
+    const printWindow = window.open('', '', 'width=900,height=900');
     const title = `Travel Itinerary - ${formData.destination} (${formData.startDate} to ${formData.endDate})`;
     
     // Get the HTML content of the itinerary
     const content = document.getElementById('itinerary-content').innerHTML;
     
-    // Create a clean HTML document for printing with watermark
+    // Calculate trip duration in days
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(formData.endDate);
+    const tripDuration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    
+    // Format the date for display
+    const formattedDate = new Date().toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    // Create a clean HTML document for printing with improved styling
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>${title}</title>
         <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          
           @page {
+            size: A4;
+            margin: 1.5cm;
             @top-right {
-              content: "Bookmysight.com";
+              content: "BookMySight";
               font-size: 10px;
-              color: #999;
+              color: #6b7280;
               font-style: italic;
             }
           }
+          
           body { 
-            font-family: Arial, sans-serif; 
+            font-family: 'Inter', Arial, sans-serif;
             line-height: 1.6; 
-            padding: 20px;
+            color: #1f2937;
+            padding: 0;
+            margin: 0;
+            background: #ffffff;
+            font-size: 14px;
+          }
+          
+          .page {
+            padding: 2.5cm;
+            max-width: 21cm;
+            margin: 0 auto;
             position: relative;
           }
+          
+          .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          
+          h1 {
+            color: #111827;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 0.5rem;
+            line-height: 1.2;
+          }
+          
+          .subtitle {
+            color: #4b5563;
+            font-size: 16px;
+            margin: 0 0 1.5rem;
+          }
+          
+          .trip-info {
+            display: flex;
+            justify-content: space-between;
+            background: #f9fafb;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+          }
+          
+          .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4b5563;
+          }
+          
+          .info-item svg {
+            width: 18px;
+            height: 18px;
+            color: #6b7280;
+          }
+          
+          .day-section {
+            margin-bottom: 2.5rem;
+            page-break-inside: avoid;
+          }
+          
+          .day-header {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            margin-bottom: 1.25rem;
+            font-weight: 600;
+            font-size: 16px;
+          }
+          
+          .time-slot {
+            margin-bottom: 1.5rem;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+          }
+          
+          .time-header {
+            background: #f3f4f6;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+          
+          .time-header svg {
+            width: 16px;
+            height: 16px;
+          }
+          
+          .time-content {
+            padding: 1.25rem;
+          }
+          
+          .activity {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed #e5e7eb;
+          }
+          
+          .activity:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+          }
+          
+          .activity-title {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+          }
+          
+          .activity-details {
+            color: #4b5563;
+            margin-left: 1.5rem;
+          }
+          
+          .activity-details p {
+            margin: 0.5rem 0;
+          }
+          
+          ul {
+            margin: 0.5rem 0 0.5rem 1.5rem;
+            padding: 0;
+          }
+          
+          li {
+            margin-bottom: 0.25rem;
+            position: relative;
+            padding-left: 1.5rem;
+          }
+          
+          li:before {
+            content: "•";
+            color: #3b82f6;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+          }
+          
+          .tips-section {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 1.25rem;
+            border-radius: 0 6px 6px 0;
+            margin-top: 2rem;
+          }
+          
+          .tips-title,
+          .sub-heading {
+            font-weight: 600;
+            color: #0369a1;
+            margin: 1.5rem 0 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 16px;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          
+          /* Special styling for specific sub-headings */
+          .sub-heading:before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 18px;
+            background-color: #3b82f6;
+            margin-right: 12px;
+            border-radius: 3px;
+          }
+          
+          .sub-heading {
+            font-weight: 700 !important;
+            font-size: 18px;
+            color: #1e40af;
+            margin: 1.5rem 0 1rem;
+            padding: 0.5rem 0;
+            display: block;
+            width: 100%;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          
+          .footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+          }
+          
           .watermark {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-45deg);
             transform-origin: center center;
-            font-size: 48px;
-            font-weight: bold;
-            color: rgba(0, 0, 0, 0.08);
+            font-size: 60px;
+            font-weight: 800;
+            color: rgba(0, 0, 0, 0.03);
             pointer-events: none;
             white-space: nowrap;
             z-index: 9999;
+            font-family: 'Inter', sans-serif;
+            opacity: 0.7;
           }
-          h1 { 
-            color: #1a365d; 
-            margin-bottom: 10px; 
-            position: relative;
-            z-index: 1;
-          }
-          h2 { 
-            color: #2c5282; 
-            margin-top: 20px; 
-            margin-bottom: 10px; 
-            position: relative;
-            z-index: 1;
-          }
-          h3 { 
-            color: #2b6cb0; 
-            margin-top: 15px; 
-            margin-bottom: 5px; 
-            position: relative;
-            z-index: 1;
-          }
-          p { 
-            margin: 10px 0; 
-            position: relative;
-            z-index: 1;
-          }
-          ul { 
-            margin: 10px 0; 
-            padding-left: 20px; 
-            position: relative;
-            z-index: 1;
-          }
-          li { 
-            margin: 5px 0; 
-            position: relative;
-            z-index: 1;
-          }
-          .header { 
-            text-align: center; 
-            margin-bottom: 20px; 
-            position: relative;
-            z-index: 1;
-          }
-          .section { 
-            margin-bottom: 30px; 
-            position: relative;
-            z-index: 1;
-          }
-          .footer { 
-            margin-top: 40px; 
-            font-size: 0.9em; 
-            color: #666; 
-            text-align: center; 
-            position: relative;
-            z-index: 1;
-          }
+          
           @media print {
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            
+            .page {
+              padding: 1.5cm;
+            }
+            
             .watermark {
               display: block !important;
+            }
+            
+            .no-print {
+              display: none !important;
             }
           }
         </style>
       </head>
       <body>
-        <div class="watermark">Bookmysight.com</div>
-        <div class="header">
-          <h1>${title}</h1>
-          <p>Generated on ${new Date().toLocaleDateString()}</p>
-        </div>
-        <div class="itinerary">
-          ${content}
-        </div>
-        <div class="footer">
-          <p>Generated by <a href="https://bookmysight.com" target="_blank">Bookmysight.com</a></p>
+        <div class="watermark">BookMySight.com</div>
+        
+        <div class="page">
+          <div class="header">
+            <h1>${title}</h1>
+            <p class="subtitle">${formData.name ? `Personalized Travel Itinerary for ${formData.name}` : 'Your Personalized Travel Itinerary'}</p>
+            
+            <div class="trip-info">
+              <div class="info-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                ${formData.startDate} - ${formData.endDate}
+              </div>
+              <div class="info-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                ${formData.destination}
+              </div>
+              <div class="info-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                ${tripDuration} Days
+              </div>
+            </div>
+          </div>
+          
+          <div class="itinerary-content">
+            ${content
+              // First, remove any existing bullet points or list items
+              .replace(/<li>\s*<h3>\s*\*?\s*Traveler Tips for the Day\s*\*?\s*<\/h3>\s*<\/li>/gi, '')
+              .replace(/<li>\s*<h3>\s*\*?\s*Estimated Time for Activities\s*\*?\s*<\/h3>\s*<\/li>/gi, '')
+              .replace(/<li>\s*<h3>\s*\*?\s*Additional Notes\s*\*?\s*<\/h3>\s*<\/li>/gi, '')
+              // Then add the styled headings
+              .replace(/(<h3>|<li>|<ul>|<\/ul>|<\/li>|\*)*\s*Traveler Tips for the Day\s*(<\/h3>|<\/li>|\*)*/gi, '<h3 class="sub-heading" style="font-weight: 700; color: #1e40af; font-size: 18px; margin: 1.5rem 0 1rem; padding: 0.5rem 0; border-bottom: 2px solid #e5e7eb; width: 100%; display: block;">Traveler Tips for the Day</h3>')
+              .replace(/(<h3>|<li>|<ul>|<\/ul>|<\/li>|\*)*\s*Estimated Time for Activities\s*(<\/h3>|<\/li>|\*)*/gi, '<h3 class="sub-heading" style="font-weight: 700; color: #1e40af; font-size: 18px; margin: 1.5rem 0 1rem; padding: 0.5rem 0; border-bottom: 2px solid #e5e7eb; width: 100%; display: block;">Estimated Time for Activities</h3>')
+              .replace(/(<h3>|<li>|<ul>|<\/ul>|<\/li>|\*)*\s*Additional Notes\s*(<\/h3>|<\/li>|\*)*/gi, '<h3 class="sub-heading" style="font-weight: 700; color: #1e40af; font-size: 18px; margin: 1.5rem 0 1rem; padding: 0.5rem 0; border-bottom: 2px solid #e5e7eb; width: 100%; display: block;">Additional Notes</h3>')
+              // Also handle any remaining asterisks in the content
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            }
+          </div>
+          
+          <div class="footer">
+            <p>Generated on ${formattedDate} by <a href="https://bookmysight.com" target="_blank" style="color: #3b82f6; text-decoration: none;">BookMySight</a></p>
+            <p class="no-print" style="font-size: 11px; margin-top: 0.5rem; color: #9ca3af;">
+              To print, use the print dialog in your browser (Ctrl+P or Cmd+P)
+            </p>
+          </div>
         </div>
       </body>
       </html>
@@ -461,6 +684,29 @@ const AIItineraryGeneratorPage = () => {
             <h2 className="text-xl font-semibold text-gray-800 mb-6">Plan Your Perfect Trip</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Your Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      name="name"
+                      id="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Your full name"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <label htmlFor="destination" className="block text-sm font-medium text-gray-700">
                     Destination
