@@ -6,6 +6,7 @@ import { FiDownload, FiMessageSquare } from 'react-icons/fi';
 const AIItineraryGeneratorPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: '',
     destination: '',
     startDate: '',
     endDate: '',
@@ -365,12 +366,12 @@ const AIItineraryGeneratorPage = () => {
         </style>
       </head>
       <body>
-        <div class="watermark">${formData.destination}</div>
+        <div class="watermark">BookMySight.com</div>
         
         <div class="page">
           <div class="header">
             <h1>${title}</h1>
-            <p class="subtitle">Your Personalized Travel Itinerary</p>
+            <p class="subtitle">${formData.name ? `Personalized Travel Itinerary for ${formData.name}` : 'Your Personalized Travel Itinerary'}</p>
             
             <div class="trip-info">
               <div class="info-item">
@@ -683,6 +684,29 @@ const AIItineraryGeneratorPage = () => {
             <h2 className="text-xl font-semibold text-gray-800 mb-6">Plan Your Perfect Trip</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Your Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      name="name"
+                      id="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Your full name"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <label htmlFor="destination" className="block text-sm font-medium text-gray-700">
                     Destination
