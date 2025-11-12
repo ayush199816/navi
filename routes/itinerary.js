@@ -16,7 +16,7 @@ const { protect, authorize, isApprovedAgent } = require('../middleware/auth');
 router.use(protect);
 
 // Routes for all authenticated users
-router.get('/:id', getItinerary);
+router.get('/:id', authorize('agent'), isApprovedAgent, getItinerary);
 
 // Routes for agents
 router.get('/my-itineraries', authorize('agent'), isApprovedAgent, getMyItineraries);

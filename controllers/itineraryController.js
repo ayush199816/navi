@@ -208,7 +208,7 @@ exports.getItineraries = async (req, res) => {
     
     // Execute query
     const itineraries = await Itinerary.find(query)
-      .populate('agent', 'name email companyName')
+      .populate('createdBy', 'name email companyName')
       .skip(startIndex)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -244,7 +244,7 @@ exports.getMyItineraries = async (req, res) => {
     
     // Build query
     const query = {
-      agent: req.user.id
+      createdBy: req.user.id
     };
     
     // Filter by destination
@@ -306,7 +306,7 @@ exports.getMyItineraries = async (req, res) => {
 exports.getItinerary = async (req, res) => {
   try {
     const itinerary = await Itinerary.findById(req.params.id)
-      .populate('agent', 'name email companyName');
+      .populate('createdBy', 'name email companyName');
     
     if (!itinerary) {
       return res.status(404).json({
@@ -315,11 +315,27 @@ exports.getItinerary = async (req, res) => {
       });
     }
     
+    // Debug logging
+    console.log('User role:', req.user.role);
+    console.log('User ID:', req.user.id);
+    console.log('Itinerary createdBy:', itinerary.createdBy);
+    console.log('Itinerary createdBy ID:', itinerary.createdBy?._id || 'N/A');
+    
     // Check if user is authorized to view this itinerary
-    if (req.user.role === 'agent' && itinerary.agent.toString() !== req.user.id) {
+    const isAdmin = req.user.role === 'admin';
+    const isOwner = itinerary.createdBy && 
+                   (itinerary.createdBy._id ? 
+                    itinerary.createdBy._id.toString() === req.user.id : 
+                    itinerary.createdBy.toString() === req.user.id);
+    
+    console.log('Is admin:', isAdmin);
+    console.log('Is owner:', isOwner);
+    
+    if (req.user.role === 'agent' && !isOwner) {
+      console.log('Access denied - Agent is not the owner');
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to access this itinerary',
+        message: 'Not authorized to access this itinerary. You must be the owner or an admin.',
       });
     }
     
@@ -356,7 +372,7 @@ exports.generateItinerary = async (req, res) => {
     // Create itinerary object
     const itinerary = await Itinerary.create({
       name: name || `${duration}-Day Trip to ${destination}`,
-      agent: req.user.id,
+      createdBy: req.user.id,
       destination,
       duration,
       travelType: travelType || 'leisure',
@@ -394,8 +410,8 @@ exports.updateItinerary = async (req, res) => {
       });
     }
     
-    // Check if user is the agent who created the itinerary
-    if (itinerary.agent.toString() !== req.user.id) {
+    // Check if user is the one who created the itinerary
+    if (itinerary.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this itinerary',
@@ -437,8 +453,8 @@ exports.createQuoteFromItinerary = async (req, res) => {
       });
     }
     
-    // Check if user is the agent who created the itinerary
-    if (itinerary.agent.toString() !== req.user.id) {
+    // Check if user is the one who created the itinerary
+    if (itinerary.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to create a quote from this itinerary',
@@ -494,7 +510,7 @@ exports.deleteItinerary = async (req, res) => {
     }
     
     // Check if user is authorized to delete this itinerary
-    if (req.user.role !== 'admin' && itinerary.agent.toString() !== req.user.id) {
+    if (req.user.role !== 'admin' && itinerary.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this itinerary',
