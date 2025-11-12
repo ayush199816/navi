@@ -98,25 +98,32 @@ const ItineraryCreator = (props) => {
             budget: itinerary.budget || '',
             notes: itinerary.notes || '',
             hotels: itinerary.hotels?.length ? itinerary.hotels : [
-              { name: '', checkIn: '', checkOut: '', roomType: '', confirmation: '' }
+              { name: '', checkIn: '', checkOut: '', roomType: '', confirmationNumber: '' }
             ],
             flights: itinerary.flights?.length ? itinerary.flights.map(flight => ({
               ...flight,
               departure: flight.departure ? format(new Date(flight.departure), "yyyy-MM-dd'T'HH:mm") : '',
               arrival: flight.arrival ? format(new Date(flight.arrival), "yyyy-MM-dd'T'HH:mm") : ''
             })) : [
-              { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmation: '' }
+              { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmationNumber: '' }
             ]
           });
 
           // Set itinerary days if available
           if (itinerary.days?.length) {
-            // Ensure each day has a date and activities array
-            const formattedDays = itinerary.days.map(day => ({
+            // Sort days by date to ensure they're in order
+            const sortedDays = [...itinerary.days].sort((a, b) => 
+              new Date(a.date || a.day) - new Date(b.date || b.day)
+            );
+            
+            // Format the days data for the UI
+            const formattedDays = sortedDays.map((day, index) => ({
               ...day,
-              date: day.date || day.day || new Date().toISOString(),
-              activities: day.activities || []
+              day: index + 1, // Ensure day number is sequential
+              date: day.date || day.day || new Date(itinerary.arrivalDate).toISOString(),
+              activities: Array.isArray(day.activities) ? day.activities : []
             }));
+            
             setItineraryDays(formattedDays);
           } else if (itinerary.arrivalDate && itinerary.departureDate) {
             // If no days data but we have dates, create days array
@@ -131,7 +138,12 @@ const ItineraryCreator = (props) => {
               generatedDays.push({
                 day: i + 1,
                 date: currentDate.toISOString(),
-                activities: []
+                activities: [],
+                meals: {
+                  breakfast: { included: false },
+                  lunch: { included: false },
+                  dinner: { included: false }
+                }
               });
             }
             setItineraryDays(generatedDays);
