@@ -23,11 +23,9 @@ const formatFlightTime = (dateTimeString) => {
     return isValid(date) ? format(date, 'MMM d, h:mm a') : 'N/A';
 };
 
-const ItineraryCreator = ({ editMode, match }) => {
+const ItineraryCreator = (props) => {
   const { user } = useSelector((state) => state.auth);
-  const [loading, setLoading] = useState(true);
-  const isEditing = Boolean(editMode);
-  const [itineraryId, setItineraryId] = useState(null);
+  const [loading, setLoading] = useState(false);
   
   // --- State Initialization ---
 
@@ -87,106 +85,11 @@ const ItineraryCreator = ({ editMode, match }) => {
     return days;
   }, []);
 
-  // Fetch itinerary data when in edit mode
   useEffect(() => {
-    const fetchItinerary = async () => {
-      if (isEditing) {
-        try {
-          const id = window.location.pathname.split('/').pop();
-          setItineraryId(id);
-          
-          const response = await fetch(`/api/itineraries/${id}`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'application/json'
-            },
-            credentials: 'include' // Include cookies for session
-          });
-          
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to fetch itinerary');
-          }
-          
-          const result = await response.json();
-          
-          if (!result.success) {
-            throw new Error(result.message || 'Invalid response from server');
-          }
-          
-          const data = result.data || {};
-          
-          // Format dates for date inputs
-          const formatDateForInput = (dateString) => {
-            if (!dateString) return '';
-            try {
-              return format(parseISO(dateString), 'yyyy-MM-dd');
-            } catch (e) {
-              console.error('Error formatting date:', e);
-              return '';
-            }
-          };
-          
-          // Update form data
-          setFormData(prev => ({
-            ...prev,
-            ...data,
-            title: data.title || '',
-            arrivalDate: formatDateForInput(data.arrivalDate) || prev.arrivalDate,
-            departureDate: formatDateForInput(data.departureDate) || prev.departureDate,
-            customerName: data.customerName || '',
-            customerEmail: data.customerEmail || '',
-            customerPhone: data.customerPhone || '',
-            destination: data.destination || '',
-            notes: data.notes || '',
-            adults: data.adults || 1,
-            children: data.children || 0,
-            hotels: Array.isArray(data.hotels) && data.hotels.length > 0 
-              ? data.hotels.map(hotel => ({
-                  ...hotel,
-                  checkIn: formatDateForInput(hotel.checkIn) || '',
-                  checkOut: formatDateForInput(hotel.checkOut) || ''
-                }))
-              : [{ name: '', checkIn: '', checkOut: '', confirmationNumber: '', roomType: '', address: '' }],
-            flights: Array.isArray(data.flights) && data.flights.length > 0 
-              ? data.flights.map(flight => ({
-                  ...flight,
-                  departure: flight.departure ? new Date(flight.departure).toISOString().slice(0, 16) : '',
-                  arrival: flight.arrival ? new Date(flight.arrival).toISOString().slice(0, 16) : ''
-                }))
-              : [{ flightNumber: '', from: '', to: '', departure: '', arrival: '', airline: '', flightType: 'oneway', confirmationNumber: '' }]
-          }));
-          
-          // Set itinerary days
-          if (Array.isArray(data.days) && data.days.length > 0) {
-            setItineraryDays(data.days.map(day => ({
-              ...day,
-              activities: Array.isArray(day.activities) ? day.activities : []
-            })));
-          } else {
-            // If no days data, create days based on arrival and departure dates
-            const startDate = data.arrivalDate ? new Date(data.arrivalDate) : new Date();
-            const endDate = data.departureDate ? new Date(data.departureDate) : new Date();
-            setItineraryDays(calculateDays(startDate, endDate));
-          }
-          
-        } catch (error) {
-          console.error('Error fetching itinerary:', error);
-          toast.error('Failed to load itinerary data');
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setItineraryDays(calculateDays(formData.arrivalDate, formData.departureDate));
-      }
-    };
-    
-    if (isEditing) {
-      fetchItinerary();
-    } else {
-      setItineraryDays(calculateDays(formData.arrivalDate, formData.departureDate));
-    }
-  }, [isEditing, calculateDays, formData.arrivalDate, formData.departureDate]);
+    setItineraryDays(calculateDays(formData.arrivalDate, formData.departureDate));
+    // In a real app, you'd load existing itinerary here if itineraryId is present
+    // fetchItinerary(itineraryId);
+  }, [formData.arrivalDate, formData.departureDate, calculateDays]);
 
 
   const handleInputChange = (e) => {
@@ -194,111 +97,11 @@ const ItineraryCreator = ({ editMode, match }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Helper function to format date for API
-  const formatDateForAPI = (dateString) => {
-    if (!dateString) return null;
-    try {
-      return new Date(dateString).toISOString();
-    } catch (e) {
-      console.error('Error formatting date for API:', e);
-      return null;
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    
-    try {
-      // Generate a default title if not provided
-      const title = formData.title || `Itinerary for ${formData.customerName || 'Customer'} - ${formData.destination || 'Destination'}`;
-      
-      // Prepare the itinerary data for the API
-      const url = isEditing && itineraryId 
-        ? `/api/itineraries/${itineraryId}`
-        : '/api/itineraries';
-      
-      const method = isEditing && itineraryId ? 'PUT' : 'POST';
-      
-      // Format dates for API
-      const formattedHotels = formData.hotels.map(hotel => ({
-        ...hotel,
-        checkIn: formatDateForAPI(hotel.checkIn),
-        checkOut: formatDateForAPI(hotel.checkOut)
-      }));
-      
-      const formattedFlights = formData.flights.map(flight => ({
-        ...flight,
-        departure: formatDateForAPI(flight.departure),
-        arrival: formatDateForAPI(flight.arrival)
-      }));
-      
-      const itineraryData = {
-        ...formData,
-        hotels: formattedHotels,
-        flights: formattedFlights,
-        arrivalDate: formatDateForAPI(formData.arrivalDate),
-        departureDate: formatDateForAPI(formData.departureDate),
-        ...formData,
-        title: title,
-        days: itineraryDays.map(day => ({
-          date: day.date,
-          activities: day.activities.map(activity => ({
-            name: activity.name,
-            description: activity.description,
-            type: activity.type,
-            location: activity.location,
-            pickupTime: activity.pickupTime,
-            pickupLocation: activity.pickupLocation,
-            dropLocation: activity.dropLocation,
-            cost: parseFloat(activity.cost) || 0,
-            notes: activity.notes,
-            aiInfo: activity.aiInfo
-          }))
-        })),
-        createdBy: user._id,
-        status: 'draft',
-        totalCost: calculateTotalCost()
-      };
-
-      // Make the API call to save/update the itinerary
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(itineraryData)
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save itinerary');
-      }
-
-      const result = await response.json();
-      
-      toast.success(`Itinerary ${isEditing ? 'updated' : 'saved'} successfully!`);
-      // Redirect to the itinerary list or view page
-      window.location.href = `/agent/itineraries/${result.data?._id || itineraryId}`;
-      
-    } catch (error) {
-      console.error('Error saving itinerary:', error);
-      toast.error(error.message || 'Failed to save itinerary. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Helper function to calculate total cost
-  const calculateTotalCost = () => {
-    let total = 0;
-    itineraryDays.forEach(day => {
-      day.activities.forEach(activity => {
-        total += parseFloat(activity.cost) || 0;
-      });
-    });
-    return total;
+    // Logic to save the itinerary via API (e.g., api.post('/itineraries', formData))
+    toast.info("Itinerary save logic executed! (Placeholder) LOL");
+    // navigate('/itineraries');
   };
 
   const handleHotelChange = (index, field, value) => {

@@ -93,7 +93,7 @@ const generateAIItinerary = async (destination, duration, preferences) => {
     destination,
     duration,
     days,
-    overview: `A ${duration}-day journey through the beautiful ${destination}, tailored to your preferences. Enjoy the perfect balance of exploration, relaxation, and authentic experiences.`,
+    overview: `A ${duration}-day journeys through the beautiful ${destination}, tailored to your preferences. Enjoy the perfect balance of exploration, relaxation, and authentic experiences.`,
     highlights: [
       `Explore the best of ${destination}`,
       'Experience local cuisine and culture',
@@ -110,8 +110,6 @@ exports.createItinerary = async (req, res, next) => {
   try {
     // Add user to req.body
     req.body.createdBy = req.user.id;
-    // Set the agent to the current user
-    req.body.agent = req.user.id;
 
     // Check for published agent
     if (req.user.role === 'agent' && !req.user.isApproved) {
@@ -271,14 +269,7 @@ exports.getMyItineraries = async (req, res) => {
 exports.getItinerary = async (req, res) => {
   try {
     const itinerary = await Itinerary.findById(req.params.id)
-      .populate({
-        path: 'agent',
-        select: 'name email companyName',
-        model: 'User',
-        options: { strictPopulate: false }
-      })
-      .populate('createdBy', 'name email')
-      .lean();
+      .populate('agent', 'name email companyName');
     
     if (!itinerary) {
       return res.status(404).json({
@@ -287,18 +278,8 @@ exports.getItinerary = async (req, res) => {
       });
     }
     
-    // If agent is not populated (in case of old records), use createdBy as agent
-    if (!itinerary.agent && itinerary.createdBy) {
-      itinerary.agent = itinerary.createdBy;
-    }
-    
     // Check if user is authorized to view this itinerary
-    const isAdmin = req.user.role === 'admin';
-    const isAgentOwner = req.user.role === 'agent' && 
-      (itinerary.agent?._id?.toString() === req.user.id || 
-       itinerary.createdBy?._id?.toString() === req.user.id);
-    
-    if (!isAdmin && !isAgentOwner) {
+    if (req.user.role === 'agent' && itinerary.agent.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to access this itinerary',
@@ -310,11 +291,10 @@ exports.getItinerary = async (req, res) => {
       data: itinerary,
     });
   } catch (err) {
-    console.error('Error fetching itinerary:', err);
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching itinerary',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      message: 'Server error',
     });
   }
 };
@@ -368,8 +348,7 @@ exports.generateItinerary = async (req, res) => {
 // @access  Private/Agent
 exports.updateItinerary = async (req, res) => {
   try {
-    // Find the itinerary and populate the agent field
-    let itinerary = await Itinerary.findById(req.params.id).populate('agent', 'id');
+    let itinerary = await Itinerary.findById(req.params.id);
     
     if (!itinerary) {
       return res.status(404).json({
@@ -379,7 +358,7 @@ exports.updateItinerary = async (req, res) => {
     }
     
     // Check if user is the agent who created the itinerary
-    if (!itinerary.agent || (itinerary.agent._id.toString() !== req.user.id && itinerary.agent.toString() !== req.user.id)) {
+    if (itinerary.agent.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this itinerary',
@@ -387,51 +366,20 @@ exports.updateItinerary = async (req, res) => {
     }
     
     // Update itinerary
-    const updateData = { ...req.body };
-    
-    // Make sure we don't accidentally change the agent
-    if (updateData.agent && updateData.agent !== req.user.id) {
-      delete updateData.agent;
-    }
-    
-    const updatedItinerary = await Itinerary.findByIdAndUpdate(
-      req.params.id, 
-      updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
-    ).populate('agent', 'name email');
+    itinerary = await Itinerary.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     
     res.status(200).json({
       success: true,
-      data: updatedItinerary,
+      data: itinerary,
     });
   } catch (err) {
-    console.error('Error updating itinerary:', err);
-    
-    // Handle validation errors
-    if (err.name === 'ValidationError') {
-      const messages = Object.values(err.errors).map(val => val.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: messages
-      });
-    }
-    
-    // Handle cast errors (invalid ObjectId)
-    if (err.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid itinerary ID format',
-      });
-    }
-    
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: 'Server error while updating itinerary',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      message: 'Server error',
     });
   }
 };

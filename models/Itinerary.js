@@ -39,11 +39,6 @@ const ItinerarySchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    agent: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
     hotels: [{
       name: {
         type: String,
@@ -75,7 +70,7 @@ const ItinerarySchema = new mongoose.Schema(
       },
       departure: {
         type: Date,
-        required: [true, 'Please add departure time'],
+        required: [true, 'Please add departure time.'],
       },
       arrival: {
         type: Date,
