@@ -649,16 +649,37 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
     if (sightseeingData.price) sightseeingData.price = Number(sightseeingData.price) || 0;
     if (sightseeingData.offerPrice) sightseeingData.offerPrice = Number(sightseeingData.offerPrice) || 0;
     
-    // Ensure inclusions is an array
-    if (sightseeingData.inclusions) {
-      if (typeof sightseeingData.inclusions === 'string') {
-        sightseeingData.inclusions = [sightseeingData.inclusions];
-      } else if (!Array.isArray(sightseeingData.inclusions)) {
-        sightseeingData.inclusions = [];
+    // Helper function to process array fields and convert to proper array of strings
+    const processArrayField = (value) => {
+      if (typeof value === 'string') {
+        try {
+          // Try to parse if it's a JSON string
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed)) {
+            // Flatten nested arrays and convert all items to strings
+            return parsed.flat(Infinity).map(String);
+          }
+          return [String(parsed)];
+        } catch (e) {
+          // If not valid JSON, treat as a single string value
+          return [value];
+        }
+      } else if (Array.isArray(value)) {
+        // If it's already an array, flatten and convert to strings
+        return value.flat(Infinity).map(String);
       }
-    } else {
-      sightseeingData.inclusions = [];
-    }
+      return [];
+    };
+
+    // Process inclusions
+    sightseeingData.inclusions = processArrayField(sightseeingData.inclusions || []);
+    
+    // Process whatToBring
+    sightseeingData.whatToBring = processArrayField(sightseeingData.whatToBring || [
+      'Comfortable walking shoes',
+      'Camera',
+      'Weather-appropriate clothing'
+    ]);
     
     // Log the data being saved with more details
     console.log('Creating sightseeing with data:', {
