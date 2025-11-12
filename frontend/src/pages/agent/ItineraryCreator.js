@@ -134,7 +134,7 @@ const ItineraryCreator = (props) => {
       };
 
       // Make the API call
-      const response = await api.post('/itineraries', itineraryData);
+      await api.post('/itineraries', itineraryData);
       
       // Handle success
       toast.success('Itinerary saved successfully!');
