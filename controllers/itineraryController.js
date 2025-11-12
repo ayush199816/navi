@@ -269,7 +269,14 @@ exports.getMyItineraries = async (req, res) => {
 exports.getItinerary = async (req, res) => {
   try {
     const itinerary = await Itinerary.findById(req.params.id)
-      .populate('agent', 'name email companyName');
+      .populate({
+        path: 'agent',
+        select: 'name email companyName',
+        model: 'User',
+        options: { strictPopulate: false }
+      })
+      .populate('createdBy', 'name email')
+      .lean();
     
     if (!itinerary) {
       return res.status(404).json({
@@ -278,8 +285,18 @@ exports.getItinerary = async (req, res) => {
       });
     }
     
+    // If agent is not populated (in case of old records), use createdBy as agent
+    if (!itinerary.agent && itinerary.createdBy) {
+      itinerary.agent = itinerary.createdBy;
+    }
+    
     // Check if user is authorized to view this itinerary
-    if (req.user.role === 'agent' && itinerary.agent.toString() !== req.user.id) {
+    const isAdmin = req.user.role === 'admin';
+    const isAgentOwner = req.user.role === 'agent' && 
+      (itinerary.agent?._id?.toString() === req.user.id || 
+       itinerary.createdBy?._id?.toString() === req.user.id);
+    
+    if (!isAdmin && !isAgentOwner) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to access this itinerary',
@@ -291,10 +308,11 @@ exports.getItinerary = async (req, res) => {
       data: itinerary,
     });
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching itinerary:', err);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: 'Server error while fetching itinerary',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };
