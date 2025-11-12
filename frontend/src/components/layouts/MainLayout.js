@@ -42,7 +42,9 @@ const MainLayout = () => {
   // Navigation items based on user role
   const navigation = [
     // Dashboard links based on role
-    { name: 'Dashboard', href: '/', icon: HomeIcon, roles: ['admin', 'operations', 'accounts', 'sales'] },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon, roles: ['admin'] },
+    { name: 'Dashboard', href: '/operations/bookings', icon: HomeIcon, roles: ['operations', 'accounts'] },
+    { name: 'Dashboard', href: '/sales/leads', icon: HomeIcon, roles: ['sales'] },
     { name: 'Dashboard', href: '/agent', icon: HomeIcon, roles: ['agent'] },
     { name: 'Dashboard', href: '/guest-dashboard', icon: HomeIcon, roles: ['user'], user_type: 'guest' },
     { name: 'Profile', href: '/profile', icon: UserIcon, roles: ['admin', 'agent', 'operations', 'accounts', 'sales'] },
