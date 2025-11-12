@@ -110,6 +110,8 @@ exports.createItinerary = async (req, res, next) => {
   try {
     // Add user to req.body
     req.body.createdBy = req.user.id;
+    // Set the agent to the current user
+    req.body.agent = req.user.id;
 
     // Check for published agent
     if (req.user.role === 'agent' && !req.user.isApproved) {
@@ -366,7 +368,8 @@ exports.generateItinerary = async (req, res) => {
 // @access  Private/Agent
 exports.updateItinerary = async (req, res) => {
   try {
-    let itinerary = await Itinerary.findById(req.params.id);
+    // Find the itinerary and populate the agent field
+    let itinerary = await Itinerary.findById(req.params.id).populate('agent', 'id');
     
     if (!itinerary) {
       return res.status(404).json({
@@ -376,7 +379,7 @@ exports.updateItinerary = async (req, res) => {
     }
     
     // Check if user is the agent who created the itinerary
-    if (itinerary.agent.toString() !== req.user.id) {
+    if (!itinerary.agent || (itinerary.agent._id.toString() !== req.user.id && itinerary.agent.toString() !== req.user.id)) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this itinerary',
@@ -384,20 +387,51 @@ exports.updateItinerary = async (req, res) => {
     }
     
     // Update itinerary
-    itinerary = await Itinerary.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updateData = { ...req.body };
+    
+    // Make sure we don't accidentally change the agent
+    if (updateData.agent && updateData.agent !== req.user.id) {
+      delete updateData.agent;
+    }
+    
+    const updatedItinerary = await Itinerary.findByIdAndUpdate(
+      req.params.id, 
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).populate('agent', 'name email');
     
     res.status(200).json({
       success: true,
-      data: itinerary,
+      data: updatedItinerary,
     });
   } catch (err) {
-    console.error(err);
+    console.error('Error updating itinerary:', err);
+    
+    // Handle validation errors
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map(val => val.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: messages
+      });
+    }
+    
+    // Handle cast errors (invalid ObjectId)
+    if (err.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid itinerary ID format',
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: 'Server error while updating itinerary',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };
