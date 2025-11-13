@@ -75,6 +75,53 @@ const ItineraryCreator = (props) => {
     ]
   });
 
+  // Initialize days when arrival and departure dates change
+  useEffect(() => {
+    if (formData.arrivalDate && formData.departureDate && !id) {
+      const startDate = new Date(formData.arrivalDate);
+      const endDate = new Date(formData.departureDate);
+      
+      // Only proceed if dates are valid and in the correct order
+      if (isValid(startDate) && isValid(endDate) && startDate <= endDate) {
+        const daysCount = differenceInDays(endDate, startDate) + 1;
+        const generatedDays = [];
+        
+        for (let i = 0; i < daysCount; i++) {
+          const currentDate = new Date(startDate);
+          currentDate.setDate(startDate.getDate() + i);
+          
+          // Check if we already have this day in the state
+          const existingDay = itineraryDays[i];
+          
+          if (existingDay) {
+            // Keep existing day data but update the date
+            generatedDays.push({
+              ...existingDay,
+              date: currentDate.toISOString()
+            });
+          } else {
+            // Create a new day
+            generatedDays.push({
+              day: i + 1,
+              date: currentDate.toISOString(),
+              activities: [],
+              meals: {
+                breakfast: { included: false },
+                lunch: { included: false },
+                dinner: { included: false }
+              }
+            });
+          }
+        }
+        
+        // Only update if the number of days has changed or it's a new itinerary
+        if (generatedDays.length !== itineraryDays.length || !itineraryDays.length) {
+          setItineraryDays(generatedDays);
+        }
+      }
+    }
+  }, [formData.arrivalDate, formData.departureDate, id, itineraryDays]);
+
   // Fetch itinerary data when in edit mode
   useEffect(() => {
     const fetchItinerary = async () => {
