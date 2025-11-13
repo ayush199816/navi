@@ -312,30 +312,37 @@ const ItineraryCreator = (props) => {
     fetchItinerary();
   }, [id]);
 
-  // --- Utility Functions (Placeholders for full code) ---
+  // --- Utility Functions ---
 
-  const calculateDays = useCallback((arrival, departure) => {
-    const start = parseISO(arrival);
-    const end = parseISO(departure);
-    if (!isValid(start) || !isValid(end) || differenceInDays(end, start) < 0) return [];
+  // Define calculateDaysStable first
+  const calculateDaysStable = useCallback((arrival, departure) => {
+    if (!arrival || !departure) return [];
+    
+    const start = new Date(arrival);
+    const end = new Date(departure);
+    
+    if (!isValid(start) || !isValid(end) || differenceInDays(end, start) < 0) {
+      console.error('Invalid date range for calculateDay:', { arrival, departure });
+      return [];
+    }
 
     const daysCount = differenceInDays(end, start) + 1;
-    let days = [];
-    for (let i = 0; i < daysCount; i++) {
-      const date = addDays(start, i);
-      days.push({
-        date: date.toISOString(),
-        activities: []
-      });
-    }
-    return days;
+    return Array.from({ length: daysCount }, (_, i) => ({
+      date: format(addDays(start, i), 'yyyy-MM-dd'),
+      day: i + 1,
+      activities: []
+    }));
   }, []);
 
+  // Only calculate days if we're not in edit mode or if we don't have days yet
   useEffect(() => {
-    setItineraryDays(calculateDays(formData.arrivalDate, formData.departureDate));
-    // In a real app, you'd load existing itinerary here if itineraryId is present
-    // fetchItinerary(itineraryId);
-  }, [formData.arrivalDate, formData.departureDate, calculateDays]);
+    if (!id && formData.arrivalDate && formData.departureDate) {
+      console.log('Calculating new days based on date range');
+      const newDays = calculateDaysStable(formData.arrivalDate, formData.departureDate);
+      console.log('New days calculated:', newDays);
+      setItineraryDays(prevDays => (!prevDays?.length ? newDays : prevDays));
+    }
+  }, [formData.arrivalDate, formData.departureDate, id, calculateDaysStable]);
 
   // Log state changes for debugging
   useEffect(() => {
@@ -349,6 +356,7 @@ const ItineraryCreator = (props) => {
       });
     }
   }, [itineraryDays]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
