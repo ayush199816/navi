@@ -1240,76 +1240,156 @@ const ItineraryCreator = (props) => {
           <h2 className="text-2xl font-bold">Daily Itinerary</h2>
           {itineraryDays.map((day, dayIndex) => (
             <div key={dayIndex} className="bg-white p-6 rounded-lg shadow border-t-4 border-blue-600">
-              <h3 className="text-lg font-semibold mb-4 text-blue-800">
-                Day {dayIndex + 1}: {isValid(parseISO(day.date)) ? format(parseISO(day.date), 'EEEE, MMMM d, yyyy') : 'Invalid Date'}
-              </h3>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-semibold text-blue-800">
+                  Day {dayIndex + 1}: {isValid(parseISO(day.date)) ? format(parseISO(day.date), 'EEEE, MMMM d, yyyy') : 'Invalid Date'}
+                </h3>
+                {isEditMode && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newItineraryText = prompt('Enter itinerary for this day:', day.itineraryText || '');
+                      if (newItineraryText !== null) {
+                        const updatedDays = [...itineraryDays];
+                        updatedDays[dayIndex] = {
+                          ...day,
+                          itineraryText: newItineraryText
+                        };
+                        setItineraryDays(updatedDays);
+                      }
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    {day.itineraryText ? 'Edit Itinerary' : '+ Add Itinerary'}
+                  </button>
+                )}
+              </div>
+              {isEditMode && day.itineraryText && (
+                <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r">
+                  <p className="whitespace-pre-line">{day.itineraryText}</p>
+                </div>
+              )}
               
-              {/* Activities */}
-              <div className="space-y-4">
-                {day.activities.map((activity, activityIndex) => (
-                  <div key={activityIndex} className="border-l-4 border-gray-400 pl-4 py-3 bg-gray-50 rounded-r relative">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-800">{activity.name}</h4>
-                        <span className="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
-                          {activity.pickupTime || 'Time TBD'}
-                        </span>
-                      </div>
+              <>
+                {/* Activities Section */}
+                <div className="mt-4">
+                  <h4 className="text-md font-semibold text-gray-700 mb-3 pb-2 border-b">
+                    Daily Activities
+                    {isEditMode && (
                       <button
                         type="button"
-                        onClick={() => removeActivity(dayIndex, activityIndex)}
-                        className="text-red-500 hover:text-red-700 absolute top-2 right-2"
-                        title="Remove activity"
+                        onClick={() => openActivityModal(dayIndex)}
+                        className="ml-3 text-sm text-blue-600 hover:text-blue-800"
                       >
-                        ✕
+                        + Add Activity
                       </button>
-                    </div>
-
-                    <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-                    
-                    {/* Detailed Activity Inputs */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 mt-3 bg-white border rounded-lg">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Pickup Location</label>
-                          <input
-                            type="text"
-                            placeholder="E.g., Hotel Lobby"
-                            value={activity.pickupLocation}
-                            onChange={(e) => updateActivity(dayIndex, activityIndex, 'pickupLocation', e.target.value)}
-                            className="w-full p-2 border rounded-md text-sm"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Drop-off Location</label>
-                          <input
-                            type="text"
-                            placeholder="E.g., Activity Venue"
-                            value={activity.dropLocation}
-                            onChange={(e) => updateActivity(dayIndex, activityIndex, 'dropLocation', e.target.value)}
-                            className="w-full p-2 border rounded-md text-sm"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Type/Cost/Location</label>
-                          <input
-                            type="text"
-                            placeholder="Type/Cost/Location"
-                            value={`${activity.type || ''}${activity.cost ? ` | ${formatPrice(activity.cost)}` : ''}${activity.location ? ` | ${activity.location}` : ''}`}
-                            disabled
-                            className="w-full p-2 border rounded-md text-sm bg-gray-100 cursor-not-allowed"
-                          />
-                        </div>
-                    </div>
-                    {activity.notes && (
-                        <div className="mt-2 text-sm text-gray-700 border-t pt-2">
-                            <strong className="text-xs text-blue-600">Notes:</strong> {activity.notes}
-                        </div>
                     )}
-                  </div>
-                ))}
-              </div>
+                  </h4>
+                  
+                  {day.activities.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
+                      {isEditMode ? 'No activities added yet. Click "Add Activity" to get started.' : 'No activities scheduled for this day.'}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {day.activities.map((activity, activityIndex) => (
+                        <div key={activityIndex} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow transition-shadow">
+                          <div className="bg-white p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center">
+                                  <h4 className="text-lg font-semibold text-gray-800">{activity.name}</h4>
+                                  {activity.type && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                      {activity.type}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {activity.pickupTime && (
+                                  <div className="mt-1 flex items-center text-sm text-gray-600">
+                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {activity.pickupTime}
+                                  </div>
+                                )}
+                                
+                                {activity.location && (
+                                  <div className="mt-1 flex items-center text-sm text-gray-600">
+                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {activity.location}
+                                  </div>
+                                )}
+                                
+                                {activity.description && (
+                                  <p className="mt-2 text-sm text-gray-600">{activity.description}</p>
+                                )}
+                                
+                                {(activity.pickupLocation || activity.dropLocation) && (
+                                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {activity.pickupLocation && (
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Pickup</label>
+                                        <div className="p-2 bg-gray-50 rounded text-sm">
+                                          {activity.pickupLocation}
+                                        </div>
+                                      </div>
+                                    )}
+                                    {activity.dropLocation && (
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Drop-off</label>
+                                        <div className="p-2 bg-gray-50 rounded text-sm">
+                                          {activity.dropLocation}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {activity.notes && (
+                                  <div className="mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r">
+                                    <p className="text-sm text-yellow-700">
+                                      <span className="font-medium">Notes:</span> {activity.notes}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {isEditMode && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeActivity(dayIndex, activityIndex)}
+                                  className="text-gray-400 hover:text-red-500 transition-colors"
+                                  title="Remove activity"
+                                >
+                                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Type/Cost/Location</label>
+                            <input
+                              type="text"
+                              placeholder="Type/Cost/Location"
+                              value={`${activity.type || ''}${activity.cost ? ` | ${formatPrice(activity.cost)}` : ''}${activity.location ? ` | ${activity.location}` : ''}`}
+                              disabled
+                              className="w-full p-2 border rounded-md text-sm bg-gray-100 cursor-not-allowed"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
 
               {/* Add Activity Button */}
               <div className="mt-4">
