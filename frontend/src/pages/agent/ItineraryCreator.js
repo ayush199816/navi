@@ -18,11 +18,45 @@ const formatPrice = (amount, currency = 'INR') => {
   }).format(amount);
 };
 
+// Utility function to format date in local timezone
+const formatLocalDate = (dateString) => {
+    if (!dateString) return 'Invalid Date';
+    try {
+        // Parse the date string and adjust for local timezone
+        const date = new Date(dateString);
+        if (!isValid(date)) return 'Invalid Date';
+        
+        // Format the date in local timezone
+        // Use the 'P' format to include the timezone offset
+        return format(date, 'EEEE, MMMM d, yyyy');
+    } catch (e) {
+        console.error('Error formatting date:', e);
+        return 'Invalid Date';
+    }
+};
+
+// Utility to get local date string without timezone issues
+const toLocalDateString = (dateString) => {
+    if (!dateString) return '';
+    try {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    } catch (e) {
+        console.error('Error converting to local date:', e);
+        return '';
+    }
+};
+
 // Utility function to format date/time for flights
 const formatFlightTime = (dateTimeString) => {
     if (!dateTimeString) return 'N/A';
-    const date = parseISO(dateTimeString);
-    return isValid(date) ? format(date, 'MMM d, h:mm a') : 'N/A';
+    try {
+        const date = new Date(dateTimeString);
+        return isValid(date) ? format(date, 'MMM d, h:mm a') : 'N/A';
+    } catch (e) {
+        console.error('Error formatting flight time:', e);
+        return 'N/A';
+    }
 };
 
 const ItineraryCreator = (props) => {
@@ -75,226 +109,264 @@ const ItineraryCreator = (props) => {
     ]
   });
 
-  // Utility function to safely format dates
-  const formatDateForInput = (dateString) => {
-    if (!dateString) return '';
-    try {
-      // Handle both string and Date objects
-      const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-      if (isNaN(date.getTime())) {
-        console.warn('Invalid date string:', dateString);
-        return '';
-      }
-      return format(date, 'yyyy-MM-dd');
-    } catch (e) {
-      console.error('Error formatting date:', e, dateString);
-      return '';
-    }
-  };
-
-  // Fetch itinerary data when in edit mode
+  // Initialize days when arrival and departure dates change
   useEffect(() => {
-    const fetchItinerary = async () => {
-      if (!id) return;
+    if (formData.arrivalDate && formData.departureDate && !id) {
+      const startDate = new Date(formData.arrivalDate);
+      const endDate = new Date(formData.departureDate);
       
-      try {
-        setLoading(true);
-        console.log('Fetching itinerary with ID:', id);
-        const response = await api.get(`/itineraries/${id}`);
-        const itinerary = response.data?.data;
+      // Only proceed if dates are valid and in the correct order
+      if (isValid(startDate) && isValid(endDate) && startDate <= endDate) {
+        const daysCount = differenceInDays(endDate, startDate) + 1;
+        const generatedDays = [];
         
-        if (!itinerary) {
-          throw new Error('No itinerary data received');
-        }
-        
-        console.log('Raw itinerary data:', itinerary);
-        
-        // Format dates consistently
-        const formattedItinerary = {
-          ...itinerary,
-          arrivalDate: formatDateForInput(itinerary.arrivalDate),
-          departureDate: formatDateForInput(itinerary.departureDate),
-          // Format hotel dates
-          hotels: itinerary.hotels?.map(hotel => ({
-            ...hotel,
-            checkIn: formatDateForInput(hotel.checkIn),
-            checkOut: formatDateForInput(hotel.checkOut)
-          })) || [],
-          // Format flight dates
-          flights: itinerary.flights?.map(flight => ({
-            ...flight,
-            departure: flight.departure ? format(new Date(flight.departure), "yyyy-MM-dd'T'HH:mm") : '',
-            arrival: flight.arrival ? format(new Date(flight.arrival), "yyyy-MM-dd'T'HH:mm") : ''
-          })) || []
-        };
-
-        console.log('Formatted itinerary data:', formattedItinerary);
-        
-        // Update form data with consistent date formatting
-        setFormData(prev => ({
-          ...prev,
-          title: formattedItinerary.title || '',
-          customerName: formattedItinerary.customerName || '',
-          customerEmail: formattedItinerary.customerEmail || '',
-          customerPhone: formattedItinerary.customerPhone || '',
-          destination: formattedItinerary.destination || '',
-          arrivalDate: formattedItinerary.arrivalDate || '',
-          departureDate: formattedItinerary.departureDate || '',
-          adults: formattedItinerary.adults || 1,
-          children: formattedItinerary.children || 0,
-          budget: formattedItinerary.budget || '',
-          notes: formattedItinerary.notes || '',
-          hotels: formattedItinerary.hotels.length ? formattedItinerary.hotels : [
-            { name: '', checkIn: '', checkOut: '', roomType: '', confirmationNumber: '' }
-          ],
-          flights: formattedItinerary.flights.length ? formattedItinerary.flights : [
-            { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmationNumber: '' }
-          ]
-        }));
-
-        // Process itinerary days with better date handling
-        if (itinerary.days?.length) {
-          console.log('Processing existing days:', itinerary.days);
+        for (let i = 0; i < daysCount; i++) {
+          const currentDate = new Date(startDate);
+          currentDate.setDate(startDate.getDate() + i);
           
-          const sortedDays = [...itinerary.days].sort((a, b) => {
-            try {
-              const dateA = a.date ? new Date(a.date) : new Date(itinerary.arrivalDate);
-              const dateB = b.date ? new Date(b.date) : new Date(itinerary.arrivalDate);
-              return dateA - dateB;
-            } catch (e) {
-              console.error('Error sorting days:', e);
-              return 0;
-            }
-          });
+          // Check if we already have this day in the state
+          const existingDay = itineraryDays[i];
           
-          const formattedDays = sortedDays.map((day, index) => {
-            let dayDate;
-            try {
-              dayDate = day.date ? new Date(day.date) : new Date(itinerary.arrivalDate);
-              if (isNaN(dayDate.getTime())) {
-                console.warn('Invalid day date, using arrival date instead:', day.date);
-                dayDate = new Date(itinerary.arrivalDate);
-              }
-            } catch (e) {
-              console.error('Error parsing day date, using arrival date:', e);
-              dayDate = new Date(itinerary.arrivalDate);
-            }
-            
-            return {
-              ...day,
-              day: index + 1, // Ensure day number is sequential
-              date: dayDate.toISOString(),
-              activities: Array.isArray(day.activities) ? day.activities : []
-            };
-          });
-          
-          console.log('Formatted days:', formattedDays);
-          setItineraryDays(formattedDays);
-        } else if (itinerary.arrivalDate && itinerary.departureDate) {
-          console.log('Generating days from date range:', { 
-            arrival: itinerary.arrivalDate, 
-            departure: itinerary.departureDate 
-          });
-          
-          try {
-            const startDate = new Date(itinerary.arrivalDate);
-            const endDate = new Date(itinerary.departureDate);
-            
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-              throw new Error('Invalid date range');
-            }
-            
-            const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-            
-            const generatedDays = Array.from({ length: daysCount }, (_, i) => {
-              const currentDate = new Date(startDate);
-              currentDate.setDate(startDate.getDate() + i);
-              return {
-                day: i + 1,
-                date: currentDate.toISOString(),
-                activities: [],
-                meals: {
-                  breakfast: { included: false },
-                  lunch: { included: false },
-                  dinner: { included: false }
-                }
-              };
+          if (existingDay) {
+            // Keep existing day data but update the date
+            generatedDays.push({
+              ...existingDay,
+              date: currentDate.toISOString()
             });
-            
-            console.log('Generated days:', generatedDays);
-            setItineraryDays(generatedDays);
-          } catch (e) {
-            console.error('Error generating days:', e);
-            // Fallback to a single day if date generation fails
-            setItineraryDays([{
-              day: 1,
-              date: new Date().toISOString(),
+          } else {
+            // Create a new day
+            generatedDays.push({
+              day: i + 1,
+              date: currentDate.toISOString(),
               activities: [],
               meals: {
                 breakfast: { included: false },
                 lunch: { included: false },
                 dinner: { included: false }
               }
-            }]);
+            });
           }
-        } else {
-          console.warn('No days data and insufficient information to generate days');
         }
         
-        setIsEditMode(true);
-        setItineraryId(id);
-      } catch (error) {
-        console.error('Error fetching itinerary:', error);
-        toast.error(`Failed to load itinerary data: ${error.message || 'Unknown error'}`);
-        
-        // Set empty state to prevent UI from breaking
-        setItineraryDays([{
-          day: 1,
-          date: new Date().toISOString(),
-          activities: [],
-          meals: {
-            breakfast: { included: false },
-            lunch: { included: false },
-            dinner: { included: false }
+        // Only update if the number of days has changed or it's a new itinerary
+        if (generatedDays.length !== itineraryDays.length || !itineraryDays.length) {
+          setItineraryDays(generatedDays);
+        }
+      }
+    }
+  }, [formData.arrivalDate, formData.departureDate, id, itineraryDays]);
+
+  // Fetch itinerary data when in edit mode
+  useEffect(() => {
+    const fetchItinerary = async () => {
+      if (id) {
+        try {
+          setLoading(true);
+          const response = await api.get(`/itineraries/${id}`);
+          const itinerary = response.data.data;
+          
+          // Format dates for input fields (YYYY-MM-DD format)
+          const formatDateForInput = (dateString) => {
+            if (!dateString) return '';
+            try {
+              const date = new Date(dateString);
+              return format(date, 'yyyy-MM-dd');
+            } catch (e) {
+              console.error('Error formatting date:', e);
+              return '';
+            }
+          };
+
+          // Update form data with fetched itinerary
+          setFormData({
+            title: itinerary.title || '',
+            customerName: itinerary.customerName || '',
+            customerEmail: itinerary.customerEmail || '',
+            customerPhone: itinerary.customerPhone || '',
+            destination: itinerary.destination || '',
+            arrivalDate: formatDateForInput(itinerary.arrivalDate),
+            departureDate: formatDateForInput(itinerary.departureDate),
+            adults: itinerary.adults || 1,
+            children: itinerary.children || 0,
+            budget: itinerary.budget || '',
+            notes: itinerary.notes || '',
+            hotels: itinerary.hotels?.length ? itinerary.hotels : [
+              { name: '', checkIn: '', checkOut: '', roomType: '', confirmationNumber: '' }
+            ],
+            flights: itinerary.flights?.length ? itinerary.flights.map(flight => ({
+              ...flight,
+              departure: flight.departure ? format(new Date(flight.departure), "yyyy-MM-dd'T'HH:mm") : '',
+              arrival: flight.arrival ? format(new Date(flight.arrival), "yyyy-MM-dd'T'HH:mm") : ''
+            })) : [
+              { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmationNumber: '' }
+            ]
+          });
+
+          // Set itinerary days if available
+          if (itinerary.days?.length) {
+            console.log('[DEBUG] Raw days data from API:', JSON.parse(JSON.stringify(itinerary.days)));
+            console.log('[DEBUG] Arrival date:', itinerary.arrivalDate);
+            console.log('[DEBUG] Departure date:', itinerary.departureDate);
+            
+            // First, ensure all days have a valid date
+            const daysWithValidDates = itinerary.days.map((day, i) => {
+              console.log(`[DEBUG] Processing day ${i}:`, day);
+              try {
+                let dayDate;
+                const dateString = day.date || day.day || itinerary.arrivalDate;
+                
+                if (dateString) {
+                  // Create date in local timezone
+                  dayDate = new Date(dateString);
+                  // If the date is invalid, use the arrival date
+                  if (isNaN(dayDate.getTime())) {
+                    dayDate = new Date(itinerary.arrivalDate);
+                  }
+                } else {
+                  dayDate = new Date(itinerary.arrivalDate);
+                }
+                
+                return {
+                  ...day,
+                  _date: dayDate, // Store the date object for sorting
+                  date: dayDate.toISOString(),
+                  activities: Array.isArray(day.activities) ? day.activities : []
+                };
+              } catch (e) {
+                console.error('Error processing day:', day, e);
+                const fallbackDate = new Date(itinerary.arrivalDate);
+                return {
+                  ...day,
+                  _date: fallbackDate,
+                  date: fallbackDate.toISOString(),
+                  activities: Array.isArray(day.activities) ? day.activities : []
+                };
+              }
+            });
+            
+            // Sort days by date
+            const sortedDays = [...daysWithValidDates].sort((a, b) => {
+              return a._date - b._date;
+            });
+            
+            // Add day numbers and clean up temporary _date property
+            const formattedDays = sortedDays.map((day, index) => ({
+              ...day,
+              day: index + 1,
+              // Remove the temporary _date property
+              _date: undefined
+            }));
+            
+            console.log('[DEBUG] Formatted days before setting state:', JSON.parse(JSON.stringify(formattedDays)));
+            
+            // Log the first few activities of the first day for debugging
+            if (formattedDays.length > 0 && formattedDays[0].activities?.length) {
+              console.log('[DEBUG] First day activities:', formattedDays[0].activities.slice(0, 3));
+            }
+            
+            setItineraryDays(formattedDays);
+            console.log('[DEBUG] State has been updated with formattedDays');
+          } else if (itinerary.arrivalDate && itinerary.departureDate) {
+            // If no days data but we have dates, create days array
+            const startDate = new Date(itinerary.arrivalDate);
+            const endDate = new Date(itinerary.departureDate);
+            const daysCount = differenceInDays(endDate, startDate) + 1;
+            
+            console.log(`Generating ${daysCount} days from ${startDate.toISOString()} to ${endDate.toISOString()}`);
+            
+            const generatedDays = [];
+            for (let i = 0; i < daysCount; i++) {
+              const currentDate = new Date(startDate);
+              currentDate.setDate(startDate.getDate() + i);
+              
+              // Format the date in local timezone for display
+              const dateString = currentDate.toISOString();
+              
+              generatedDays.push({
+                day: i + 1,
+                date: dateString,
+                activities: [],
+                meals: {
+                  breakfast: { included: false },
+                  lunch: { included: false },
+                  dinner: { included: false }
+                }
+              });
+            }
+            
+            console.log('Generated days:', JSON.parse(JSON.stringify(generatedDays)));
+            setItineraryDays(generatedDays);
           }
-        }]);
-      } finally {
-        setLoading(false);
+          
+          setIsEditMode(true);
+          setItineraryId(id);
+        } catch (error) {
+          console.error('Error fetching itinerary:', error);
+          toast.error('Failed to load itinerary data');
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
     fetchItinerary();
   }, [id]);
 
-  // --- Utility Functions (Placeholders for full code) ---
+  // --- Utility Functions ---
 
-  const calculateDays = useCallback((arrival, departure) => {
-    const start = parseISO(arrival);
-    const end = parseISO(departure);
-    if (!isValid(start) || !isValid(end) || differenceInDays(end, start) < 0) return [];
+  // Define calculateDaysStable first
+  const calculateDaysStable = useCallback((arrival, departure) => {
+    if (!arrival || !departure) return [];
+    
+    const start = new Date(arrival);
+    const end = new Date(departure);
+    
+    if (!isValid(start) || !isValid(end) || differenceInDays(end, start) < 0) {
+      console.error('Invalid date range for calculateDay:', { arrival, departure });
+      return [];
+    }
 
     const daysCount = differenceInDays(end, start) + 1;
-    let days = [];
-    for (let i = 0; i < daysCount; i++) {
-      const date = addDays(start, i);
-      days.push({
-        date: date.toISOString(),
-        activities: []
-      });
-    }
-    return days;
+    return Array.from({ length: daysCount }, (_, i) => ({
+      date: format(addDays(start, i), 'yyyy-MM-dd'),
+      day: i + 1,
+      activities: []
+    }));
   }, []);
 
+  // Only calculate days if we're not in edit mode or if we don't have days yet
   useEffect(() => {
-    setItineraryDays(calculateDays(formData.arrivalDate, formData.departureDate));
-    // In a real app, you'd load existing itinerary here if itineraryId is present
-    // fetchItinerary(itineraryId);
-  }, [formData.arrivalDate, formData.departureDate, calculateDays]);
+    if (!id && formData.arrivalDate && formData.departureDate) {
+      console.log('Calculating new days based on date range');
+      const newDays = calculateDaysStable(formData.arrivalDate, formData.departureDate);
+      console.log('New days calculated:', newDays);
+      setItineraryDays(prevDays => (!prevDays?.length ? newDays : prevDays));
+    }
+  }, [formData.arrivalDate, formData.departureDate, id, calculateDaysStable]);
+
+  // Log state changes for debugging
+  useEffect(() => {
+    console.log('itineraryDays state updated. Length:', itineraryDays?.length);
+    if (itineraryDays?.length > 0) {
+      console.log('First day in state:', {
+        date: itineraryDays[0].date,
+        day: itineraryDays[0].day,
+        activitiesCount: itineraryDays[0].activities?.length || 0,
+        hasItineraryText: !!itineraryDays[0].itineraryText
+      });
+    }
+  }, [itineraryDays]);
 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev, 
+      [name]: value,
+      // Update the other date field's min/max when one changes
+      ...(name === 'arrivalDate' ? { departureDate: prev.departureDate < value ? '' : prev.departureDate } : {}),
+      ...(name === 'departureDate' ? { arrivalDate: prev.arrivalDate > value ? '' : prev.arrivalDate } : {})
+    }));
   };
 
   const navigate = useNavigate();
@@ -431,12 +503,6 @@ const ItineraryCreator = (props) => {
     updatedDays[dayIndex].activities.splice(activityIndex, 1);
     setItineraryDays(updatedDays);
     toast.warn('Activity removed.');
-  };
-
-  const updateActivity = (dayIndex, activityIndex, field, value) => {
-    const updatedDays = [...itineraryDays];
-    updatedDays[dayIndex].activities[activityIndex][field] = value;
-    setItineraryDays(updatedDays);
   };
 
   // --- PDF Generation Logic (The main focus of the correction) ---
@@ -1007,22 +1073,35 @@ const ItineraryCreator = (props) => {
                 type="date"
                 name="arrivalDate"
                 value={formData.arrivalDate}
+                min={format(new Date(), 'yyyy-MM-dd')} // Can't select past dates
+                max={formData.departureDate || ''}
                 onChange={handleInputChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
+              {formData.arrivalDate && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {format(new Date(formData.arrivalDate), 'EEEE, MMMM d, yyyy')}
+                </div>
+              )}
             </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700">Departure Date *</label>
               <input
                 type="date"
                 name="departureDate"
                 value={formData.departureDate}
+                min={formData.arrivalDate || format(new Date(), 'yyyy-MM-dd')}
                 onChange={handleInputChange}
-                min={formData.arrivalDate}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
+              {formData.departureDate && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {format(new Date(formData.departureDate), 'EEEE, MMMM d, yyyy')}
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Adults *</label>
@@ -1275,76 +1354,159 @@ const ItineraryCreator = (props) => {
           <h2 className="text-2xl font-bold">Daily Itinerary</h2>
           {itineraryDays.map((day, dayIndex) => (
             <div key={dayIndex} className="bg-white p-6 rounded-lg shadow border-t-4 border-blue-600">
-              <h3 className="text-lg font-semibold mb-4 text-blue-800">
-                Day {dayIndex + 1}: {isValid(parseISO(day.date)) ? format(parseISO(day.date), 'EEEE, MMMM d, yyyy') : 'Invalid Date'}
-              </h3>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-semibold text-blue-800">
+                  Day {dayIndex + 1}: {formatLocalDate(day.date)}
+                  <span className="ml-2 text-sm text-gray-500">
+                    ({toLocalDateString(day.date)})
+                  </span>
+                </h3>
+                {isEditMode && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newItineraryText = prompt('Enter itinerary for this day:', day.itineraryText || '');
+                      if (newItineraryText !== null) {
+                        const updatedDays = [...itineraryDays];
+                        updatedDays[dayIndex] = {
+                          ...day,
+                          itineraryText: newItineraryText
+                        };
+                        setItineraryDays(updatedDays);
+                      }
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    {day.itineraryText ? 'Edit Itinerary' : '+ Add Itinerary'}
+                  </button>
+                )}
+              </div>
+              {isEditMode && day.itineraryText && (
+                <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r">
+                  <p className="whitespace-pre-line">{day.itineraryText}</p>
+                </div>
+              )}
               
-              {/* Activities */}
-              <div className="space-y-4">
-                {day.activities.map((activity, activityIndex) => (
-                  <div key={activityIndex} className="border-l-4 border-gray-400 pl-4 py-3 bg-gray-50 rounded-r relative">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-800">{activity.name}</h4>
-                        <span className="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
-                          {activity.pickupTime || 'Time TBD'}
-                        </span>
-                      </div>
+              <>
+                {/* Activities Section */}
+                <div className="mt-4">
+                  <h4 className="text-md font-semibold text-gray-700 mb-3 pb-2 border-b">
+                    Daily Activities
+                    {isEditMode && (
                       <button
                         type="button"
-                        onClick={() => removeActivity(dayIndex, activityIndex)}
-                        className="text-red-500 hover:text-red-700 absolute top-2 right-2"
-                        title="Remove activity"
+                        onClick={() => openActivityModal(dayIndex)}
+                        className="ml-3 text-sm text-blue-600 hover:text-blue-800"
                       >
-                        ✕
+                        + Add Activity
                       </button>
-                    </div>
-
-                    <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-                    
-                    {/* Detailed Activity Inputs */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 mt-3 bg-white border rounded-lg">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Pickup Location</label>
-                          <input
-                            type="text"
-                            placeholder="E.g., Hotel Lobby"
-                            value={activity.pickupLocation}
-                            onChange={(e) => updateActivity(dayIndex, activityIndex, 'pickupLocation', e.target.value)}
-                            className="w-full p-2 border rounded-md text-sm"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Drop-off Location</label>
-                          <input
-                            type="text"
-                            placeholder="E.g., Activity Venue"
-                            value={activity.dropLocation}
-                            onChange={(e) => updateActivity(dayIndex, activityIndex, 'dropLocation', e.target.value)}
-                            className="w-full p-2 border rounded-md text-sm"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Type/Cost/Location</label>
-                          <input
-                            type="text"
-                            placeholder="Type/Cost/Location"
-                            value={`${activity.type || ''}${activity.cost ? ` | ${formatPrice(activity.cost)}` : ''}${activity.location ? ` | ${activity.location}` : ''}`}
-                            disabled
-                            className="w-full p-2 border rounded-md text-sm bg-gray-100 cursor-not-allowed"
-                          />
-                        </div>
-                    </div>
-                    {activity.notes && (
-                        <div className="mt-2 text-sm text-gray-700 border-t pt-2">
-                            <strong className="text-xs text-blue-600">Notes:</strong> {activity.notes}
-                        </div>
                     )}
-                  </div>
-                ))}
-              </div>
+                  </h4>
+                  
+                  {day.activities.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
+                      {isEditMode ? 'No activities added yet. Click "Add Activity" to get started.' : 'No activities scheduled for this day.'}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {day.activities.map((activity, activityIndex) => (
+                        <div key={activityIndex} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow transition-shadow">
+                          <div className="bg-white p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center">
+                                  <h4 className="text-lg font-semibold text-gray-800">{activity.name}</h4>
+                                  {activity.type && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                      {activity.type}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {activity.pickupTime && (
+                                  <div className="mt-1 flex items-center text-sm text-gray-600">
+                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {activity.pickupTime}
+                                  </div>
+                                )}
+                                
+                                {activity.location && (
+                                  <div className="mt-1 flex items-center text-sm text-gray-600">
+                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {activity.location}
+                                  </div>
+                                )}
+                                
+                                {activity.description && (
+                                  <p className="mt-2 text-sm text-gray-600">{activity.description}</p>
+                                )}
+                                
+                                {(activity.pickupLocation || activity.dropLocation) && (
+                                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {activity.pickupLocation && (
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Pickup</label>
+                                        <div className="p-2 bg-gray-50 rounded text-sm">
+                                          {activity.pickupLocation}
+                                        </div>
+                                      </div>
+                                    )}
+                                    {activity.dropLocation && (
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Drop-off</label>
+                                        <div className="p-2 bg-gray-50 rounded text-sm">
+                                          {activity.dropLocation}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {activity.notes && (
+                                  <div className="mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r">
+                                    <p className="text-sm text-yellow-700">
+                                      <span className="font-medium">Notes:</span> {activity.notes}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {isEditMode && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeActivity(dayIndex, activityIndex)}
+                                  className="text-gray-400 hover:text-red-500 transition-colors"
+                                  title="Remove activity"
+                                >
+                                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Type/Cost/Location</label>
+                            <input
+                              type="text"
+                              placeholder="Type/Cost/Location"
+                              value={`${activity.type || ''}${activity.cost ? ` | ${formatPrice(activity.cost)}` : ''}${activity.location ? ` | ${activity.location}` : ''}`}
+                              disabled
+                              className="w-full p-2 border rounded-md text-sm bg-gray-100 cursor-not-allowed"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
 
               {/* Add Activity Button */}
               <div className="mt-4">

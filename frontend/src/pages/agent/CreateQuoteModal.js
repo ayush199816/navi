@@ -60,7 +60,7 @@ const CreateQuoteModal = ({ open, onClose, onSuccess }) => {
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create quote');
+      setError(err.response?.data?.message || 'Failed to create quotes');
     }
     setSubmitting(false);
   };
