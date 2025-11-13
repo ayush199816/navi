@@ -75,141 +75,88 @@ const ItineraryCreator = (props) => {
     ]
   });
 
-  // Utility function to safely format dates
-  const formatDateForInput = (dateString) => {
-    if (!dateString) return '';
-    try {
-      // Handle both string and Date objects
-      const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-      if (isNaN(date.getTime())) {
-        console.warn('Invalid date string:', dateString);
-        return '';
-      }
-      return format(date, 'yyyy-MM-dd');
-    } catch (e) {
-      console.error('Error formatting date:', e, dateString);
-      return '';
-    }
-  };
-
   // Fetch itinerary data when in edit mode
   useEffect(() => {
     const fetchItinerary = async () => {
-      if (!id) return;
-      
-      try {
-        setLoading(true);
-        console.log('Fetching itinerary with ID:', id);
-        const response = await api.get(`/itineraries/${id}`);
-        const itinerary = response.data?.data;
-        
-        if (!itinerary) {
-          throw new Error('No itinerary data received');
-        }
-        
-        console.log('Raw itinerary data:', itinerary);
-        
-        // Format dates consistently
-        const formattedItinerary = {
-          ...itinerary,
-          arrivalDate: formatDateForInput(itinerary.arrivalDate),
-          departureDate: formatDateForInput(itinerary.departureDate),
-          // Format hotel dates
-          hotels: itinerary.hotels?.map(hotel => ({
-            ...hotel,
-            checkIn: formatDateForInput(hotel.checkIn),
-            checkOut: formatDateForInput(hotel.checkOut)
-          })) || [],
-          // Format flight dates
-          flights: itinerary.flights?.map(flight => ({
-            ...flight,
-            departure: flight.departure ? format(new Date(flight.departure), "yyyy-MM-dd'T'HH:mm") : '',
-            arrival: flight.arrival ? format(new Date(flight.arrival), "yyyy-MM-dd'T'HH:mm") : ''
-          })) || []
-        };
-
-        console.log('Formatted itinerary data:', formattedItinerary);
-        
-        // Update form data with consistent date formatting
-        setFormData(prev => ({
-          ...prev,
-          title: formattedItinerary.title || '',
-          customerName: formattedItinerary.customerName || '',
-          customerEmail: formattedItinerary.customerEmail || '',
-          customerPhone: formattedItinerary.customerPhone || '',
-          destination: formattedItinerary.destination || '',
-          arrivalDate: formattedItinerary.arrivalDate || '',
-          departureDate: formattedItinerary.departureDate || '',
-          adults: formattedItinerary.adults || 1,
-          children: formattedItinerary.children || 0,
-          budget: formattedItinerary.budget || '',
-          notes: formattedItinerary.notes || '',
-          hotels: formattedItinerary.hotels.length ? formattedItinerary.hotels : [
-            { name: '', checkIn: '', checkOut: '', roomType: '', confirmationNumber: '' }
-          ],
-          flights: formattedItinerary.flights.length ? formattedItinerary.flights : [
-            { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmationNumber: '' }
-          ]
-        }));
-
-        // Process itinerary days with better date handling
-        if (itinerary.days?.length) {
-          console.log('Processing existing days:', itinerary.days);
+      if (id) {
+        try {
+          setLoading(true);
+          const response = await api.get(`/itineraries/${id}`);
+          const itinerary = response.data.data;
           
-          const sortedDays = [...itinerary.days].sort((a, b) => {
-            try {
-              const dateA = a.date ? new Date(a.date) : new Date(itinerary.arrivalDate);
-              const dateB = b.date ? new Date(b.date) : new Date(itinerary.arrivalDate);
-              return dateA - dateB;
-            } catch (e) {
-              console.error('Error sorting days:', e);
-              return 0;
-            }
+          // Update form data with fetched itinerary
+          setFormData({
+            title: itinerary.title || '',
+            customerName: itinerary.customerName || '',
+            customerEmail: itinerary.customerEmail || '',
+            customerPhone: itinerary.customerPhone || '',
+            destination: itinerary.destination || '',
+            arrivalDate: itinerary.arrivalDate ? format(new Date(itinerary.arrivalDate), 'yyyy-MM-dd') : '',
+            departureDate: itinerary.departureDate ? format(new Date(itinerary.departureDate), 'yyyy-MM-dd') : '',
+            adults: itinerary.adults || 1,
+            children: itinerary.children || 0,
+            budget: itinerary.budget || '',
+            notes: itinerary.notes || '',
+            hotels: itinerary.hotels?.length ? itinerary.hotels : [
+              { name: '', checkIn: '', checkOut: '', roomType: '', confirmationNumber: '' }
+            ],
+            flights: itinerary.flights?.length ? itinerary.flights.map(flight => ({
+              ...flight,
+              departure: flight.departure ? format(new Date(flight.departure), "yyyy-MM-dd'T'HH:mm") : '',
+              arrival: flight.arrival ? format(new Date(flight.arrival), "yyyy-MM-dd'T'HH:mm") : ''
+            })) : [
+              { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmationNumber: '' }
+            ]
           });
-          
-          const formattedDays = sortedDays.map((day, index) => {
-            let dayDate;
-            try {
-              dayDate = day.date ? new Date(day.date) : new Date(itinerary.arrivalDate);
-              if (isNaN(dayDate.getTime())) {
-                console.warn('Invalid day date, using arrival date instead:', day.date);
+
+          // Set itinerary days if available
+          if (itinerary.days?.length) {
+            // Sort days by date to ensure they're in order
+            const sortedDays = [...itinerary.days].sort((a, b) => {
+              const dateA = new Date(a.date || a.day || itinerary.arrivalDate);
+              const dateB = new Date(b.date || b.day || itinerary.arrivalDate);
+              return dateA - dateB;
+            });
+            
+            // Format the days data for the UI
+            const formattedDays = sortedDays.map((day, index) => {
+              // Ensure we have a valid date for each day
+              let dayDate;
+              try {
+                dayDate = day.date || day.day || new Date(itinerary.arrivalDate);
+                if (typeof dayDate === 'string') {
+                  dayDate = new Date(dayDate);
+                }
+                // Ensure the date is valid, if not use the arrival date
+                if (isNaN(dayDate.getTime())) {
+                  dayDate = new Date(itinerary.arrivalDate);
+                }
+              } catch (e) {
+                console.error('Error parsing date:', e);
                 dayDate = new Date(itinerary.arrivalDate);
               }
-            } catch (e) {
-              console.error('Error parsing day date, using arrival date:', e);
-              dayDate = new Date(itinerary.arrivalDate);
-            }
+              
+              return {
+                ...day,
+                day: index + 1, // Ensure day number is sequential
+                date: dayDate.toISOString(),
+                activities: Array.isArray(day.activities) ? day.activities : []
+              };
+            });
             
-            return {
-              ...day,
-              day: index + 1, // Ensure day number is sequential
-              date: dayDate.toISOString(),
-              activities: Array.isArray(day.activities) ? day.activities : []
-            };
-          });
-          
-          console.log('Formatted days:', formattedDays);
-          setItineraryDays(formattedDays);
-        } else if (itinerary.arrivalDate && itinerary.departureDate) {
-          console.log('Generating days from date range:', { 
-            arrival: itinerary.arrivalDate, 
-            departure: itinerary.departureDate 
-          });
-          
-          try {
+            console.log('Formatted days:', formattedDays); // Debug log
+            setItineraryDays(formattedDays);
+          } else if (itinerary.arrivalDate && itinerary.departureDate) {
+            // If no days data but we have dates, create days array
             const startDate = new Date(itinerary.arrivalDate);
             const endDate = new Date(itinerary.departureDate);
-            
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-              throw new Error('Invalid date range');
-            }
-            
             const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
             
-            const generatedDays = Array.from({ length: daysCount }, (_, i) => {
+            const generatedDays = [];
+            for (let i = 0; i < daysCount; i++) {
               const currentDate = new Date(startDate);
               currentDate.setDate(startDate.getDate() + i);
-              return {
+              generatedDays.push({
                 day: i + 1,
                 date: currentDate.toISOString(),
                 activities: [],
@@ -218,48 +165,19 @@ const ItineraryCreator = (props) => {
                   lunch: { included: false },
                   dinner: { included: false }
                 }
-              };
-            });
-            
-            console.log('Generated days:', generatedDays);
+              });
+            }
             setItineraryDays(generatedDays);
-          } catch (e) {
-            console.error('Error generating days:', e);
-            // Fallback to a single day if date generation fails
-            setItineraryDays([{
-              day: 1,
-              date: new Date().toISOString(),
-              activities: [],
-              meals: {
-                breakfast: { included: false },
-                lunch: { included: false },
-                dinner: { included: false }
-              }
-            }]);
           }
-        } else {
-          console.warn('No days data and insufficient information to generate days');
+          
+          setIsEditMode(true);
+          setItineraryId(id);
+        } catch (error) {
+          console.error('Error fetching itinerary:', error);
+          toast.error('Failed to load itinerary data');
+        } finally {
+          setLoading(false);
         }
-        
-        setIsEditMode(true);
-        setItineraryId(id);
-      } catch (error) {
-        console.error('Error fetching itinerary:', error);
-        toast.error(`Failed to load itinerary data: ${error.message || 'Unknown error'}`);
-        
-        // Set empty state to prevent UI from breaking
-        setItineraryDays([{
-          day: 1,
-          date: new Date().toISOString(),
-          activities: [],
-          meals: {
-            breakfast: { included: false },
-            lunch: { included: false },
-            dinner: { included: false }
-          }
-        }]);
-      } finally {
-        setLoading(false);
       }
     };
 
