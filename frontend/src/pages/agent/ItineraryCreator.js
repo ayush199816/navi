@@ -60,7 +60,14 @@ const ItineraryCreator = (props) => {
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [showPrice, setShowPrice] = useState(false);
+  const [priceData, setPriceData] = useState({
+    amount: '',
+    type: 'per_person', // 'per_person' or 'total'
+    currency: '₹' // Default currency symbol
+  });
   const [itineraryId, setItineraryId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams();
   
   // --- State Initialization ---
@@ -86,6 +93,9 @@ const ItineraryCreator = (props) => {
     aiInfo: ''
   });
 
+  const [showHotelSection, setShowHotelSection] = useState(true);
+  const [showFlightSection, setShowFlightSection] = useState(true);
+  
   const [formData, setFormData] = useState({
     title: '',
     customerName: '',
@@ -99,10 +109,10 @@ const ItineraryCreator = (props) => {
     budget: '',
     notes: '',
     hotels: [
-      { name: '', checkIn: '', checkOut: '', roomType: '', confirmation: '' }
+      { name: '', checkIn: '', checkOut: '', roomType: '', confirmationNumber: '' }
     ],
     flights: [
-      { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmation: '' }
+      { airline: '', flightNumber: '', departure: '', arrival: '', from: '', to: '', confirmationNumber: '' }
     ]
   });
 
@@ -332,7 +342,6 @@ const ItineraryCreator = (props) => {
   };
 
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -351,11 +360,27 @@ const ItineraryCreator = (props) => {
         throw new Error('Please specify a destination for the itinerary');
       }
 
+      // Filter out empty hotel entries
+      const validHotels = formData.hotels.filter(hotel => 
+        hotel.name && hotel.name.trim() !== '' && 
+        hotel.checkIn && hotel.checkOut
+      );
+
+      // Filter out empty flight entries
+      const validFlights = formData.flights.filter(flight => 
+        (flight.airline || flight.flightNumber) && 
+        flight.from && flight.to && 
+        flight.departure && flight.arrival
+      );
+
       // Prepare the data to send
       const itineraryData = {
         ...formData,
         title: formData.title, // Ensure title is included
         days: itineraryDays,
+        // Only include hotels and flights if they have valid data
+        hotels: validHotels.length > 0 ? validHotels : [],
+        flights: validFlights.length > 0 ? validFlights : [],
         // Ensure dates are in ISO format
         arrivalDate: formData.arrivalDate ? new Date(formData.arrivalDate).toISOString() : new Date().toISOString(),
         departureDate: formData.departureDate 
@@ -366,10 +391,23 @@ const ItineraryCreator = (props) => {
       };
 
       // Make the API call (POST for create, PUT for update)
-      if (isEditMode && itineraryId) {
-        await api.put(`/itineraries/${itineraryId}`, itineraryData);
-      } else {
-        await api.post('/itineraries', itineraryData);
+      console.log('Submitting itinerary data:', JSON.stringify(itineraryData, null, 2));
+      let response;
+      try {
+        if (isEditMode && itineraryId) {
+          response = await api.put(`/itineraries/${itineraryId}`, itineraryData);
+        } else {
+          response = await api.post('/itineraries', itineraryData);
+        }
+        console.log('API Response:', response);
+      } catch (apiError) {
+        console.error('API Error:', apiError);
+        if (apiError.response) {
+          console.error('Response data:', apiError.response.data);
+          console.error('Response status:', apiError.response.status);
+          console.error('Response headers:', apiError.response.headers);
+        }
+        throw apiError; // Re-throw to be caught by the outer catch
       }
       
       // Handle success
@@ -569,7 +607,7 @@ const ItineraryCreator = (props) => {
           titleDiv.style.paddingBottom = '2px';
           titleDiv.style.borderBottom = '1px solid #f0f0f0'; // Lighter border
           titleDiv.innerHTML = `
-            <h3 style="margin: 0; color: #2c3e50; font-size: 1.1em; font-weight: 600; line-height: 1.2;">
+            <h3 style="margin: 0; color: #2c3e50; font-size: 1.1em; font-weight: 600;">
               ${title}
             </h3>
           `;
@@ -626,7 +664,6 @@ const ItineraryCreator = (props) => {
           scale: 2,
           useCORS: true,
           allowTaint: true,
-          logging: false,
           backgroundColor: null,
           scrollY: 0,
           windowWidth: 794,
@@ -669,7 +706,7 @@ const ItineraryCreator = (props) => {
       };
       
 
-      // Add Agent Information section
+      // Add Agent Information section with optional price
       await addSection('', `
         <div style="
           background: url('https://res.cloudinary.com/dqlcup2s7/image/upload/v1758475269/navi/guestsightseeing/mb9nxjwcrdwevptwxqxi.jpg');
@@ -683,14 +720,15 @@ const ItineraryCreator = (props) => {
           overflow: hidden;
           color: white;
         ">
-          <div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 20px;">
-            <div style="width: 50px; height: 50px; border-radius: 50%; background: #9b59b6; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2em; font-weight: bold; flex-shrink: 0;">
-              ${user?.name?.charAt(0)?.toUpperCase() || 'A'}
-            </div>
-            <div style="color: white;">
-              <h3 style="margin: 0 0 5px 0; color: white; font-size: 1.4em; line-height: 1.3; font-weight: 600;">
-                ${user?.name || 'Your Travel Partner'}
-              </h3>
+          <div style="position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+              <div style="width: 50px; height: 50px; border-radius: 50%; background: #9b59b6; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2em; font-weight: bold; flex-shrink: 0;">
+                ${user?.name?.charAt(0)?.toUpperCase() || 'A'}
+              </div>
+              <div style="color: white;">
+                <h3 style="margin: 0 0 5px 0; color: white; font-size: 1.4em; line-height: 1.3; font-weight: 600;">
+                  ${user?.name || 'Your Travel Partner'}
+                </h3>
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 ${user?.email ? `
                   <div style="font-size: 0.9em; display: flex; align-items: center; gap: 5px;">
@@ -718,6 +756,19 @@ const ItineraryCreator = (props) => {
                   </div>` : ''}
               </div>
             </div>
+            ${showPrice && priceData.amount ? `
+              <div style="background: rgba(255, 255, 255, 0.2); margin-left: 325px; padding: 10px 20px; border-radius: 8px; text-align: right; backdrop-filter: blur(5px);">
+                <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 5px;">
+                  ${priceData.type === 'per_person' ? 'Starting from' : 'Total Price'}
+                </div>
+                <div style="font-size: 2em; font-weight: 700; line-height: 1;">
+                  ${priceData.currency}${parseFloat(priceData.amount).toLocaleString('en-IN')}
+                </div>
+                <div style="font-size: 0.9em; opacity: 0.9; margin-top: 3px;">
+                  ${priceData.type === 'per_person' ? 'per person' : 'for all travelers'}
+                </div>
+              </div>
+            ` : ''}
           </div>
         </div>
       `, { marginBottom: 5 });
@@ -741,72 +792,90 @@ const ItineraryCreator = (props) => {
         </div>
       `, { marginBottom: 5 });
       
-      // Add Flights section if exists
-      if (formData.flights && formData.flights.length > 0) {
-        currentY = await addSection('', `
-          <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; border-left: 4px solid #e74c3c; margin-bottom: 8px;">
-            ${formData.flights.map((flight, index) => `
-              <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <h4 style="margin: 0; color: #2c3e50; font-size: 1.1em; font-weight: 600;">Flight ${index + 1}: ${flight.airline || 'Airline'} ${flight.flightNumber || ''}</h4>
-                  <span style="background: #f1c40f; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.7em; display: inline-block; text-align: center; min-width: 70px;">
-                    ${flight.flightType === 'roundtrip' ? 'Round Trip' : 'One Way'}
-                  </span>
+      // Add Flights section if exists and visible
+      if (showFlightSection && formData.flights && formData.flights.length > 0) {
+        const validFlights = formData.flights.filter(flight => 
+          (flight.airline || flight.flightNumber || flight.from || flight.to) && 
+          flight.from && flight.to
+        );
+        
+        if (validFlights.length > 0) {
+          currentY = await addSection('', `
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; border-left: 4px solid #e74c3c; margin-bottom: 8px;">
+              ${validFlights.map((flight, index) => `
+                <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="margin: 0; color: #2c3e50; font-size: 1.1em; font-weight: 600;">
+                      ${flight.airline || flight.flightNumber ? `Flight ${index + 1}: ${flight.airline || ''} ${flight.flightNumber || ''}` : 'Flight Details'}
+                    </h4>
+                    ${flight.flightType ? `
+                      <span style="background: #f1c40f; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.7em; display: inline-block; text-align: center; min-width: 70px;">
+                        ${flight.flightType === 'roundtrip' ? 'Round Trip' : 'One Way'}
+                      </span>
+                    ` : ''}
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; border-bottom: 1px dashed #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                    <div>
+                      <div style="font-weight: bold; font-size: 1.1em;">${flight.from || 'N/A'}</div>
+                      ${flight.departure ? `<div style="color: #7f8c8d; font-size: 0.85em;">${formatFlightTime(flight.departure)}</div>` : ''}
+                    </div>
+                    <div style="text-align: center; color: #3b82f6; transform: rotate(45deg); margin: 0 5px;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                      </svg>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-weight: bold; font-size: 1.1em;">${flight.to || 'N/A'}</div>
+                      ${flight.arrival ? `<div style="color: #7f8c8d; font-size: 0.85em;">${formatFlightTime(flight.arrival)}</div>` : ''}
+                    </div>
+                  </div>
+                  ${flight.confirmationNumber ? `
+                    <div style="font-size: 0.9em;">
+                      <strong>Confirmation #:</strong> ${flight.confirmationNumber}
+                    </div>
+                  ` : ''}
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; border-bottom: 1px dashed #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                  <div>
-                    <div style="font-weight: bold; font-size: 1.1em;">${flight.from || 'N/A'}</div>
-                    <div style="color: #7f8c8d; font-size: 0.85em;">${formatFlightTime(flight.departure)}</div>
-                  </div>
-                  <div style="text-align: center; color: #3b82f6; transform: rotate(45deg); margin: 0 5px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 2L11 13"></path>
-                      <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
-                    </svg>
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="font-weight: bold; font-size: 1.1em;">${flight.to || 'N/A'}</div>
-                    <div style="color: #7f8c8d; font-size: 0.85em;">${formatFlightTime(flight.arrival)}</div>
-                  </div>
-                </div>
-                ${flight.confirmationNumber ? `
-                  <div style="font-size: 0.9em;">
-                    <strong>Confirmation #:</strong> ${flight.confirmationNumber}
-                  </div>
-                ` : ''}
-              </div>
-            `).join('')}
-          </div>
-        `, { marginBottom: 10 });
+              `).join('')}
+            </div>
+          `, { marginBottom: 10 });
+        }
       }
       
-      // Add Accommodation section if exists
-      if (formData.hotels && formData.hotels.length > 0) {
-        currentY = await addSection('', `
-          <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; border-left: 4px solid #2ecc71; position: relative; margin-top: 5px;">
-            <div style="position: absolute; top: 10px; right: 15px; color: #8B4513; font-size: 20px;">☕</div>
-            ${formData.hotels.map((hotel, index) => `
-              <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
-                <h4 style="margin-top: 0; margin-bottom: 10px; color: #2c3e50; font-size: 1.1em; font-weight: 600;">${hotel.name || `Hotel ${index + 1}`}</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">
-                  <div>
-                    <p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Check-in:</strong> ${hotel.checkIn ? format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy') : 'N/A'}</p>
-                    <p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Check-out:</strong> ${hotel.checkOut ? format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy') : 'N/A'}</p>
+      // Add Accommodation section if exists and visible
+      if (showHotelSection && formData.hotels && formData.hotels.length > 0) {
+        const validHotels = formData.hotels.filter(hotel => 
+          hotel.name && hotel.name.trim() !== '' && 
+          hotel.checkIn && hotel.checkOut
+        );
+        
+        if (validHotels.length > 0) {
+          currentY = await addSection('', `
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; border-left: 4px solid #2ecc71; position: relative; margin-top: 5px;">
+              <div style="position: absolute; top: 10px; right: 15px; color: #8B4513; font-size: 20px;">🏨</div>
+              ${validHotels.map((hotel, index) => `
+                <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
+                  <h4 style="margin-top: 0; margin-bottom: 10px; color: #2c3e50; font-size: 1.1em; font-weight: 600;">${hotel.name || `Hotel ${index + 1}`}</h4>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">
+                    <div>
+                      <p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Check-in:</strong> ${format(parseISO(hotel.checkIn), 'EEE, MMM d, yyyy')}</p>
+                      <p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Check-out:</strong> ${format(parseISO(hotel.checkOut), 'EEE, MMM d, yyyy')}</p>
+                    </div>
+                    <div>
+                      ${hotel.roomType ? `<p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Room Type:</strong> ${hotel.roomType}</p>` : ''}
+                      ${hotel.confirmationNumber ? `<p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Confirmation #:</strong> ${hotel.confirmationNumber}</p>` : ''}
+                    </div>
                   </div>
-                  <div>
-                    ${hotel.roomType ? `<p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Room Type:</strong> ${hotel.roomType}</p>` : ''}
-                    ${hotel.confirmationNumber ? `<p style="margin: 3px 0;"><strong style="color: #7f8c8d;">Confirmation #:</strong> ${hotel.confirmationNumber}</p>` : ''}
-                  </div>
+                  ${hotel.address ? `
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; color: #666; font-size: 0.9em;">
+                      <strong>Address:</strong> ${hotel.address}
+                    </div>
+                  ` : ''}
                 </div>
-                ${hotel.address ? `
-                  <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; color: #666; font-size: 0.9em;">
-                    <strong>Address:</strong> ${hotel.address}
-                  </div>
-                ` : ''}
-              </div>
-            `).join('')}
-          </div>
-        `, { marginBottom: 10 });
+              `).join('')}
+            </div>
+          `, { marginBottom: 10 });
+        }
       }
       
       // --- Daily Itinerary Section ---
@@ -964,19 +1033,77 @@ const ItineraryCreator = (props) => {
         }
       }
       
-      // Add footer to the last page
+      // Add footer to each page
+      for (let i = 1; i <= currentPage; i++) {
+        pdf.setPage(i);
+        
+        // Save current graphics state
+        pdf.saveGraphicsState();
+        
+        // Set footer style
+        pdf.setFontSize(8);
+        pdf.setTextColor(100, 100, 100);
+        
+        // Draw a subtle line above footer
+        pdf.setLineWidth(1.5); // Make the line thicker
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(
+          margin,
+          pageHeight - 25, // Move the line up slightly (from -20 to -18)
+          pageWidth - margin,
+          pageHeight - 25  // Move the line up slightly (from -20 to -18)
+        );
+        pdf.setLineWidth(0.1); // Reset to default line width
+        
+        // Left side - Copyright
+        pdf.text(
+          `© ${new Date().getFullYear()} ${user?.companyName || 'Navi Travel'}. All rights reserved.`,
+          margin,
+          pageHeight - 15,
+          { align: 'left' }
+        );
+        
+        // Center - Page number
+        pdf.text(
+          `Page ${i} of ${currentPage}`,
+          pageWidth / 2,
+          pageHeight - 15,
+          { align: 'center' }
+        );
+        
+        // Right side - Contact info
+        const contactInfo = [];
+        if (user?.email) contactInfo.push(user.email);
+        if (user?.phone) contactInfo.push(user.phone);
+        
+        if (contactInfo.length > 0) {
+          pdf.text(
+            contactInfo.join(' | '),
+            pageWidth - margin,
+            pageHeight - 15,
+            { align: 'right' }
+          );
+        }
+        
+        // Restore graphics state
+        pdf.restoreGraphicsState();
+      }
+      
+      // Add a thank you message on the last page
       pdf.setPage(currentPage);
       pdf.setFontSize(10);
-      pdf.setTextColor(150, 150, 150);
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFont(undefined, 'italic');
       pdf.text(
-        `Thank you for choosing ${user?.companyName || 'our travel services'}`,
+        `Thank you for choosing ${user?.companyName || 'our travel services'}.`,
         pageWidth / 2,
-        pageHeight - margin / 2,
+        pageHeight - 40,
         { align: 'center' }
       );
       
-      // Save the PDF
-      const fileName = `Itinerary_${formData.customerName ? formData.customerName.replace(/\s+/g, '_') : 'Customer'}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      // Save the PDF with a timestamp
+      const timestamp = format(new Date(), 'yyyyMMdd-HHmmss');
+      const fileName = `Itinerary_${formData.customerName ? formData.customerName.replace(/\s+/g, '_') : 'Customer'}_${timestamp}.pdf`;
       pdf.save(fileName);
       
       toast.success('PDF generated successfully!');
@@ -993,6 +1120,14 @@ const ItineraryCreator = (props) => {
 
   const downloadPDF = async () => {
     await generatePdf();
+  };
+
+  const handlePriceChange = (e) => {
+    const { name, value } = e.target;
+    setPriceData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -1135,11 +1270,103 @@ const ItineraryCreator = (props) => {
           </div>
         </section>
 
-        {/* Hotels Section */}
+        {/* Price Toggle */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium">Pricing Information</h2>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={showPrice}
+                onChange={() => setShowPrice(!showPrice)}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <span className="ml-3 text-sm font-medium text-gray-700">
+                {showPrice ? 'Hide Price' : 'Show Price in PDF'}
+              </span>
+            </label>
+          </div>
+          
+          {showPrice && (
+            <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Amount
+                  </label>
+                  <div className="relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">{priceData.currency}</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="amount"
+                      value={priceData.amount}
+                      onChange={handlePriceChange}
+                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-12 sm:text-sm border-gray-300 rounded-md"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Price Type
+                  </label>
+                  <select
+                    name="type"
+                    value={priceData.type}
+                    onChange={handlePriceChange}
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  >
+                    <option value="per_person">Per Person</option>
+                    <option value="total">Total for All Travelers</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Currency
+                  </label>
+                  <select
+                    name="currency"
+                    value={priceData.currency}
+                    onChange={handlePriceChange}
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  >
+                    <option value="₹">INR (₹)</option>
+                    <option value="$">USD ($)</option>
+                    <option value="€">EUR (€)</option>
+                    <option value="£">GBP (£)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Hotel Section with Toggle */}
         <section className="bg-white p-6 rounded-lg shadow">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Hotel Details</h2>
-            {formData.hotels.length < 7 && (
+            <div className="flex items-center">
+              <h2 className="text-xl font-semibold mr-3">Hotel Details</h2>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={showHotelSection}
+                  onChange={() => setShowHotelSection(!showHotelSection)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span className="ml-2 text-sm font-medium text-gray-700">
+                  {showHotelSection ? 'Hide' : 'Show'}
+                </span>
+              </label>
+            </div>
+            {showHotelSection && formData.hotels.length < 7 && (
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({
@@ -1152,7 +1379,7 @@ const ItineraryCreator = (props) => {
               </button>
             )}
           </div>
-          {formData.hotels.map((hotel, index) => (
+          {showHotelSection && formData.hotels.map((hotel, index) => (
             <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 relative border p-4 rounded-lg bg-gray-50">
               {formData.hotels.length > 0 && (
                 <button
@@ -1172,34 +1399,34 @@ const ItineraryCreator = (props) => {
                 </button>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Hotel {index + 1} Name *</label>
+                <label className="block text-sm font-medium text-gray-700">Hotel {index + 1} Name</label>
                 <input
                   type="text"
                   value={hotel.name}
                   onChange={(e) => handleHotelChange(index, 'name', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
+                  placeholder="Hotel name (optional)"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Check-in *</label>
+                <label className="block text-sm font-medium text-gray-700">Check-in</label>
                 <input
                   type="date"
                   value={hotel.checkIn ? (typeof hotel.checkIn === 'string' ? hotel.checkIn.split('T')[0] : format(new Date(hotel.checkIn), 'yyyy-MM-dd')) : ''}
                   onChange={(e) => handleHotelChange(index, 'checkIn', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
+                  placeholder="Check-in date (optional)"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Check-out *</label>
+                <label className="block text-sm font-medium text-gray-700">Check-out</label>
                 <input
                   type="date"
                   value={hotel.checkOut ? (typeof hotel.checkOut === 'string' ? hotel.checkOut.split('T')[0] : format(new Date(hotel.checkOut), 'yyyy-MM-dd')) : ''}
                   onChange={(e) => handleHotelChange(index, 'checkOut', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   min={hotel.checkIn || ''}
-                  required
+                  placeholder="Check-out date (optional)"
                 />
               </div>
               <div>
@@ -1226,11 +1453,25 @@ const ItineraryCreator = (props) => {
           ))}
         </section>
 
-        {/* Flights Section */}
+        {/* Flight Section with Toggle */}
         <section className="bg-white p-6 rounded-lg shadow">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Flight Details</h2>
-            {formData.flights.length < 15 && (
+            <div className="flex items-center">
+              <h2 className="text-xl font-semibold mr-3">Flight Details</h2>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={showFlightSection}
+                  onChange={() => setShowFlightSection(!showFlightSection)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span className="ml-2 text-sm font-medium text-gray-700">
+                  {showFlightSection ? 'Hide' : 'Show'}
+                </span>
+              </label>
+            </div>
+            {showFlightSection && formData.flights.length < 15 && (
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({
@@ -1243,7 +1484,7 @@ const ItineraryCreator = (props) => {
               </button>
             )}
           </div>
-          {formData.flights.map((flight, index) => (
+          {showFlightSection && formData.flights.map((flight, index) => (
             <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 relative border p-4 rounded-lg bg-gray-50">
               {formData.flights.length > 0 && (
                 <button
@@ -1264,22 +1505,21 @@ const ItineraryCreator = (props) => {
               )}
               {/* Added Airline and Flight Type fields */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Airline & Flight # *</label>
+                <label className="block text-sm font-medium text-gray-700">Airline & Flight #</label>
                 <div className="flex gap-2 mt-1">
                   <input
                     type="text"
-                    placeholder="Airline"
+                    placeholder="Airline (optional)"
                     value={flight.airline || ''}
                     onChange={(e) => handleFlightChange(index, 'airline', e.target.value)}
                     className="block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                   <input
                     type="text"
-                    placeholder="Flight Number"
+                    placeholder="Flight # (optional)"
                     value={flight.flightNumber}
                     onChange={(e) => handleFlightChange(index, 'flightNumber', e.target.value)}
                     className="block w-2/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    required
                   />
                 </div>
               </div>
@@ -1308,45 +1548,41 @@ const ItineraryCreator = (props) => {
               <div className="md:col-span-5 border-t pt-3 mt-3 border-gray-200">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">From *</label>
+                    <label className="block text-sm font-medium text-gray-700">From</label>
                     <input
                       type="text"
-                      placeholder="Origin"
-                      value={flight.from}
+                      placeholder="Origin (optional)"
+                      value={flight.from || ''}
                       onChange={(e) => handleFlightChange(index, 'from', e.target.value)}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">To *</label>
+                    <label className="block text-sm font-medium text-gray-700">To</label>
                     <input
                       type="text"
-                      placeholder="Destination"
-                      value={flight.to}
+                      placeholder="Destination (optional)"
+                      value={flight.to || ''}
                       onChange={(e) => handleFlightChange(index, 'to', e.target.value)}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Departure *</label>
+                    <label className="block text-sm font-medium text-gray-700">Departure</label>
                     <input
                       type="datetime-local"
-                      value={flight.departure}
+                      value={flight.departure || ''}
                       onChange={(e) => handleFlightChange(index, 'departure', e.target.value)}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Arrival *</label>
+                    <label className="block text-sm font-medium text-gray-700">Arrival</label>
                     <input
                       type="datetime-local"
-                      value={flight.arrival}
+                      value={flight.arrival || ''}
                       onChange={(e) => handleFlightChange(index, 'arrival', e.target.value)}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      required
                     />
                   </div>
                 </div>
