@@ -398,12 +398,6 @@ const ItineraryCreator = (props) => {
     toast.warn('Activity removed.');
   };
 
-  const updateActivity = (dayIndex, activityIndex, field, value) => {
-    const updatedDays = [...itineraryDays];
-    updatedDays[dayIndex].activities[activityIndex][field] = value;
-    setItineraryDays(updatedDays);
-  };
-
   // --- PDF Generation Logic (The main focus of the correction) ---
 
   /**
