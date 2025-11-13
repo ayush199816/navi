@@ -18,11 +18,45 @@ const formatPrice = (amount, currency = 'INR') => {
   }).format(amount);
 };
 
+// Utility function to format date in local timezone
+const formatLocalDate = (dateString) => {
+    if (!dateString) return 'Invalid Date';
+    try {
+        // Parse the date string and adjust for local timezone
+        const date = new Date(dateString);
+        if (!isValid(date)) return 'Invalid Date';
+        
+        // Format the date in local timezone
+        // Use the 'P' format to include the timezone offset
+        return format(date, 'EEEE, MMMM d, yyyy');
+    } catch (e) {
+        console.error('Error formatting date:', e);
+        return 'Invalid Date';
+    }
+};
+
+// Utility to get local date string without timezone issues
+const toLocalDateString = (dateString) => {
+    if (!dateString) return '';
+    try {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    } catch (e) {
+        console.error('Error converting to local date:', e);
+        return '';
+    }
+};
+
 // Utility function to format date/time for flights
 const formatFlightTime = (dateTimeString) => {
     if (!dateTimeString) return 'N/A';
-    const date = parseISO(dateTimeString);
-    return isValid(date) ? format(date, 'MMM d, h:mm a') : 'N/A';
+    try {
+        const date = new Date(dateTimeString);
+        return isValid(date) ? format(date, 'MMM d, h:mm a') : 'N/A';
+    } catch (e) {
+        console.error('Error formatting flight time:', e);
+        return 'N/A';
+    }
 };
 
 const ItineraryCreator = (props) => {
@@ -131,6 +165,18 @@ const ItineraryCreator = (props) => {
           const response = await api.get(`/itineraries/${id}`);
           const itinerary = response.data.data;
           
+          // Format dates for input fields (YYYY-MM-DD format)
+          const formatDateForInput = (dateString) => {
+            if (!dateString) return '';
+            try {
+              const date = new Date(dateString);
+              return format(date, 'yyyy-MM-dd');
+            } catch (e) {
+              console.error('Error formatting date:', e);
+              return '';
+            }
+          };
+
           // Update form data with fetched itinerary
           setFormData({
             title: itinerary.title || '',
@@ -138,8 +184,8 @@ const ItineraryCreator = (props) => {
             customerEmail: itinerary.customerEmail || '',
             customerPhone: itinerary.customerPhone || '',
             destination: itinerary.destination || '',
-            arrivalDate: itinerary.arrivalDate ? format(new Date(itinerary.arrivalDate), 'yyyy-MM-dd') : '',
-            departureDate: itinerary.departureDate ? format(new Date(itinerary.departureDate), 'yyyy-MM-dd') : '',
+            arrivalDate: formatDateForInput(itinerary.arrivalDate),
+            departureDate: formatDateForInput(itinerary.departureDate),
             adults: itinerary.adults || 1,
             children: itinerary.children || 0,
             budget: itinerary.budget || '',
@@ -158,12 +204,14 @@ const ItineraryCreator = (props) => {
 
           // Set itinerary days if available
           if (itinerary.days?.length) {
+            console.log('Original days from API:', JSON.parse(JSON.stringify(itinerary.days)));
             // Sort days by date to ensure they're in order
             const sortedDays = [...itinerary.days].sort((a, b) => {
               const dateA = new Date(a.date || a.day || itinerary.arrivalDate);
               const dateB = new Date(b.date || b.day || itinerary.arrivalDate);
               return dateA - dateB;
             });
+            console.log('Sorted days:', JSON.parse(JSON.stringify(sortedDays)));
             
             // Format the days data for the UI
             const formattedDays = sortedDays.map((day, index) => {
@@ -271,7 +319,13 @@ const ItineraryCreator = (props) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev, 
+      [name]: value,
+      // Update the other date field's min/max when one changes
+      ...(name === 'arrivalDate' ? { departureDate: prev.departureDate < value ? '' : prev.departureDate } : {}),
+      ...(name === 'departureDate' ? { arrivalDate: prev.arrivalDate > value ? '' : prev.arrivalDate } : {})
+    }));
   };
 
   const navigate = useNavigate();
@@ -978,22 +1032,35 @@ const ItineraryCreator = (props) => {
                 type="date"
                 name="arrivalDate"
                 value={formData.arrivalDate}
+                min={format(new Date(), 'yyyy-MM-dd')} // Can't select past dates
+                max={formData.departureDate || ''}
                 onChange={handleInputChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
+              {formData.arrivalDate && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {format(new Date(formData.arrivalDate), 'EEEE, MMMM d, yyyy')}
+                </div>
+              )}
             </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700">Departure Date *</label>
               <input
                 type="date"
                 name="departureDate"
                 value={formData.departureDate}
+                min={formData.arrivalDate || format(new Date(), 'yyyy-MM-dd')}
                 onChange={handleInputChange}
-                min={formData.arrivalDate}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
               />
+              {formData.departureDate && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {format(new Date(formData.departureDate), 'EEEE, MMMM d, yyyy')}
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Adults *</label>
@@ -1248,7 +1315,10 @@ const ItineraryCreator = (props) => {
             <div key={dayIndex} className="bg-white p-6 rounded-lg shadow border-t-4 border-blue-600">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-semibold text-blue-800">
-                  Day {dayIndex + 1}: {isValid(parseISO(day.date)) ? format(parseISO(day.date), 'EEEE, MMMM d, yyyy') : 'Invalid Date'}
+                  Day {dayIndex + 1}: {formatLocalDate(day.date)}
+                  <span className="ml-2 text-sm text-gray-500">
+                    ({toLocalDateString(day.date)})
+                  </span>
                 </h3>
                 {isEditMode && (
                   <button
