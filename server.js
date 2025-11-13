@@ -163,9 +163,12 @@ app.use((req, res, next) => {
 });
 
 // Register all routes
-routes.forEach(({ path, route }) => {
-  app.use(path, route);
-  console.log(`Registered route: ${path} (${path.startsWith('/api/ai') || path.startsWith('/api/v1/ai-itinerary') || path.startsWith('/api/auth') ? 'Public' : 'Protected'})`);
+routes.forEach(route => {
+  app.use(route.path, (req, res, next) => {
+    console.log(`Route accessed: ${req.method} ${route.path}`);
+    next();
+  }, route.route);
+  console.log(`Registered route: ${route.path} (${route.path.startsWith('/api/ai') || route.path.startsWith('/api/v1/ai-itinerary') || route.path.startsWith('/api/auth') ? 'Public' : 'Protected'})`);
 });
 
 // Root route
