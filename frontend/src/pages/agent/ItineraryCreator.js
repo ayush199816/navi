@@ -30,7 +30,6 @@ const formatLocalDate = (dateString) => {
         // Use the 'P' format to include the timezone offset
         return format(date, 'EEEE, MMMM d, yyyy');
     } catch (e) {
-        console.error('Error formatting date:', e);
         return 'Invalid Date';
     }
 };
@@ -42,7 +41,6 @@ const toLocalDateString = (dateString) => {
         const date = new Date(dateString);
         return date.toISOString().split('T')[0];
     } catch (e) {
-        console.error('Error converting to local date:', e);
         return '';
     }
 };
@@ -54,7 +52,6 @@ const formatFlightTime = (dateTimeString) => {
         const date = new Date(dateTimeString);
         return isValid(date) ? format(date, 'MMM d, h:mm a') : 'N/A';
     } catch (e) {
-        console.error('Error formatting flight time:', e);
         return 'N/A';
     }
 };
@@ -172,7 +169,6 @@ const ItineraryCreator = (props) => {
               const date = new Date(dateString);
               return format(date, 'yyyy-MM-dd');
             } catch (e) {
-              console.error('Error formatting date:', e);
               return '';
             }
           };
@@ -204,13 +200,8 @@ const ItineraryCreator = (props) => {
 
           // Set itinerary days if available
           if (itinerary.days?.length) {
-            console.log('[DEBUG] Raw days data from API:', JSON.parse(JSON.stringify(itinerary.days)));
-            console.log('[DEBUG] Arrival date:', itinerary.arrivalDate);
-            console.log('[DEBUG] Departure date:', itinerary.departureDate);
-            
             // First, ensure all days have a valid date
-            const daysWithValidDates = itinerary.days.map((day, i) => {
-              console.log(`[DEBUG] Processing day ${i}:`, day);
+            const daysWithValidDates = itinerary.days.map((day) => {
               try {
                 let dayDate;
                 const dateString = day.date || day.day || itinerary.arrivalDate;
@@ -233,7 +224,6 @@ const ItineraryCreator = (props) => {
                   activities: Array.isArray(day.activities) ? day.activities : []
                 };
               } catch (e) {
-                console.error('Error processing day:', day, e);
                 const fallbackDate = new Date(itinerary.arrivalDate);
                 return {
                   ...day,
@@ -257,22 +247,12 @@ const ItineraryCreator = (props) => {
               _date: undefined
             }));
             
-            console.log('[DEBUG] Formatted days before setting state:', JSON.parse(JSON.stringify(formattedDays)));
-            
-            // Log the first few activities of the first day for debugging
-            if (formattedDays.length > 0 && formattedDays[0].activities?.length) {
-              console.log('[DEBUG] First day activities:', formattedDays[0].activities.slice(0, 3));
-            }
-            
             setItineraryDays(formattedDays);
-            console.log('[DEBUG] State has been updated with formattedDays');
           } else if (itinerary.arrivalDate && itinerary.departureDate) {
             // If no days data but we have dates, create days array
             const startDate = new Date(itinerary.arrivalDate);
             const endDate = new Date(itinerary.departureDate);
             const daysCount = differenceInDays(endDate, startDate) + 1;
-            
-            console.log(`Generating ${daysCount} days from ${startDate.toISOString()} to ${endDate.toISOString()}`);
             
             const generatedDays = [];
             for (let i = 0; i < daysCount; i++) {
@@ -294,14 +274,12 @@ const ItineraryCreator = (props) => {
               });
             }
             
-            console.log('Generated days:', JSON.parse(JSON.stringify(generatedDays)));
             setItineraryDays(generatedDays);
           }
           
           setIsEditMode(true);
           setItineraryId(id);
         } catch (error) {
-          console.error('Error fetching itinerary:', error);
           toast.error('Failed to load itinerary data');
         } finally {
           setLoading(false);
@@ -322,7 +300,6 @@ const ItineraryCreator = (props) => {
     const end = new Date(departure);
     
     if (!isValid(start) || !isValid(end) || differenceInDays(end, start) < 0) {
-      console.error('Invalid date range for calculateDay:', { arrival, departure });
       return [];
     }
 
@@ -337,25 +314,10 @@ const ItineraryCreator = (props) => {
   // Only calculate days if we're not in edit mode or if we don't have days yet
   useEffect(() => {
     if (!id && formData.arrivalDate && formData.departureDate) {
-      console.log('Calculating new days based on date range');
       const newDays = calculateDaysStable(formData.arrivalDate, formData.departureDate);
-      console.log('New days calculated:', newDays);
       setItineraryDays(prevDays => (!prevDays?.length ? newDays : prevDays));
     }
   }, [formData.arrivalDate, formData.departureDate, id, calculateDaysStable]);
-
-  // Log state changes for debugging
-  useEffect(() => {
-    console.log('itineraryDays state updated. Length:', itineraryDays?.length);
-    if (itineraryDays?.length > 0) {
-      console.log('First day in state:', {
-        date: itineraryDays[0].date,
-        day: itineraryDays[0].day,
-        activitiesCount: itineraryDays[0].activities?.length || 0,
-        hasItineraryText: !!itineraryDays[0].itineraryText
-      });
-    }
-  }, [itineraryDays]);
 
 
   const handleInputChange = (e) => {
@@ -417,8 +379,6 @@ const ItineraryCreator = (props) => {
       navigate('/agent/itineraries');
       
     } catch (error) {
-      console.error('Error saving itinerary:', error);
-      
       // Handle different types of errors
       if (error.response) {
         // The request was made and the server responded with a status code
@@ -541,10 +501,39 @@ const ItineraryCreator = (props) => {
         if (pageNumber > 1) {
           pdf.addPage();
         }
-        pdf.setFontSize(18);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(title || 'Itinerary', margin, 30);
-        return 60; // Return new Y position after header
+        
+        // Add blue title with client name and Travel Itinerary
+        pdf.setFontSize(16); // Reduced by 5px from 21
+        pdf.setTextColor(0, 71, 171); // Dark blue
+        pdf.setFont(undefined, 'bold');
+        
+        // Client name with 'Travel Itinerary'
+        const clientTitle = `${formData.customerName || 'Customer'}'s Travel Itinerary`;
+        const clientTitleWidth = pdf.getTextWidth(clientTitle);
+        pdf.text(clientTitle, (pageWidth - clientTitleWidth) / 2, 25);
+        
+        // Country name below the title
+        if (formData.destination) {
+          pdf.setFontSize(12);
+          const countryTitle = formData.destination;
+          const countryTitleWidth = pdf.getTextWidth(countryTitle);
+          pdf.text(countryTitle, (pageWidth - countryTitleWidth) / 2, 40);
+        }
+        
+        // Add blue line after header
+        pdf.setDrawColor(0, 71, 171);
+        pdf.setLineWidth(1);
+        pdf.line(margin, 50, pageWidth - margin, 50);
+        
+        // Add page title if provided
+        if (title) {
+          pdf.setFontSize(14); // Reduced by 5px from 19
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(title, margin, 70);
+          return 80; // Return Y position after header
+        }
+        
+        return 60; // Return Y position after header
       };
 
       // Add section function (Uses html2canvas for complex HTML rendering)
@@ -679,19 +668,27 @@ const ItineraryCreator = (props) => {
         });
       };
       
-      // --- Page 1: Summary & Bookings ---
-      
-      currentY = addNewPage(pdf, currentPage, `${formData.destination || 'Travel'} Itinerary`);
 
       // Add Agent Information section
       await addSection('', `
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #9b59b6; margin-bottom: 15px;">
-          <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="
+          background: url('https://res.cloudinary.com/dqlcup2s7/image/upload/v1758475269/navi/guestsightseeing/mb9nxjwcrdwevptwxqxi.jpg');
+          background-size: cover;
+          background-position: center;
+          padding: 15px;
+          border-radius: 6px;
+          border-left: 4px solid #9b59b6;
+          margin-bottom: 8px;
+          position: relative;
+          overflow: hidden;
+          color: white;
+        ">
+          <div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 20px;">
             <div style="width: 50px; height: 50px; border-radius: 50%; background: #9b59b6; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2em; font-weight: bold; flex-shrink: 0;">
               ${user?.name?.charAt(0)?.toUpperCase() || 'A'}
             </div>
-            <div style="color: #2c3e50;">
-              <h3 style="margin: 0 0 5px 0; color: #9b59b6; font-size: 1.4em; line-height: 1.3; font-weight: 600;">
+            <div style="color: white;">
+              <h3 style="margin: 0 0 5px 0; color: white; font-size: 1.4em; line-height: 1.3; font-weight: 600;">
                 ${user?.name || 'Your Travel Partner'}
               </h3>
               <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -723,31 +720,31 @@ const ItineraryCreator = (props) => {
             </div>
           </div>
         </div>
-      `, { marginBottom: 10 });
+      `, { marginBottom: 5 });
       
       // Add Travelers section
       await addSection('', `
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db; margin-bottom: 15px;">
-          <h2 style="margin-top: 0; margin-bottom: 10px; color: #2c3e50; font-size: 1.2em; font-weight: 600;">Trip Summary</h2>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 4px solid #3498db; margin-bottom: 8px;">
+          <h2 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 1.2em; font-weight: 600;">Trip Summary</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
-              <p style="margin: 0 0 5px 0;"><strong style="color: #7f8c8d;">Customer:</strong> ${formData.customerName || 'N/A'}</p>
-              <p style="margin: 0 0 5px 0;"><strong style="color: #7f8c8d;">Email:</strong> ${formData.customerEmail || 'N/A'}</p>
-              <p style="margin: 0 0 5px 0;"><strong style="color: #7f8c8d;">Destination:</strong> ${formData.destination || 'N/A'}</p>
+              <p style="margin: 0 0 4px 0;"><strong style="color: #7f8c8d;">Customer:</strong> ${formData.customerName || 'N/A'}</p>
+              <p style="margin: 0 0 4px 0;"><strong style="color: #7f8c8d;">Email:</strong> ${formData.customerEmail || 'N/A'}</p>
+              <p style="margin: 0 0 4px 0;"><strong style="color: #7f8c8d;">Destination:</strong> ${formData.destination || 'N/A'}</p>
             </div>
             <div>
-              <p style="margin: 0 0 5px 0;"><strong style="color: #7f8c8d;">Dates:</strong> ${formData.arrivalDate} to ${formData.departureDate}</p>
-              <p style="margin: 0 0 5px 0;"><strong style="color: #7f8c8d;">Adults:</strong> ${formData.adults || 1}</p>
-              <p style="margin: 0 0 5px 0;"><strong style="color: #7f8c8d;">Children:</strong> ${formData.children || 0}</p>
+              <p style="margin: 0 0 4px 0;"><strong style="color: #7f8c8d;">Dates:</strong> ${formData.arrivalDate} to ${formData.departureDate}</p>
+              <p style="margin: 0 0 4px 0;"><strong style="color: #7f8c8d;">Adults:</strong> ${formData.adults || 1}</p>
+              <p style="margin: 0 0 4px 0;"><strong style="color: #7f8c8d;">Children:</strong> ${formData.children || 0}</p>
             </div>
           </div>
         </div>
-      `, { marginBottom: 10 });
+      `, { marginBottom: 5 });
       
       // Add Flights section if exists
       if (formData.flights && formData.flights.length > 0) {
-        currentY = await addSection('Flight Details', `
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c;">
+        currentY = await addSection('', `
+          <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; border-left: 4px solid #e74c3c; margin-bottom: 8px;">
             ${formData.flights.map((flight, index) => `
               <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -785,8 +782,9 @@ const ItineraryCreator = (props) => {
       
       // Add Accommodation section if exists
       if (formData.hotels && formData.hotels.length > 0) {
-        currentY = await addSection('Accommodation', `
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #2ecc71;">
+        currentY = await addSection('', `
+          <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; border-left: 4px solid #2ecc71; position: relative; margin-top: 5px;">
+            <div style="position: absolute; top: 10px; right: 15px; color: #8B4513; font-size: 20px;">☕</div>
             ${formData.hotels.map((hotel, index) => `
               <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #eee;">
                 <h4 style="margin-top: 0; margin-bottom: 10px; color: #2c3e50; font-size: 1.1em; font-weight: 600;">${hotel.name || `Hotel ${index + 1}`}</h4>
@@ -816,7 +814,7 @@ const ItineraryCreator = (props) => {
       if (itineraryDays && itineraryDays.length > 0) {
         // Add a new page for the first day
         currentPage++;
-        currentY = addNewPage(pdf, currentPage, 'Daily Itinerary');
+        currentY = addNewPage(pdf, currentPage);
         
         for (let dayIndex = 0; dayIndex < itineraryDays.length; dayIndex++) {
           const day = itineraryDays[dayIndex];
@@ -833,30 +831,39 @@ const ItineraryCreator = (props) => {
           // Check if we need a new page for the day header
           if (currentY > margin + 20 && currentY + 100 > pageHeight - margin) {
             currentPage++;
-            currentY = addNewPage(pdf, currentPage, 'Daily Itinerary (continued)');
+            currentY = addNewPage(pdf, currentPage);
           }
           
-          // Add day header with a colored background
-          const dayHeaderHeight = 10;
+          // Add day header with a colored background (full width blue box)
+          const dayHeaderHeight = 14; // Slightly taller for better visibility
           pdf.saveGraphicsState();
-          pdf.setFillColor(52, 152, 219);
+          pdf.setFillColor(0, 71, 171); // Darker blue
+          
+          // Full width box (accounting for left and right margins)
+          const boxX = margin;
+          const boxWidth = pageWidth - (2 * margin);
+          
+          // Draw the full width box with rounded corners
           pdf.roundedRect(
-            margin, 
+            boxX, 
             currentY - 2, 
-            contentWidth, 
+            boxWidth, 
             dayHeaderHeight + 4, 
-            2, 2, 'F'
+            4, 4, 'F' // Rounded corners
           );
           
-          // Add day text
-          pdf.setFontSize(11);
+          // Add day text (centered in the full width box)
+          pdf.setFontSize(12); // Slightly larger for better visibility
           pdf.setTextColor(255, 255, 255);
           pdf.setFont(undefined, 'bold');
           const dayTitle = `Day ${dayIndex + 1}: ${isValid(date) ? format(date, 'EEEE, MMMM d, yyyy') : 'Invalid Date'}`;
-          pdf.text(dayTitle, margin + 5, currentY + dayHeaderHeight - 3);
+          const dayTitleWidth = pdf.getTextWidth(dayTitle);
+          
+          // Center text in the full width box
+          pdf.text(dayTitle, margin + ((pageWidth - (2 * margin) - dayTitleWidth) / 2), currentY + dayHeaderHeight - 1);
           pdf.restoreGraphicsState();
           
-          currentY += dayHeaderHeight + 8;
+          currentY += dayHeaderHeight + 10; // Slightly more space after header
           
           // Add activities for the day
           if (day.activities && day.activities.length > 0) {
@@ -865,25 +872,25 @@ const ItineraryCreator = (props) => {
               const activityDiv = document.createElement('div');
               activityDiv.style.width = `${contentWidth}px`;
               activityDiv.style.fontFamily = '"Helvetica Neue", Arial, sans-serif';
-              activityDiv.style.fontSize = '12px';
+              activityDiv.style.fontSize = '11px'; // Reduced from 16px
               
               // Activity HTML content
               activityDiv.innerHTML = `
                 <div style="margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;">
                   <div style="background: #f5f5f5; padding: 8px 15px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-weight: 600; color: #333;">${activity.pickupTime || 'Time TBD'}</div>
+                    <div style="font-weight: 600; color: #333; font-size: 12px;">${activity.pickupTime || 'Time TBD'}</div>
                     ${activity.type ? `
-                      <div style="background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 500;">
+                      <div style="background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 20px; font-size: 9px; font-weight: 500;">
                         ${activity.type}
                       </div>` : ''}
                   </div>
                   <div style="padding: 15px; background: white;">
                     ${activity.name ? `
-                      <h3 style="margin: 0 0 10px 0; color: #1a237e; font-size: 14px; font-weight: 600;">
+                      <h3 style="margin: 0 0 8px 0; color: #1a237e; font-size: 13px; font-weight: 600;">
                         ${activity.name}
                       </h3>` : ''}
                     ${activity.description ? `
-                      <div style="color: #555; font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;">
+                      <div style="color: #555; font-size: 0.9em; line-height: 1.4; margin-bottom: 8px;">
                         ${activity.description}
                       </div>` : ''}
                     
@@ -940,7 +947,7 @@ const ItineraryCreator = (props) => {
               // Check for page break
               if (currentY + imgHeight + 10 > pageHeight - margin) {
                 currentPage++;
-                currentY = addNewPage(pdf, currentPage, 'Daily Itinerary (continued)');
+                currentY = addNewPage(pdf, currentPage);
               }
               
               pdf.addImage(imgData, 'PNG', margin, currentY, imgWidth, imgHeight);
@@ -974,7 +981,6 @@ const ItineraryCreator = (props) => {
       
       toast.success('PDF generated successfully!');
     } catch (err) {
-      console.error('Error generating PDF:', err);
       toast.error('Failed to generate PDF. Please try again.');
     } finally {
       // Clean up the temporary content div
