@@ -8,6 +8,7 @@ import CartPage from './pages/CartPage';
 
 // Layouts
 import MainLayout from './components/layouts/MainLayout';
+import ChatBot from './components/ChatBot';
 // AuthLayout is imported but not used
 
 // Pages
@@ -222,6 +223,7 @@ function App() {
   return (
     <CurrencyProvider>
       <Modal />
+      <ChatBot />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />

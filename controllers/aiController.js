@@ -103,6 +103,7 @@ Format the entire response in clean Markdown with proper headings (##, ###) and 
     // Define models to try in order of preference
     const modelsToTry = [
       'gemini-2.5-flash',
+      'gemini-2.0-flash',
       'gemini-2.5-flash-lite',
       'gemini-1.5-pro',
       'gemini-1.5-flash',
