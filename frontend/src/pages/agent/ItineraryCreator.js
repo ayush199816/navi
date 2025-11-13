@@ -204,10 +204,13 @@ const ItineraryCreator = (props) => {
 
           // Set itinerary days if available
           if (itinerary.days?.length) {
-            console.log('Original days from API:', JSON.parse(JSON.stringify(itinerary.days)));
+            console.log('[DEBUG] Raw days data from API:', JSON.parse(JSON.stringify(itinerary.days)));
+            console.log('[DEBUG] Arrival date:', itinerary.arrivalDate);
+            console.log('[DEBUG] Departure date:', itinerary.departureDate);
             
             // First, ensure all days have a valid date
-            const daysWithValidDates = itinerary.days.map(day => {
+            const daysWithValidDates = itinerary.days.map((day, i) => {
+              console.log(`[DEBUG] Processing day ${i}:`, day);
               try {
                 let dayDate;
                 const dateString = day.date || day.day || itinerary.arrivalDate;
@@ -254,8 +257,15 @@ const ItineraryCreator = (props) => {
               _date: undefined
             }));
             
-            console.log('Formatted days:', JSON.parse(JSON.stringify(formattedDays)));
+            console.log('[DEBUG] Formatted days before setting state:', JSON.parse(JSON.stringify(formattedDays)));
+            
+            // Log the first few activities of the first day for debugging
+            if (formattedDays.length > 0 && formattedDays[0].activities?.length) {
+              console.log('[DEBUG] First day activities:', formattedDays[0].activities.slice(0, 3));
+            }
+            
             setItineraryDays(formattedDays);
+            console.log('[DEBUG] State has been updated with formattedDays');
           } else if (itinerary.arrivalDate && itinerary.departureDate) {
             // If no days data but we have dates, create days array
             const startDate = new Date(itinerary.arrivalDate);
@@ -327,6 +337,18 @@ const ItineraryCreator = (props) => {
     // fetchItinerary(itineraryId);
   }, [formData.arrivalDate, formData.departureDate, calculateDays]);
 
+  // Log state changes for debugging
+  useEffect(() => {
+    console.log('itineraryDays state updated. Length:', itineraryDays?.length);
+    if (itineraryDays?.length > 0) {
+      console.log('First day in state:', {
+        date: itineraryDays[0].date,
+        day: itineraryDays[0].day,
+        activitiesCount: itineraryDays[0].activities?.length || 0,
+        hasItineraryText: !!itineraryDays[0].itineraryText
+      });
+    }
+  }, [itineraryDays]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
