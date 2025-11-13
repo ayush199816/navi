@@ -205,67 +205,76 @@ const ItineraryCreator = (props) => {
           // Set itinerary days if available
           if (itinerary.days?.length) {
             console.log('Original days from API:', JSON.parse(JSON.stringify(itinerary.days)));
-            // Sort days by date to ensure they're in order
-            const sortedDays = [...itinerary.days].sort((a, b) => {
-              const dateA = new Date(a.date || a.day || itinerary.arrivalDate);
-              const dateB = new Date(b.date || b.day || itinerary.arrivalDate);
-              return dateA - dateB;
-            });
-            console.log('Sorted days:', JSON.parse(JSON.stringify(sortedDays)));
             
-            // Format the days data for the UI
-            const formattedDays = sortedDays.map((day, index) => {
-              // Ensure we have a valid date for each day
-              let dayDate;
+            // First, ensure all days have a valid date
+            const daysWithValidDates = itinerary.days.map(day => {
               try {
-                // Handle the date string properly, accounting for timezone
+                let dayDate;
                 const dateString = day.date || day.day || itinerary.arrivalDate;
+                
                 if (dateString) {
-                  // Create date in local timezone by parsing the date part only
-                  const datePart = new Date(dateString).toISOString().split('T')[0];
-                  dayDate = new Date(datePart);
+                  // Create date in local timezone
+                  dayDate = new Date(dateString);
+                  // If the date is invalid, use the arrival date
+                  if (isNaN(dayDate.getTime())) {
+                    dayDate = new Date(itinerary.arrivalDate);
+                  }
                 } else {
                   dayDate = new Date(itinerary.arrivalDate);
                 }
                 
-                // If we still don't have a valid date, use the arrival date
-                if (isNaN(dayDate.getTime())) {
-                  dayDate = new Date(itinerary.arrivalDate);
-                }
+                return {
+                  ...day,
+                  _date: dayDate, // Store the date object for sorting
+                  date: dayDate.toISOString(),
+                  activities: Array.isArray(day.activities) ? day.activities : []
+                };
               } catch (e) {
-                console.error('Error parsing date:', e);
-                dayDate = new Date(itinerary.arrivalDate);
+                console.error('Error processing day:', day, e);
+                const fallbackDate = new Date(itinerary.arrivalDate);
+                return {
+                  ...day,
+                  _date: fallbackDate,
+                  date: fallbackDate.toISOString(),
+                  activities: Array.isArray(day.activities) ? day.activities : []
+                };
               }
-              
-              return {
-                ...day,
-                day: index + 1, // Ensure day number is sequential
-                date: dayDate.toISOString(),
-                activities: Array.isArray(day.activities) ? day.activities : []
-              };
             });
             
-            console.log('Formatted days:', formattedDays); // Debug log
+            // Sort days by date
+            const sortedDays = [...daysWithValidDates].sort((a, b) => {
+              return a._date - b._date;
+            });
+            
+            // Add day numbers and clean up temporary _date property
+            const formattedDays = sortedDays.map((day, index) => ({
+              ...day,
+              day: index + 1,
+              // Remove the temporary _date property
+              _date: undefined
+            }));
+            
+            console.log('Formatted days:', JSON.parse(JSON.stringify(formattedDays)));
             setItineraryDays(formattedDays);
           } else if (itinerary.arrivalDate && itinerary.departureDate) {
             // If no days data but we have dates, create days array
-            // Parse dates without timezone offset
-            const parseDateWithoutOffset = (dateStr) => {
-              const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
-              return new Date(year, month - 1, day);
-            };
+            const startDate = new Date(itinerary.arrivalDate);
+            const endDate = new Date(itinerary.departureDate);
+            const daysCount = differenceInDays(endDate, startDate) + 1;
             
-            const startDate = parseDateWithoutOffset(itinerary.arrivalDate);
-            const endDate = parseDateWithoutOffset(itinerary.departureDate);
-            const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            console.log(`Generating ${daysCount} days from ${startDate.toISOString()} to ${endDate.toISOString()}`);
             
             const generatedDays = [];
             for (let i = 0; i < daysCount; i++) {
               const currentDate = new Date(startDate);
               currentDate.setDate(startDate.getDate() + i);
+              
+              // Format the date in local timezone for display
+              const dateString = currentDate.toISOString();
+              
               generatedDays.push({
                 day: i + 1,
-                date: currentDate.toISOString(),
+                date: dateString,
                 activities: [],
                 meals: {
                   breakfast: { included: false },
@@ -274,6 +283,8 @@ const ItineraryCreator = (props) => {
                 }
               });
             }
+            
+            console.log('Generated days:', JSON.parse(JSON.stringify(generatedDays)));
             setItineraryDays(generatedDays);
           }
           
