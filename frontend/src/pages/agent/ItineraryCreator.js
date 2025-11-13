@@ -170,11 +170,17 @@ const ItineraryCreator = (props) => {
               // Ensure we have a valid date for each day
               let dayDate;
               try {
-                dayDate = day.date || day.day || new Date(itinerary.arrivalDate);
-                if (typeof dayDate === 'string') {
-                  dayDate = new Date(dayDate);
+                // Handle the date string properly, accounting for timezone
+                const dateString = day.date || day.day || itinerary.arrivalDate;
+                if (dateString) {
+                  // Create date in local timezone by parsing the date part only
+                  const datePart = new Date(dateString).toISOString().split('T')[0];
+                  dayDate = new Date(datePart);
+                } else {
+                  dayDate = new Date(itinerary.arrivalDate);
                 }
-                // Ensure the date is valid, if not use the arrival date
+                
+                // If we still don't have a valid date, use the arrival date
                 if (isNaN(dayDate.getTime())) {
                   dayDate = new Date(itinerary.arrivalDate);
                 }
@@ -195,8 +201,14 @@ const ItineraryCreator = (props) => {
             setItineraryDays(formattedDays);
           } else if (itinerary.arrivalDate && itinerary.departureDate) {
             // If no days data but we have dates, create days array
-            const startDate = new Date(itinerary.arrivalDate);
-            const endDate = new Date(itinerary.departureDate);
+            // Parse dates without timezone offset
+            const parseDateWithoutOffset = (dateStr) => {
+              const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+              return new Date(year, month - 1, day);
+            };
+            
+            const startDate = parseDateWithoutOffset(itinerary.arrivalDate);
+            const endDate = parseDateWithoutOffset(itinerary.departureDate);
             const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
             
             const generatedDays = [];
