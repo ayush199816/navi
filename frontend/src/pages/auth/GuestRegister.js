@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -8,7 +8,13 @@ import { register } from '../../redux/slices/authSlice';
 const GuestRegister = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading, error } = useSelector(state => state.auth);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const { isAuthenticated, loading, error, isGuest } = useSelector(state => ({
+    isAuthenticated: state.auth.isAuthenticated,
+    loading: state.auth.loading,
+    error: state.auth.error,
+    isGuest: state.auth.user?.isGuest
+  }));
 
   useEffect(() => {
     // Redirect if already authenticated
@@ -16,6 +22,17 @@ const GuestRegister = () => {
       navigate('/guest-dashboard');
     }
   }, [isAuthenticated, navigate]);
+
+  // Handle successful registration
+  useEffect(() => {
+    if (isGuest) {
+      // Show success message and redirect to login after 2 seconds
+      const timer = setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isGuest, navigate]);
 
   // Validation schema
   const validationSchema = Yup.object({
@@ -48,12 +65,23 @@ const GuestRegister = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (values) => {
-    dispatch(register({ 
-      ...values, 
-      role: 'user',
-      user_type: 'guest' 
-    }));
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      setRegistrationSuccess(false);
+      const result = await dispatch(register({ 
+        ...values, 
+        role: 'user',
+        user_type: 'guest' 
+      })).unwrap();
+      
+      if (result.isGuest) {
+        setRegistrationSuccess(true);
+      }
+    } catch (error) {
+      console.error('Registration failed:', error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -67,11 +95,15 @@ const GuestRegister = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
+          {registrationSuccess ? (
+            <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md">
+              <p className="font-medium">Registration successful! Redirecting to login page...</p>
+            </div>
+          ) : error ? (
             <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
               <p className="font-medium">{error}</p>
             </div>
-          )}
+          ) : null}
 
           <Formik
             initialValues={initialValues}

@@ -77,8 +77,13 @@ export const register = createAsyncThunk(
         }
       });
       
-      toast.success('Registration successful! Please wait for approval.');
-      return res.data;
+      if (userData.user_type === 'guest') {
+        toast.success('Registration successful! You can now login with your credentials.');
+        return { ...res.data, isGuest: true };
+      } else {
+        toast.success('Registration successful! Please wait for approval.');
+        return res.data;
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
       return rejectWithValue(err.response?.data?.message || 'Registration failed');

@@ -105,7 +105,8 @@ exports.register = async (req, res) => {
     // Generate JWT token
     const token = user.getSignedJwtToken();
 
-    res.status(201).json({
+    // Customize success message based on user type
+    const responseData = {
       success: true,
       token,
       user: {
@@ -114,8 +115,14 @@ exports.register = async (req, res) => {
         email: user.email,
         role: user.role,
         isApproved: user.isApproved,
+        user_type: user_type
       },
-    });
+      message: user_type === 'guest' 
+        ? 'User registered successfully. You can now log in.' 
+        : 'Registration successful! Please wait for approval.'
+    };
+
+    res.status(201).json(responseData);
   } catch (err) {
     console.error(err);
     res.status(500).json({
