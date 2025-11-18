@@ -185,7 +185,6 @@ const GuestLogin = () => {
                         ← Go to Home
                       </Link>
                     </div>
-                    <p>Don't have an account? <Link to="/guest-register" className="text-blue-600 hover:underline">Register here</Link></p>
                     <p>
                       <Link to="/forgot-password" className="text-blue-600 hover:underline">Forgot password?</Link>
                     </p>
