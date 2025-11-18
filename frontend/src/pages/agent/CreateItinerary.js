@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Container, Form, Button, Row, Col, Card, Alert } from 'react-bootstrap';
-import { FiDownload, FiPlus, FiTrash2, FiCalendar, FiUser, FiMail, FiPhone, FiMapPin, FiHome, FiClock } from 'react-icons/fi';
+import { Container, Form, Button, Row, Col, Card, Alert, Modal } from 'react-bootstrap';
+import { FiDownload, FiPlus, FiTrash2, FiEdit2, FiSave, FiX, FiCalendar, FiUser, FiMail, FiPhone, FiMapPin, FiHome, FiClock } from 'react-icons/fi';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -55,6 +55,9 @@ const CreateItinerary = () => {
 
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [editingActivity, setEditingActivity] = useState({ dayIndex: -1, activityIndex: -1 });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activityToDelete, setActivityToDelete] = useState({ dayIndex: -1, activityIndex: -1 });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,6 +117,25 @@ const CreateItinerary = () => {
       ...prev,
       days: updatedDays
     }));
+    setShowDeleteModal(false);
+    setEditingActivity({ dayIndex: -1, activityIndex: -1 });
+  };
+
+  const startEditing = (dayIndex, activityIndex) => {
+    setEditingActivity({ dayIndex, activityIndex });
+  };
+
+  const saveActivity = (dayIndex, activityIndex) => {
+    setEditingActivity({ dayIndex: -1, activityIndex: -1 });
+  };
+
+  const cancelEditing = () => {
+    setEditingActivity({ dayIndex: -1, activityIndex: -1 });
+  };
+
+  const confirmDeleteActivity = (dayIndex, activityIndex) => {
+    setActivityToDelete({ dayIndex, activityIndex });
+    setShowDeleteModal(true);
   };
 
   const generatePDF = async () => {
@@ -625,32 +647,79 @@ const CreateItinerary = () => {
               </Card.Header>
               <Card.Body>
                 {day.activities.map((activity, activityIndex) => (
-                  <div key={activityIndex} className="d-flex mb-3 align-items-start">
-                    <div className="me-3" style={{ width: '100px' }}>
-                      <Form.Control 
-                        type="time" 
-                        value={activity.time}
-                        onChange={(e) => handleActivityChange(dayIndex, activityIndex, 'time', e.target.value)}
-                      />
-                    </div>
-                    <div className="flex-grow-1 me-2">
-                      <Form.Control 
-                        as="textarea" 
-                        rows={2}
-                        value={activity.description}
-                        onChange={(e) => handleActivityChange(dayIndex, activityIndex, 'description', e.target.value)}
-                        placeholder="Activity description"
-                      />
-                    </div>
-                    <Button 
-                      variant="outline-danger" 
-                      size="sm" 
-                      onClick={() => removeActivity(dayIndex, activityIndex)}
-                      disabled={day.activities.length <= 1}
-                      className="mt-1"
-                    >
-                      <FiTrash2 />
-                    </Button>
+                  <div key={activityIndex} className="mb-3 p-3 border rounded">
+                    {editingActivity.dayIndex === dayIndex && editingActivity.activityIndex === activityIndex ? (
+                      <div className="d-flex flex-column">
+                        <div className="d-flex mb-2">
+                          <div className="me-3" style={{ width: '120px' }}>
+                            <Form.Label>Time</Form.Label>
+                            <Form.Control 
+                              type="time" 
+                              value={activity.time}
+                              onChange={(e) => handleActivityChange(dayIndex, activityIndex, 'time', e.target.value)}
+                            />
+                          </div>
+                          <div className="flex-grow-1">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control 
+                              as="textarea" 
+                              rows={3}
+                              value={activity.description}
+                              onChange={(e) => handleActivityChange(dayIndex, activityIndex, 'description', e.target.value)}
+                              placeholder="Activity description"
+                            />
+                          </div>
+                        </div>
+                        <div className="d-flex justify-content-end gap-2 mt-2">
+                          <Button 
+                            variant="outline-secondary" 
+                            size="sm" 
+                            onClick={cancelEditing}
+                          >
+                            <FiX className="me-1" /> Cancel
+                          </Button>
+                          <Button 
+                            variant="primary" 
+                            size="sm" 
+                            onClick={() => saveActivity(dayIndex, activityIndex)}
+                          >
+                            <FiSave className="me-1" /> Save
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div className="d-flex align-items-start">
+                          <div className="me-3" style={{ width: '80px' }}>
+                            <div className="badge bg-light text-dark p-2 w-100">
+                              {activity.time}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="mb-0">{activity.description}</p>
+                          </div>
+                        </div>
+                        <div className="d-flex gap-1">
+                          <Button 
+                            variant="outline-primary" 
+                            size="sm" 
+                            onClick={() => startEditing(dayIndex, activityIndex)}
+                            className="d-flex align-items-center"
+                          >
+                            <FiEdit2 size={14} />
+                          </Button>
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm" 
+                            onClick={() => confirmDeleteActivity(dayIndex, activityIndex)}
+                            disabled={day.activities.length <= 1}
+                            className="d-flex align-items-center"
+                          >
+                            <FiTrash2 size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
                 <Button 
@@ -677,6 +746,29 @@ const CreateItinerary = () => {
           <FiDownload className="me-2" /> Download PDF Itinerary
         </Button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this activity? This action cannot be undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="danger" 
+            onClick={() => {
+              removeActivity(activityToDelete.dayIndex, activityToDelete.activityIndex);
+            }}
+          >
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
