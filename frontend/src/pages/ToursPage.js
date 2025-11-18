@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp, FiDollarSign } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
@@ -10,6 +10,106 @@ const ToursPage = () => {
   const [citySearch, setCitySearch] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
+  // State declarations
+  const [showPriceFilter, setShowPriceFilter] = useState(false);
+  const [isDragging, setIsDragging] = useState(null);
+  const sliderRef = useRef(null);
+  
+  // Default price range
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  
+  // Get sightseeings from Redux store
+  const { sightseeings, loading, error } = useSelector((state) => state.guestSightseeings);
+  
+  // Calculate min and max price from available sightseeings
+  const priceRangeLimits = React.useMemo(() => {
+    if (!sightseeings?.length) return { min: 0, max: 1000 };
+    const prices = sightseeings.map(s => s.price).filter(price => typeof price === 'number');
+    if (prices.length === 0) return { min: 0, max: 1000 };
+    return {
+      min: Math.min(...prices),
+      max: Math.max(...prices)
+    };
+  }, [sightseeings]);
+  
+  // Handle slider drag
+  const handleMouseDown = useCallback((type) => {
+    setIsDragging(type);
+  }, []);
+  
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(null);
+  }, []);
+  
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging || !sliderRef.current) return;
+    
+    const slider = sliderRef.current;
+    const rect = slider.getBoundingClientRect();
+    
+    // Calculate the new value based on mouse position (with bounds checking)
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    
+    // Calculate the price range size
+    const range = priceRangeLimits.max - priceRangeLimits.min;
+    
+    // Calculate the new value using logarithmic scale for better distribution
+    const percentage = x / rect.width;
+    let newValue;
+    
+    // Use logarithmic scale for better distribution of values
+    if (range > 1000) {
+      // For larger ranges, use logarithmic scale
+      const logMin = Math.log10(priceRangeLimits.min || 1);
+      const logMax = Math.log10(priceRangeLimits.max || 1);
+      const logRange = logMax - logMin;
+      const logValue = logMin + (percentage * logRange);
+      newValue = Math.round(Math.pow(10, logValue));
+    } else {
+      // For smaller ranges, use linear scale
+      newValue = Math.round(priceRangeLimits.min + (percentage * range));
+    }
+    
+    // Ensure we don't go below min or above max
+    newValue = Math.max(priceRangeLimits.min, Math.min(newValue, priceRangeLimits.max));
+    
+    // Calculate minimum gap (1% of total range, but at least 1 unit)
+    const minGap = Math.max(1, range * 0.01);
+    
+    // Update the appropriate value based on which handle is being dragged
+    if (isDragging === 'min') {
+      // For min handle, ensure it doesn't go above max - minGap
+      const maxMinValue = priceRange[1] - minGap;
+      const clampedValue = Math.min(newValue, maxMinValue);
+      setPriceRange(prev => [Math.max(clampedValue, priceRangeLimits.min), prev[1]]);
+    } else if (isDragging === 'max') {
+      // For max handle, ensure it doesn't go below min + minGap
+      const minMaxValue = priceRange[0] + minGap;
+      const clampedValue = Math.max(newValue, minMaxValue);
+      setPriceRange(prev => [prev[0], Math.min(clampedValue, priceRangeLimits.max)]);
+    }
+  }, [isDragging, priceRangeLimits.min, priceRangeLimits.max, priceRange]);
+  
+  // Add/remove global event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      // Prevent text selection while dragging
+      document.body.style.userSelect = 'none';
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.userSelect = '';
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+  
+  // Update price range when limits change
+  useEffect(() => {
+    setPriceRange([priceRangeLimits.min, priceRangeLimits.max]);
+  }, [priceRangeLimits]);
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
@@ -23,10 +123,46 @@ const ToursPage = () => {
     CURRENCY_SYMBOLS
   } = useCurrency();
   
-  const { sightseeings, loading, error } = useSelector((state) => state.guestSightseeings);
   
+  const handleSearch = useCallback((e) => {
+    e?.preventDefault?.();
+    // Prepare filters
+    const filters = {
+      isActive: true
+    };
+    
+    // Add city filter if provided
+    if (cityFilter) {
+      filters.city = cityFilter;
+    } else if (citySearch.trim()) {
+      filters.city = citySearch.trim();
+    }
+    
+    // Add country filter if selected
+    if (countryFilter) {
+      filters.country = countryFilter;
+    }
+    
+    dispatch(fetchGuestSightseeings(filters));
+  }, [cityFilter, citySearch, countryFilter, dispatch]);
+  
+  // Filter sightseeings by price on the client side
+  const filteredSightseeings = React.useMemo(() => {
+    if (!sightseeings) return [];
+    return sightseeings.filter(sightseeing => {
+      const price = sightseeing.price || 0;
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+  }, [sightseeings, priceRange]);
+  
+  // Initial data load and setup
   useEffect(() => {
-    dispatch(fetchGuestSightseeings({ isActive: true }));
+    // Initial load with default filters
+    const initialFilters = {
+      isActive: true
+    };
+    
+    dispatch(fetchGuestSightseeings(initialFilters));
     
     // Handle click outside to close currency dropdown
     const handleClickOutside = (event) => {
@@ -41,30 +177,6 @@ const ToursPage = () => {
     };
   }, [dispatch, currencyDropdownRef]);
   
-  const handleSearch = (e) => {
-    e.preventDefault();
-    // Prepare filters
-    const filters = {
-      isActive: true
-    };
-    
-    // Add city filter if provided
-    if (cityFilter) {
-      filters.city = cityFilter;
-    } else if (citySearch.trim()) {
-      filters.city = citySearch.trim();
-    }
-    
-    
-    // Add country filter if selected
-    if (countryFilter) {
-      filters.country = countryFilter;
-    }
-    
-    // Tour type filter has been removed
-    
-    dispatch(fetchGuestSightseeings(filters));
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,7 +230,7 @@ const ToursPage = () => {
         {/* Search Form */}
         <div className="bg-white p-6 rounded-2xl shadow-lg mb-12 border border-gray-100">
           <form onSubmit={handleSearch}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               {/* City Input */}
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -181,7 +293,98 @@ const ToursPage = () => {
 
             </div>
             
-            <div className="mt-6 flex justify-center">
+            {/* Price Range Filter */}
+            <div className="mb-4">
+              <button 
+                type="button"
+                onClick={() => setShowPriceFilter(!showPriceFilter)}
+                className="flex items-center text-sm text-gray-600 hover:text-blue-600 mb-2"
+              >
+                <FiDollarSign className="mr-1" />
+                <span>Price Range</span>
+                {showPriceFilter ? (
+                  <FiChevronUp className="ml-1 w-4 h-4" />
+                ) : (
+                  <FiChevronDown className="ml-1 w-4 h-4" />
+                )}
+              </button>
+              
+              {showPriceFilter && (
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-gray-600">
+                      {formatPrice(priceRange[0])}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      {formatPrice(priceRange[1])}
+                    </span>
+                  </div>
+                  <div 
+                    className="relative py-2"
+                    ref={sliderRef}
+                    onMouseLeave={handleMouseUp}
+                  >
+                    <div className="relative w-full h-1 bg-gray-200 rounded-full" ref={sliderRef}>
+                      <div 
+                        className="absolute h-full bg-blue-500 rounded-full"
+                        style={{
+                          left: `${((priceRange[0] - priceRangeLimits.min) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`,
+                          width: `${((priceRange[1] - priceRange[0]) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`
+                        }}
+                      />
+                      <input
+                        type="range"
+                        min={priceRangeLimits.min}
+                        max={priceRangeLimits.max}
+                        step={1}
+                        value={priceRange[0]}
+                        onChange={(e) => {
+                          const newMin = parseInt(e.target.value);
+                          if (newMin < priceRange[1]) {
+                            setPriceRange([newMin, priceRange[1]]);
+                          }
+                        }}
+                        onMouseDown={() => handleMouseDown('min')}
+                        className="absolute w-full h-1 appearance-none pointer-events-none opacity-0"
+                      />
+                      <input
+                        type="range"
+                        min={priceRangeLimits.min}
+                        max={priceRangeLimits.max}
+                        step={1}
+                        value={priceRange[1]}
+                        onChange={(e) => {
+                          const newMax = parseInt(e.target.value);
+                          if (newMax > priceRange[0]) {
+                            setPriceRange([priceRange[0], newMax]);
+                          }
+                        }}
+                        onMouseDown={() => handleMouseDown('max')}
+                        className="absolute w-full h-1 appearance-none pointer-events-none opacity-0"
+                      />
+                      <div 
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full cursor-pointer -ml-2 z-10"
+                        style={{
+                          left: `${((priceRange[0] - priceRangeLimits.min) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`,
+                          transform: 'translateY(-50%) translateX(0)'
+                        }}
+                        onMouseDown={() => handleMouseDown('min')}
+                      />
+                      <div 
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full cursor-pointer -ml-2 z-10"
+                        style={{
+                          left: `${((priceRange[1] - priceRangeLimits.min) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`,
+                          transform: 'translateY(-50%) translateX(-100%)'
+                        }}
+                        onMouseDown={() => handleMouseDown('max')}
+                      />
+                    </div>  
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-2 flex justify-center">
               <button
                 type="submit"
                 className="w-full md:min-w-[300px] px-16 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-lg rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 whitespace-nowrap transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -219,9 +422,24 @@ const ToursPage = () => {
                 </div>
               </div>
             </div>
+          ) : filteredSightseeings.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No sightseeings found matching your filters.</p>
+              <button 
+                onClick={() => {
+                  setPriceRange([priceRangeLimits.min, priceRangeLimits.max]);
+                  setCityFilter('');
+                  setCountryFilter('');
+                  setCitySearch('');
+                }}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Reset Filters
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sightseeings.map((sightseeing) => (
+              {filteredSightseeings.map((sightseeing) => (
                 <div key={sightseeing._id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
                   {sightseeing.images && sightseeing.images.length > 0 ? (
                     <img 

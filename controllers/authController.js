@@ -119,7 +119,7 @@ exports.register = async (req, res) => {
       },
       message: user_type === 'guest' 
         ? 'User registered successfully. You can now log in.' 
-        : 'Registration successful! Please wait for approval.'
+        : 'Go back to signin page if automatically not redirected.'
     };
 
     res.status(201).json(responseData);
