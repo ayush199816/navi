@@ -680,6 +680,18 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
       'Camera',
       'Weather-appropriate clothing'
     ]);
+
+    // Process keywords and highlights
+    sightseeingData.keywords = processArrayField(sightseeingData.keywords || []);
+    sightseeingData.highlights = processArrayField(sightseeingData.highlights || []);
+
+    // Ensure defaults if arrays are empty after processing
+    if (sightseeingData.inclusions.length === 0) {
+      sightseeingData.inclusions = ['No inclusions specified'];
+    }
+    if (sightseeingData.highlights.length === 0) {
+      sightseeingData.highlights = ['No highlights available'];
+    }
     
     // Log the data being saved with more details
     console.log('Creating sightseeing with data:', {
