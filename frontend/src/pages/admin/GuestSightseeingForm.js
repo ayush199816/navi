@@ -1,340 +1,333 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  createGuestSightseeing, 
-  updateGuestSightseeing
-} from '../../redux/slices/guestSightseeingSlice';
+import { createGuestSightseeing, updateGuestSightseeing } from '../../redux/slices/guestSightseeingSlice';
 import { toast } from 'react-toastify';
-import { CheckIcon } from '@heroicons/react/24/outline';
+import {
+  CheckIcon,
+  CurrencyDollarIcon,
+  DocumentTextIcon,
+  InformationCircleIcon,
+  MapPinIcon,
+  PhotoIcon,
+  TagIcon
+} from '@heroicons/react/24/outline';
 import api from '../../utils/api';
 
+const SectionCard = ({ title, description, icon: Icon, children }) => (
+  <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="flex items-start gap-3 border-b border-slate-100 bg-slate-50/70 px-6 py-5">
+      {Icon && (
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+          <Icon className="h-5 w-5" />
+        </span>
+      )}
+      <div>
+        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+        {description && (
+          <p className="mt-1 text-sm text-slate-500">{description}</p>
+        )}
+      </div>
+    </div>
+    <div className="px-6 py-6">{children}</div>
+  </section>
+);
+
+const baseInputClasses =
+  'block w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100';
+const textareaClasses = `${baseInputClasses} min-h-[140px] align-top`;
+
 const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCancel }) => {
-  const dispatch = useDispatch();
-  const isEditMode = !!propSightseeing?._id;
-  
-  const { error, success } = useSelector(
-    (state) => state.guestSightseeings
-  );
+  const dispatch = useDispatch();
+  const isEditMode = !!propSightseeing?._id;
+  const { error, success } = useSelector((state) => state.guestSightseeings);
+  // Only USD is supported as per requirements
+  const [formData, setFormData] = useState({
+    name: '',
+    country: '',
+    city: '',
+    description: '',
+    price: '',
+    priceCurrency: 'USD', // Default currency
+    offerPrice: '',
+    offerPriceCurrency: 'USD', // Default currency
+    duration: 'Not specified',
+    inclusions: ['No inclusions specified'],
+    isActive: true,
+    images: [],
+    keywords: [],
+    tourType: 'shared', // Default to shared
+    activityType: 'Sightseeing', // Default to Sightseeing
+    aboutTour: 'No detailed description available.',
+    highlights: ['No highlights available'],
+    meetingPoint: 'To be advised upon booking',
+    whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+  });
+  const [newInclusion, setNewInclusion] = useState('');
+  const [newHighlight, setNewHighlight] = useState('');
+  const [newWhatToBring, setNewWhatToBring] = useState('');
+  const [newKeyword, setNewKeyword] = useState('');
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Only USD is supported as per requirements
+  useEffect(() => {
+    if (propSightseeing) {
+      const safeSightseeing = JSON.parse(JSON.stringify(propSightseeing));
+      console.log('Raw propSightseeing in form:', safeSightseeing);
+      const defaultValues = {
+        name: '',
+        country: '',
+        city: '',
+        description: '',
+        price: '',
+        priceCurrency: 'USD',
+        offerPrice: '',
+        offerPriceCurrency: 'USD',
+        duration: 'Not specified',
+        inclusions: ['No inclusions specified'],
+        isActive: true,
+        images: [],
+        keywords: [],
+        tourType: 'shared',
+        activityType: 'Sightseeing',
+        aboutTour: 'No detailed description available.',
+        highlights: ['No highlights available'],
+        meetingPoint: 'To be advised upon booking',
+        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+      };
+      // Create new form data with defaults and override with prop values
+      const newFormData = { ...defaultValues };
+      // Only override with prop values that are not undefined or null
+      Object.keys(safeSightseeing).forEach(key => {
+        if (safeSightseeing[key] !== undefined && safeSightseeing[key] !== null) {
+          // Special handling for arrays to ensure they are properly initialized
+          if (Array.isArray(defaultValues[key])) {
+            newFormData[key] = Array.isArray(safeSightseeing[key])
+              ? [...safeSightseeing[key]]
+              : [];
+          } else {
+            newFormData[key] = safeSightseeing[key];
+          }
+        }
+      });
+      // Ensure required fields have proper values
+      if (!newFormData.tourType) {
+        newFormData.tourType = 'shared';
+      }
+      if (!newFormData.activityType) {
+        newFormData.activityType = 'Sightseeing';
+      }
+      if (!newFormData.city) {
+        newFormData.city = '';
+      }
+      // Handle array fields to ensure they are properly initialized
+      if (!Array.isArray(newFormData.inclusions) || newFormData.inclusions.length === 0) {
+        newFormData.inclusions = ['No inclusions specified'];
+      }
+      if (!Array.isArray(newFormData.keywords)) {
+        newFormData.keywords = [];
+      }
+      if (!Array.isArray(newFormData.highlights) || newFormData.highlights.length === 0) {
+        newFormData.highlights = ['No highlights available'];
+      }
+      if (!Array.isArray(newFormData.whatToBring) || newFormData.whatToBring.length === 0) {
+        newFormData.whatToBring = ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'];
+      }
+      console.log('Setting form data:', newFormData);
+      setFormData(newFormData);
+      setImagePreviews(propSightseeing.images || []);
+    } else {
+      // Reset form if no sightseeing is provided
+      setFormData({
+        name: '',
+        country: '',
+        city: '',
+        description: '',
+        price: '',
+        priceCurrency: 'USD',
+        offerPrice: '',
+        offerPriceCurrency: 'USD',
+        duration: 'Not specified',
+        inclusions: ['No inclusions specified'],
+        isActive: true,
+        images: [],
+        keywords: [],
+        tourType: 'shared',
+        activityType: 'Sightseeing',
+        aboutTour: 'No detailed description available.',
+        highlights: ['No highlights available'],
+        meetingPoint: 'To be advised upon booking',
+        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+      });
+      setImagePreviews([]);
+      setNewInclusion('');
+      setNewHighlight('');
+      setNewWhatToBring('');
+    }
+  }, [propSightseeing]);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    country: '',
-    city: '',
-    description: '',
-    price: '',
-    priceCurrency: 'USD', // Default currency
-    offerPrice: '',
-    offerPriceCurrency: 'USD', // Default currency
-    duration: 'Not specified',
-    inclusions: ['No inclusions specified'],
-    isActive: true,
-    images: [],
-    keywords: [],
-    tourType: 'shared', // Default to shared
-    activityType: 'Sightseeing', // Default to Sightseeing
-    aboutTour: 'No detailed description available.',
-    highlights: ['No highlights available'],
-    meetingPoint: 'To be advised upon booking',
-    whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
-  });
-  
-  const [newInclusion, setNewInclusion] = useState('');
-  const [newHighlight, setNewHighlight] = useState('');
-  const [newWhatToBring, setNewWhatToBring] = useState('');
-  const [newKeyword, setNewKeyword] = useState('');
+  useEffect(() => {
+    if (success && onSuccess) {
+      toast.success(
+        `Sightseeing ${isEditMode ? 'updated' : 'created'} successfully!`
+      );
+      onSuccess();
+    }
 
-  const [imagePreviews, setImagePreviews] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+    if (error) {
+      toast.error(error);
+    }
+  }, [success, error, isEditMode, onSuccess]);
 
-  useEffect(() => {
-    if (propSightseeing) {
-      const safeSightseeing = JSON.parse(JSON.stringify(propSightseeing));
-      console.log('Raw propSightseeing in form:', safeSightseeing);
-      
-      const defaultValues = {
-        name: '',
-        country: '',
-        city: '',
-        description: '',
-        price: '',
-        priceCurrency: 'USD',
-        offerPrice: '',
-        offerPriceCurrency: 'USD',
-        duration: 'Not specified',
-        inclusions: ['No inclusions specified'],
-        isActive: true,
-        images: [],
-        keywords: [],
-        tourType: 'shared',
-        activityType: 'Sightseeing',
-        aboutTour: 'No detailed description available.',
-        highlights: ['No highlights available'],
-        meetingPoint: 'To be advised upon booking',
-        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
-      };
-      
-      // Create new form data with defaults and override with prop values
-      const newFormData = { ...defaultValues };
-      
-      // Only override with prop values that are not undefined or null
-      Object.keys(safeSightseeing).forEach(key => {
-        if (safeSightseeing[key] !== undefined && safeSightseeing[key] !== null) {
-          // Special handling for arrays to ensure they are properly initialized
-          if (Array.isArray(defaultValues[key])) {
-            newFormData[key] = Array.isArray(safeSightseeing[key]) 
-              ? [...safeSightseeing[key]] 
-              : [];
-          } else {
-            newFormData[key] = safeSightseeing[key];
-          }
-        }
-      });
-      
-      // Ensure required fields have proper values
-      if (!newFormData.tourType) {
-        newFormData.tourType = 'shared';
+  const handleBack = () => {
+    if (onCancel) {
+      onCancel();
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    let processedValue = value;
+
+    if (type === 'checkbox') {
+      processedValue = checked;
+    } else if (name === 'price' || name === 'offerPrice') {
+      processedValue = value === '' ? '' : Number(value);
+      if (Number.isNaN(processedValue)) {
+        processedValue = '';
       }
-      if (!newFormData.activityType) {
-        newFormData.activityType = 'Sightseeing';
-      }
-      if (!newFormData.city) {
-        newFormData.city = '';
-      }
-      
-      // Handle array fields to ensure they are properly initialized
-      if (!Array.isArray(newFormData.inclusions) || newFormData.inclusions.length === 0) {
-        newFormData.inclusions = ['No inclusions specified'];
-      }
-      if (!Array.isArray(newFormData.keywords)) {
-        newFormData.keywords = [];
-      }
-      if (!Array.isArray(newFormData.highlights) || newFormData.highlights.length === 0) {
-        newFormData.highlights = ['No highlights available'];
-      }
-      if (!Array.isArray(newFormData.whatToBring) || newFormData.whatToBring.length === 0) {
-        newFormData.whatToBring = ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'];
-      }
-      
-      console.log('Setting form data:', newFormData);
-      
-      setFormData(newFormData);
-      setImagePreviews(propSightseeing.images || []);
-    } else {
-      // Reset form if no sightseeing is provided
-      setFormData({
-        name: '',
-        country: '',
-        city: '',
-        description: '',
-        price: '',
-        priceCurrency: 'USD',
-        offerPrice: '',
-        offerPriceCurrency: 'USD',
-        duration: 'Not specified',
-        inclusions: ['No inclusions specified'],
-        isActive: true,
-        images: [],
-        keywords: [],
-        tourType: 'shared',
-        activityType: 'Sightseeing',
-        aboutTour: 'No detailed description available.',
-        highlights: ['No highlights available'],
-        meetingPoint: 'To be advised upon booking',
-        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
-      });
-      setImagePreviews([]);
-      setNewInclusion('');
-      setNewHighlight('');
-      setNewWhatToBring('');
     }
-  }, [propSightseeing]);
 
-  useEffect(() => {
-    if (success && onSuccess) {
-      toast.success(
-        `Sightseeing ${isEditMode ? 'updated' : 'created'} successfully!`
-      );
-      onSuccess();
-    }
-
-    if (error) {
-      toast.error(error);
-    }
-  }, [success, error, isEditMode, onSuccess]);
-
-  const handleBack = () => {
-    if (onCancel) {
-      onCancel();
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Convert price and offerPrice to numbers
-    const processedValue = (name === 'price' || name === 'offerPrice') && value !== '' 
-      ? parseFloat(value) || ''
-      : value;
-      
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
     }));
   };
 
-  const handleImageChange = async (e) => {
-    const files = Array.from(e.target.files);
-    
-    if (files.length === 0) return;
-    
-    const formData = new FormData();
-    files.forEach(file => {
-      formData.append('images', file);
-    });
-    
-    try {
-      const response = await api.post('/guest-sightseeing/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      
-      if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        const newImageUrls = response.data.data.map(item => 
-          typeof item === 'string' ? item : item.url || item.secure_url
-        );
-        
-        const newImages = newImageUrls.map(url => ({
-          url,
-          name: url.split('/').pop()
-        }));
-        
-        setImagePreviews(prev => [...prev, ...newImages]);
-        setFormData(prev => ({
-          ...prev,
-          images: [...prev.images, ...newImageUrls]
-        }));
-        
-        toast.success(`${files.length} image(s) uploaded successfully`);
-      } else {
-        throw new Error('Invalid response format from server');
-      }
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      toast.error(error.response?.data?.message || 'Failed to upload images');
-    }
-  };
+  const handleImageChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('images', file);
+    });
+    try {
+      const response = await api.post('/guest-sightseeing/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+     
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        const newImageUrls = response.data.data.map(item =>
+          typeof item === 'string' ? item : item.url || item.secure_url
+        );
+       
+        const newImages = newImageUrls.map(url => ({
+          url,
+          name: url.split('/').pop()
+        }));
+       
+        setImagePreviews(prev => [...prev, ...newImages]);
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...newImageUrls]
+        }));
+       
+        toast.success(`${files.length} image(s) uploaded successfully`);
+      } else {
+        throw new Error('Invalid response format from server');
+      }
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error(error.response?.data?.message || 'Failed to upload images');
+    }
+  };
 
-  const handleRemoveImage = (index) => {
-    const newPreviews = [...imagePreviews];
-    newPreviews.splice(index, 1);
-    setImagePreviews(newPreviews);
-    
-    // Update form data
-    setFormData(prev => ({
-      ...prev,
-      images: newPreviews.map(img => (typeof img === 'string' ? img : img.name))
-    }));
-  };
+  const handleRemoveImage = (index) => {
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1);
+    setImagePreviews(newPreviews);
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      images: newPreviews.map(img => (typeof img === 'string' ? img : img.name))
+    }));
+  };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Create FormData object
       const formDataToSubmit = new FormData();
-      
-      // Prepare form data for submission
       const formDataCopy = { ...formData };
-      
-      // Ensure required fields have default values
-      if (!formDataCopy.tourType) {
-        formDataCopy.tourType = 'shared';
-      }
-      
-      if (!formDataCopy.duration) {
-        formDataCopy.duration = 'Not specified';
-      }
-      
-      // Convert price fields to numbers
-      if (formDataCopy.price) {
-        formDataCopy.price = Number(formDataCopy.price);
-      }
-      
-      if (formDataCopy.offerPrice) {
-        formDataCopy.offerPrice = Number(formDataCopy.offerPrice);
-      }
-      
-      // Handle array fields
       const arrayFields = ['inclusions', 'highlights', 'whatToBring', 'keywords'];
+
       arrayFields.forEach(field => {
-        if (!Array.isArray(formDataCopy[field]) || formDataCopy[field].length === 0) {
-          formDataCopy[field] = field === 'keywords' ? [] : 
-                              field === 'whatToBring' ? ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'] : 
-                              field === 'highlights' ? ['No highlights available'] : 
-                              ['No inclusions specified'];
-        }
-        
-        // Ensure whatToBring is a flat array of strings
-        if (field === 'whatToBring') {
-          formDataCopy[field] = formDataCopy[field].flatMap(item => 
-            Array.isArray(item) ? item : [item]
-          ).filter(Boolean);
-        }
-      });
-      
-      // Add all form fields to FormData
-      Object.entries(formDataCopy).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          // Handle array fields
-          if (Array.isArray(value)) {
-            // First remove any existing entries with this key
-            formDataToSubmit.delete(key);
-            // Ensure we have a valid array of strings
-            const validArray = value.filter(item => {
-              if (item === null || item === undefined) return false;
-              const strItem = String(item).trim();
-              return strItem !== '' && strItem !== 'undefined' && strItem !== 'null';
-            });
-            
-            // If no valid items, use default for required arrays
-            if (validArray.length === 0) {
-              if (key === 'whatToBring') {
-                validArray.push('Comfortable walking shoes', 'camera', 'weather-appropriate clothing');
-              } else if (key === 'highlights') {
-                validArray.push('No highlights available');
-              } else if (key === 'inclusions') {
-                validArray.push('No inclusions specified');
-              }
-            }
-            
-            // Append each item with the same key
-            validArray.forEach(item => {
-              formDataToSubmit.append(key, String(item).trim());
-            });
-          } else {
-            // For regular fields, use set to avoid duplicates
-            formDataToSubmit.set(key, String(value).trim());
+        let fieldValue = formDataCopy[field];
+
+        if (typeof fieldValue === 'string') {
+          try {
+            fieldValue = JSON.parse(fieldValue);
+          } catch (err) {
+            fieldValue = [fieldValue];
           }
         }
+
+        if (!Array.isArray(fieldValue)) {
+          fieldValue = [fieldValue];
+        }
+
+        formDataCopy[field] = fieldValue
+          .flat(Infinity)
+          .map(item => String(item).trim())
+          .filter(item => item && item !== 'undefined' && item !== 'null');
       });
-      
+
+      if (formDataCopy.whatToBring.length === 0) {
+        formDataCopy.whatToBring = [
+          'Comfortable walking shoes',
+          'camera',
+          'weather-appropriate clothing'
+        ];
+      }
+      if (formDataCopy.highlights.length === 0) {
+        formDataCopy.highlights = ['No highlights available'];
+      }
+      if (formDataCopy.inclusions.length === 0) {
+        formDataCopy.inclusions = ['No inclusions specified'];
+      }
+
+      Object.entries(formDataCopy).forEach(([key, value]) => {
+        if (value === null || value === undefined) return;
+
+        formDataToSubmit.delete(key);
+
+        if (Array.isArray(value)) {
+          value.forEach(item => {
+            if (item === null || item === undefined) return;
+            const strValue = String(item).trim();
+            if (strValue) {
+              formDataToSubmit.append(key, strValue);
+            }
+          });
+        } else {
+          formDataToSubmit.set(key, String(value).trim());
+        }
+      });
+
       if (isEditMode) {
-        await dispatch(updateGuestSightseeing({ 
-          id: propSightseeing._id, 
+        await dispatch(updateGuestSightseeing({
+          id: propSightseeing._id,
           data: formDataToSubmit
         })).unwrap();
-        
         toast.success('Sightseeing updated successfully');
-        if (onSuccess) onSuccess();
       } else {
         await dispatch(createGuestSightseeing(formDataToSubmit)).unwrap();
         toast.success('Sightseeing created successfully');
-        if (onSuccess) onSuccess();
       }
+
+      onSuccess?.();
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error(error || 'An error occurred while saving');
@@ -344,416 +337,450 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">
-          {isEditMode ? 'Edit Guest Sightseeing' : 'Add New Guest Sightseeing'}
-        </h1>
-      </div>
+    <div className="min-h-screen bg-slate-50 py-8">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6 shadow-sm">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-500">
+              Guest Sightseeing
+            </p>
+            <h1 className="mt-3 text-3xl font-bold text-slate-900">
+              {isEditMode ? 'Update guest sightseeing' : 'Create a new guest sightseeing'}
+            </h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Provide comprehensive details so the experience feels premium and complete for travellers.
+            </p>
+          </div>
+          <span
+            className={`rounded-full px-4 py-2 text-sm font-semibold ${
+              isEditMode ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+            }`}
+          >
+            {isEditMode ? 'Editing existing record' : 'Drafting new record'}
+          </span>
+        </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <form onSubmit={handleSubmit}>
-          <div className="px-4 py-5 sm:p-6 space-y-6">
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-              <div className="sm:col-span-6">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <SectionCard
+            title="General information"
+            description="Core details that describe the sightseeing experience."
+            icon={InformationCircleIcon}
+          >
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-2 md:col-span-2">
+                <label htmlFor="name" className="text-sm font-semibold text-slate-700">
                   Sightseeing Name *
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={baseInputClasses}
+                  placeholder="E.g. Dubai Evening Desert Safari"
+                />
               </div>
 
-              <div className="sm:col-span-3">
-                <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2">
+                <label htmlFor="country" className="text-sm font-semibold text-slate-700">
                   Country *
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="country"
-                    id="country"
-                    required
-                    value={formData.country}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
+                <input
+                  type="text"
+                  name="country"
+                  id="country"
+                  required
+                  value={formData.country}
+                  onChange={handleChange}
+                  className={baseInputClasses}
+                  placeholder="United Arab Emirates"
+                />
               </div>
 
-              <div className="sm:col-span-3">
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2">
+                <label htmlFor="city" className="text-sm font-semibold text-slate-700">
                   City *
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="city"
-                    id="city"
-                    required
-                    value={formData.city || ''}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
+                <input
+                  type="text"
+                  name="city"
+                  id="city"
+                  required
+                  value={formData.city || ''}
+                  onChange={handleChange}
+                  className={baseInputClasses}
+                  placeholder="Dubai"
+                />
               </div>
 
-              <div className="sm:col-span-3">
-                <label htmlFor="activityType" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2">
+                <label htmlFor="activityType" className="text-sm font-semibold text-slate-700">
                   Activity Type *
                 </label>
-                <div className="mt-1">
-                  <select
-                    id="activityType"
-                    name="activityType"
-                    value={formData.activityType || 'Sightseeing'}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="Sightseeing">Sightseeing</option>
-                    <option value="Transfers">Transfers</option>
-                    <option value="Both">Both</option>
-                  </select>
-                </div>
+                <select
+                  id="activityType"
+                  name="activityType"
+                  value={formData.activityType || 'Sightseeing'}
+                  onChange={handleChange}
+                  className={baseInputClasses}
+                  required
+                >
+                  <option value="Sightseeing">Sightseeing</option>
+                  <option value="Transfers">Transfers</option>
+                  <option value="Both">Both</option>
+                </select>
               </div>
 
-              <div className="sm:col-span-3">
-                <label htmlFor="tourType" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2">
+                <label htmlFor="tourType" className="text-sm font-semibold text-slate-700">
                   Tour Type *
                 </label>
-                <div className="mt-1">
-                  <select
-                    id="tourType"
-                    name="tourType"
-                    value={formData.tourType || 'shared'}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="shared">Shared Tour</option>
-                    <option value="private">Private Tour</option>
-                    <option value="both">Both Shared & Private</option>
-                    <option value="none">None</option>
-                  </select>
-                </div>
+                <select
+                  id="tourType"
+                  name="tourType"
+                  value={formData.tourType || 'shared'}
+                  onChange={handleChange}
+                  className={baseInputClasses}
+                  required
+                >
+                  <option value="shared">Shared Tour</option>
+                  <option value="private">Private Tour</option>
+                  <option value="both">Both Shared & Private</option>
+                  <option value="none">None</option>
+                </select>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                    Price (USD)
-                  </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">
-                        $
-                      </span>
-                    </div>
-                    <input
-                      type="number"
-                      name="price"
-                      id="price"
-                      min="0"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={handleChange}
-                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-8 pr-12 sm:text-sm border-gray-300 rounded-md"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label htmlFor="offerPrice" className="block text-sm font-medium text-gray-700">
-                    Offer Price (USD)
-                  </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">
-                        $
-                      </span>
-                    </div>
-                    <input
-                      type="number"
-                      name="offerPrice"
-                      id="offerPrice"
-                      min="0"
-                      step="0.01"
-                      value={formData.offerPrice}
-                      onChange={handleChange}
-                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-8 pr-12 sm:text-sm border-gray-300 rounded-md"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                  Leave empty if there's no special offer
-                </p>
-
-              <div className="sm:col-span-3">
-                <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2">
+                <label htmlFor="duration" className="text-sm font-semibold text-slate-700">
                   Duration
                 </label>
-                <div className="mt-1">
+                <input
+                  type="text"
+                  name="duration"
+                  id="duration"
+                  value={formData.duration}
+                  onChange={handleChange}
+                  className={baseInputClasses}
+                  placeholder="e.g., 2 hours, Full day, etc."
+                />
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Pricing"
+            description="Set the published price and optional promo price."
+            icon={CurrencyDollarIcon}
+          >
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="price" className="text-sm font-semibold text-slate-700">
+                  Price (USD)
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-semibold text-slate-400">
+                    $
+                  </span>
                   <input
-                    type="text"
-                    name="duration"
-                    id="duration"
-                    value={formData.duration}
+                    type="number"
+                    name="price"
+                    id="price"
+                    min="0"
+                    step="0.01"
+                    value={formData.price}
                     onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                    placeholder="e.g., 2 hours, Full day, etc."
+                    className={`${baseInputClasses} pl-8`}
+                    placeholder="0.00"
                   />
                 </div>
+                <p className="text-xs text-slate-500">Displayed as the primary retail price.</p>
               </div>
 
-              <div className="sm:col-span-6">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2">
+                <label htmlFor="offerPrice" className="text-sm font-semibold text-slate-700">
+                  Offer Price (USD)
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-semibold text-slate-400">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    name="offerPrice"
+                    id="offerPrice"
+                    min="0"
+                    step="0.01"
+                    value={formData.offerPrice}
+                    onChange={handleChange}
+                    className={`${baseInputClasses} pl-8`}
+                    placeholder="0.00"
+                  />
+                </div>
+                <p className="text-xs text-slate-500">Leave empty if there is no promotional offer.</p>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Narrative content"
+            description="Craft compelling descriptions so agents can easily pitch this experience."
+            icon={DocumentTextIcon}
+          >
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="description" className="text-sm font-semibold text-slate-700">
                   Description *
                 </label>
-                <div className="mt-1">
-                  <textarea
-                    id="description"
-                    name="description"
-                    rows={4}
-                    required
-                    value={formData.description}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                  />
-                </div>
+                <textarea
+                  id="description"
+                  name="description"
+                  required
+                  value={formData.description}
+                  onChange={handleChange}
+                  className={textareaClasses}
+                  placeholder="Provide a crisp summary of what the guest can expect."
+                />
               </div>
 
-              <div className="sm:col-span-6">
-                <label htmlFor="aboutTour" className="block text-sm font-medium text-gray-700">
-                  About This Tour
+              <div className="space-y-2">
+                <label htmlFor="aboutTour" className="text-sm font-semibold text-slate-700">
+                  About this tour
                 </label>
-                <div className="mt-1">
-                  <textarea
-                    id="aboutTour"
-                    name="aboutTour"
-                    rows={4}
-                    value={formData.aboutTour}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                    placeholder="Detailed description of the tour"
-                  />
-                </div>
+                <textarea
+                  id="aboutTour"
+                  name="aboutTour"
+                  value={formData.aboutTour}
+                  onChange={handleChange}
+                  className={textareaClasses}
+                  placeholder="Share detailed insights, storytelling, or insider tips."
+                />
               </div>
+            </div>
+          </SectionCard>
 
-              <div className="sm:col-span-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Keywords
-                </label>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {formData.keywords.map((keyword, index) => (
-                      <div key={index} className="flex items-center bg-blue-100 rounded-full px-3 py-1">
-                        <span className="text-sm text-blue-800 mr-1">{keyword}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newKeywords = [...formData.keywords];
-                            newKeywords.splice(index, 1);
-                            setFormData(prev => ({
-                              ...prev,
-                              keywords: newKeywords
-                            }));
-                          }}
-                          className="text-blue-400 hover:text-blue-700 focus:outline-none"
-                        >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      value={newKeyword}
-                      onChange={(e) => setNewKeyword(e.target.value)}
-                      onKeyDown={(e) => {
-                        if ((e.key === 'Enter' || e.key === ',') && newKeyword.trim()) {
-                          e.preventDefault();
-                          const keywordToAdd = newKeyword.trim().replace(/,+$/, '');
-                          if (keywordToAdd) {
-                            setFormData(prev => ({
-                              ...prev,
-                              keywords: [...new Set([...prev.keywords, keywordToAdd])]
-                            }));
-                            setNewKeyword('');
-                          }
-                        }
-                      }}
-                      onPaste={(e) => {
-                        e.preventDefault();
-                        const pastedText = e.clipboardData.getData('text');
-                        const pastedKeywords = pastedText
-                          .split(',')
-                          .map(k => k.trim())
-                          .filter(k => k.length > 0);
-                        
-                        if (pastedKeywords.length > 0) {
-                          setFormData(prev => ({
-                            ...prev,
-                            keywords: [...new Set([...prev.keywords, ...pastedKeywords])]
-                          }));
-                        }
-                      }}
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                      placeholder="Type and press Enter or comma to add keywords"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (newKeyword.trim()) {
-                          const keywordToAdd = newKeyword.trim().replace(/,+$/, '');
-                          if (keywordToAdd) {
-                            setFormData(prev => ({
-                              ...prev,
-                              keywords: [...new Set([...prev.keywords, keywordToAdd])]
-                            }));
-                            setNewKeyword('');
-                          }
-                        }
-                      }}
-                      className="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          <SectionCard
+            title="Keywords & highlights"
+            description="Add quick tags and standout moments for faster discovery."
+            icon={TagIcon}
+          >
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-slate-700">Keywords</h3>
+                  <span className="text-xs font-medium text-slate-400">Press Enter to add</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.keywords.map((keyword, index) => (
+                    <div
+                      key={`${keyword}-${index}`}
+                      className="group flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700"
                     >
-                      Add
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="sm:col-span-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Highlights
-                </label>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {formData.highlights.map((highlight, index) => (
-                      <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-                        <CheckIcon className="h-4 w-4 text-green-500 mr-1" />
-                        <span className="text-sm text-gray-700 mr-1">{highlight}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newHighlights = [...formData.highlights];
-                            newHighlights.splice(index, 1);
-                            setFormData(prev => ({
-                              ...prev,
-                              highlights: newHighlights.length > 0 ? newHighlights : ['No highlights available']
-                            }));
-                          }}
-                          className="text-gray-400 hover:text-red-500 focus:outline-none"
-                        >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex mt-2">
-                    <input
-                      type="text"
-                      value={newHighlight}
-                      onChange={(e) => setNewHighlight(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && newHighlight.trim()) {
-                          e.preventDefault();
-                          const newHighlights = [...formData.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()];
+                      <span>{keyword}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newKeywords = [...formData.keywords];
+                          newKeywords.splice(index, 1);
                           setFormData(prev => ({
                             ...prev,
-                            highlights: newHighlights
+                            keywords: newKeywords
                           }));
-                          setNewHighlight('');
-                        }
-                      }}
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      placeholder="Add a highlight and press Enter"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (newHighlight.trim()) {
-                          const newHighlights = [...formData.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()];
-                          setFormData(prev => ({
-                            ...prev,
-                            highlights: newHighlights
-                          }));
-                          setNewHighlight('');
-                        }
-                      }}
-                      className="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Add
-                    </button>
-                  </div>
+                        }}
+                        className="text-blue-400 transition hover:text-blue-700"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              </div>
-
-              <div className="sm:col-span-6">
-                <label htmlFor="meetingPoint" className="block text-sm font-medium text-gray-700">
-                  Meeting Point
-                </label>
-                <div className="mt-1">
+                <div className="flex flex-col gap-3 sm:flex-row">
                   <input
                     type="text"
-                    name="meetingPoint"
-                    id="meetingPoint"
-                    value={formData.meetingPoint}
-                    onChange={handleChange}
-                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                    placeholder="Enter meeting point details"
+                    value={newKeyword}
+                    onChange={(e) => setNewKeyword(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.key === 'Enter' || e.key === ',') && newKeyword.trim()) {
+                        e.preventDefault();
+                        const keywordToAdd = newKeyword.trim().replace(/,+$/, '');
+                        if (keywordToAdd) {
+                          setFormData(prev => ({
+                            ...prev,
+                            keywords: [...new Set([...prev.keywords, keywordToAdd])]
+                          }));
+                          setNewKeyword('');
+                        }
+                      }
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pastedKeywords = e.clipboardData
+                        .getData('text')
+                        .split(',')
+                        .map(k => k.trim())
+                        .filter(k => k.length > 0);
+
+                      if (pastedKeywords.length > 0) {
+                        setFormData(prev => ({
+                          ...prev,
+                          keywords: [...new Set([...prev.keywords, ...pastedKeywords])]
+                        }));
+                      }
+                    }}
+                    className={baseInputClasses}
+                    placeholder="Add keyword"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newKeyword.trim()) {
+                        const keywordToAdd = newKeyword.trim().replace(/,+$/, '');
+                        if (keywordToAdd) {
+                          setFormData(prev => ({
+                            ...prev,
+                            keywords: [...new Set([...prev.keywords, keywordToAdd])]
+                          }));
+                          setNewKeyword('');
+                        }
+                      }
+                    }}
+                    className="inline-flex items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                  >
+                    Add
+                  </button>
                 </div>
               </div>
 
-              <div className="sm:col-span-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What to Bring
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-slate-700">Highlights</h3>
+                  <span className="text-xs font-medium text-slate-400">Spotlight the wow moments</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.highlights.map((highlight, index) => (
+                    <div
+                      key={`${highlight}-${index}`}
+                      className="group flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700"
+                    >
+                      <CheckIcon className="h-4 w-4 text-emerald-500" />
+                      <span>{highlight}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newHighlights = [...formData.highlights];
+                          newHighlights.splice(index, 1);
+                          setFormData(prev => ({
+                            ...prev,
+                            highlights: newHighlights.length > 0 ? newHighlights : ['No highlights available']
+                          }));
+                        }}
+                        className="text-slate-400 transition hover:text-rose-500"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <input
+                    type="text"
+                    value={newHighlight}
+                    onChange={(e) => setNewHighlight(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newHighlight.trim()) {
+                        e.preventDefault();
+                        const newHighlights = [...formData.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()];
+                        setFormData(prev => ({
+                          ...prev,
+                          highlights: newHighlights
+                        }));
+                        setNewHighlight('');
+                      }
+                    }}
+                    className={baseInputClasses}
+                    placeholder="Add highlight"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newHighlight.trim()) {
+                        const newHighlights = [...formData.highlights.filter(h => h !== 'No highlights available'), newHighlight.trim()];
+                        setFormData(prev => ({
+                          ...prev,
+                          highlights: newHighlights
+                        }));
+                        setNewHighlight('');
+                      }
+                    }}
+                    className="inline-flex items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Logistics & essentials"
+            description="Cover meeting points, inclusions, and packing reminders."
+            icon={MapPinIcon}
+          >
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <label htmlFor="meetingPoint" className="text-sm font-semibold text-slate-700">
+                  Meeting point
                 </label>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2 mb-2">
+                <input
+                  type="text"
+                  name="meetingPoint"
+                  id="meetingPoint"
+                  value={formData.meetingPoint}
+                  onChange={handleChange}
+                  className={baseInputClasses}
+                  placeholder="Enter the exact pickup or meetup location"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-slate-700">What to bring</h3>
+                    <span className="text-xs font-medium text-slate-400">Set guests up for success</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
                     {formData.whatToBring.map((item, index) => (
-                      <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-                        <CheckIcon className="h-4 w-4 text-green-500 mr-1" />
-                        <span className="text-sm text-gray-700 mr-1">{item}</span>
+                      <div
+                        key={`${item}-${index}`}
+                        className="group flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700"
+                      >
+                        <CheckIcon className="h-4 w-4 text-blue-500" />
+                        <span>{item}</span>
                         <button
                           type="button"
                           onClick={() => {
-                            const newWhatToBring = [...formData.whatToBring];
-                            newWhatToBring.splice(index, 1);
+                            const newItems = [...formData.whatToBring];
+                            newItems.splice(index, 1);
                             setFormData(prev => ({
                               ...prev,
-                              whatToBring: newWhatToBring.length > 0 ? newWhatToBring : ['No items specified']
+                              whatToBring: newItems.length > 0 ? newItems : ['No items specified']
                             }));
                           }}
-                          className="text-gray-400 hover:text-red-500 focus:outline-none"
+                          className="text-slate-400 transition hover:text-rose-500"
                         >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
                     ))}
                   </div>
-                  <div className="flex mt-2">
+                  <div className="flex flex-col gap-3 sm:flex-row">
                     <input
                       type="text"
                       value={newWhatToBring}
@@ -764,15 +791,15 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                           const updatedItems = [...formData.whatToBring, newWhatToBring.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            whatToBring: updatedItems.includes('No items specified') 
+                            whatToBring: updatedItems.includes('No items specified')
                               ? updatedItems.filter(item => item !== 'No items specified')
                               : updatedItems
                           }));
                           setNewWhatToBring('');
                         }
                       }}
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      placeholder="Add an item and press Enter"
+                      className={baseInputClasses}
+                      placeholder="Add packing tip"
                     />
                     <button
                       type="button"
@@ -781,31 +808,33 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                           const updatedItems = [...formData.whatToBring, newWhatToBring.trim()];
                           setFormData(prev => ({
                             ...prev,
-                            whatToBring: updatedItems.includes('No items specified') 
+                            whatToBring: updatedItems.includes('No items specified')
                               ? updatedItems.filter(item => item !== 'No items specified')
                               : updatedItems
                           }));
                           setNewWhatToBring('');
                         }
                       }}
-                      className="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
                     >
                       Add
                     </button>
                   </div>
                 </div>
-              </div>
 
-              <div className="sm:col-span-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What's Included
-                </label>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2 mb-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-slate-700">What's included</h3>
+                    <span className="text-xs font-medium text-slate-400">Clarify value upfront</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
                     {formData.inclusions.map((inclusion, index) => (
-                      <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-                        <CheckIcon className="h-4 w-4 text-green-500 mr-1" />
-                        <span className="text-sm text-gray-700 mr-1">{inclusion}</span>
+                      <div
+                        key={`${inclusion}-${index}`}
+                        className="group flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700"
+                      >
+                        <CheckIcon className="h-4 w-4 text-emerald-500" />
+                        <span>{inclusion}</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -816,16 +845,16 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                               inclusions: newInclusions.length > 0 ? newInclusions : ['No inclusions specified']
                             }));
                           }}
-                          className="text-gray-400 hover:text-red-500 focus:outline-none"
+                          className="text-slate-400 transition hover:text-rose-500"
                         >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
                     ))}
                   </div>
-                  <div className="flex mt-2">
+                  <div className="flex flex-col gap-3 sm:flex-row">
                     <input
                       type="text"
                       value={newInclusion}
@@ -843,8 +872,8 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                           setNewInclusion('');
                         }
                       }}
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      placeholder="Add an inclusion and press Enter"
+                      className={baseInputClasses}
+                      placeholder="Add inclusion"
                     />
                     <button
                       type="button"
@@ -860,77 +889,68 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                           setNewInclusion('');
                         }
                       }}
-                      className="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
                     >
                       Add
                     </button>
                   </div>
                 </div>
               </div>
+            </div>
+          </SectionCard>
 
-              <div className="sm:col-span-6">
-                <label className="block text-sm font-medium text-gray-700">
-                  Images
-                </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                  <div className="space-y-1 text-center">
-                    <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
-                      stroke="currentColor"
-                      fill="none"
-                      viewBox="0 0 48 48"
-                      aria-hidden="true"
+          <SectionCard
+            title="Media & visibility"
+            description="Upload imagery and control whether travellers can book this now."
+            icon={PhotoIcon}
+          >
+            <div className="space-y-8">
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Images</label>
+                <div className="mt-3 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 px-6 py-10 text-center">
+                  <PhotoIcon className="h-10 w-10 text-slate-400" />
+                  <div className="text-sm text-slate-600">
+                    <label
+                      htmlFor="file-upload"
+                      className="cursor-pointer font-semibold text-blue-600 transition hover:text-blue-700"
                     >
-                      <path
-                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                      <span>Upload files</span>
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageChange}
                       />
-                    </svg>
-                    <div className="flex text-sm text-gray-600">
-                      <label
-                        htmlFor="file-upload"
-                        className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                      >
-                        <span>Upload files</span>
-                        <input 
-                          id="file-upload" 
-                          name="file-upload" 
-                          type="file" 
-                          className="sr-only" 
-                          multiple
-                          accept="image/*"
-                          onChange={handleImageChange}
-                        />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      PNG, JPG, GIF up to 10MB
-                    </p>
+                    </label>
+                    <span className="text-slate-400"> or drag & drop</span>
                   </div>
+                  <p className="text-xs text-slate-400">PNG, JPG up to 10MB each</p>
                 </div>
-                
-                {/* Image previews */}
+
                 {imagePreviews.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Images</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <div className="mt-5">
+                    <h4 className="text-sm font-semibold text-slate-700">Uploaded images</h4>
+                    <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                       {imagePreviews.map((img, index) => (
-                        <div key={index} className="relative group">
+                        <div
+                          key={`${typeof img === 'string' ? img : img.url}-${index}`}
+                          className="group relative overflow-hidden rounded-2xl border border-slate-200"
+                        >
                           <img
                             src={typeof img === 'string' ? img : img.url}
                             alt={`Preview ${index + 1}`}
-                            className="h-24 w-full object-cover rounded-md"
+                            className="h-32 w-full object-cover"
                           />
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute right-2 top-2 rounded-full bg-rose-500/90 p-1 text-white opacity-0 transition group-hover:opacity-100"
                             title="Remove image"
                           >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </button>
@@ -941,52 +961,53 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                 )}
               </div>
 
-              <div className="sm:col-span-6">
-                <div className="flex items-center">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Visibility toggle</p>
+                  <p className="text-xs text-slate-500">Inactive sightseeings will stay hidden from customers.</p>
+                </div>
+                <label className="inline-flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
                   <input
                     id="isActive"
                     name="isActive"
                     type="checkbox"
                     checked={formData.isActive}
                     onChange={handleChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                    Active
-                  </label>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Inactive sightseeings won't be visible to customers
-                </p>
+                  <span className="text-sm font-medium text-slate-700">
+                    {formData.isActive ? 'Active & bookable' : 'Inactive'}
+                  </span>
+                </label>
               </div>
             </div>
-          </div>
-          
-          <div className="px-4 py-3 bg-gray-50 text-right sm:px-6 flex justify-end space-x-3">
+          </SectionCard>
+
+          <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
             <button
               type="button"
               onClick={handleBack}
-              className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-500 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="https://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" strokeWidth="4" />
+                    <path className="opacity-75" d="M4 12a8 8 0 018-8" strokeWidth="4" />
                   </svg>
                   Saving...
                 </>
               ) : (
                 <>
-                  <CheckIcon className="h-4 w-4 mr-1" />
-                  {isEditMode ? 'Update' : 'Create'}
+                  <CheckIcon className="h-4 w-4" />
+                  {isEditMode ? 'Update sightseeing' : 'Create sightseeing'}
                 </>
               )}
             </button>
