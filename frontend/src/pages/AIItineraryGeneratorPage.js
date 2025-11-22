@@ -1,7 +1,181 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FiDownload, FiMessageSquare } from 'react-icons/fi';
+import {
+  FiDownload,
+  FiMessageSquare,
+  FiSunrise,
+  FiSunset,
+  FiMoon,
+  FiCoffee,
+  FiMapPin,
+  FiClock
+} from 'react-icons/fi';
+
+const SECTION_KEYWORDS = [
+  'Morning',
+  'Morning Activity',
+  'Late Morning',
+  'Afternoon',
+  'Afternoon Activity',
+  'Evening',
+  'Evening Activity',
+  'Night',
+  'Late Night',
+  'Daytime',
+  'Leisure Time',
+  'Breakfast',
+  'Lunch',
+  'Dinner'
+];
+
+const createSectionRegex = () => {
+  const pattern = SECTION_KEYWORDS.map(keyword => keyword.replace(/\s+/g, '\\s+')).join('|');
+  return new RegExp(`^(?:(${pattern}))\\s*(?:-|:)?`, 'gim');
+};
+
+const normalizeSectionTitle = (rawTitle = '') => {
+  const value = rawTitle.toLowerCase();
+  if (value.includes('morning')) return 'Morning';
+  if (value.includes('afternoon')) return 'Afternoon';
+  if (value.includes('evening') && !value.includes('activity')) return 'Evening';
+  if (value.includes('night')) return 'Night';
+  if (value.includes('breakfast')) return 'Breakfast';
+  if (value.includes('lunch')) return 'Lunch';
+  if (value.includes('dinner')) return 'Dinner';
+  if (value.includes('leisure')) return 'Leisure Time';
+  if (value.includes('activity')) {
+    if (value.includes('morning')) return 'Morning';
+    if (value.includes('afternoon')) return 'Afternoon';
+    if (value.includes('evening')) return 'Evening';
+  }
+  return rawTitle.replace(/\*/g, '').trim();
+};
+
+const sanitizeLine = (line = '') => {
+  const cleaned = line
+    .replace(/^[-–•●\d.\s]+/, '')
+    .replace(/^\*+/, '')
+    .replace(/\*+$/, '')
+    .trim();
+
+  if (!cleaned || cleaned === '--') return '';
+
+  const meta = cleaned.toLowerCase();
+  if (
+    meta.startsWith('traveler tips for the day') ||
+    meta.startsWith('estimated time for activities') ||
+    meta.startsWith('additional notes')
+  ) {
+    return '';
+  }
+
+  return cleaned;
+};
+
+const toLineItem = (line = '') => {
+  let primary = line;
+  let secondary = '';
+
+  if (line.includes(' - ')) {
+    const [title, ...rest] = line.split(' - ');
+    primary = title;
+    secondary = rest.join(' - ').trim();
+  }
+
+  if (!secondary && primary.includes(':')) {
+    const [title, ...rest] = primary.split(':');
+    primary = title;
+    secondary = rest.join(':').trim();
+  }
+
+  return {
+    title: primary.trim() || 'Details',
+    description: secondary
+  };
+};
+
+const buildStructuredSections = (rawText = '') => {
+  const normalized = rawText.replace(/\r/g, '').trim();
+  if (!normalized) return [];
+
+  const sectionPattern = createSectionRegex();
+  const matches = [];
+  let match;
+
+  while ((match = sectionPattern.exec(normalized)) !== null) {
+    matches.push({
+      title: normalizeSectionTitle(match[1]),
+      headingIndex: match.index,
+      contentStart: sectionPattern.lastIndex
+    });
+  }
+
+  if (!matches.length) return [];
+
+  return matches
+    .map((section, index) => {
+      const end = index + 1 < matches.length ? matches[index + 1].headingIndex : normalized.length;
+      const body = normalized.slice(section.contentStart, end).trim();
+
+      const items = body
+        .split(/\n+/)
+        .map(item => sanitizeLine(item))
+        .filter(Boolean)
+        .map(toLineItem);
+
+      if (!items.length) return null;
+
+      return {
+        title: section.title,
+        items
+      };
+    })
+    .filter(Boolean);
+};
+
+const SectionIcon = ({ title }) => {
+  switch (title) {
+    case 'Morning':
+      return <FiSunrise className="text-blue-600" />;
+    case 'Afternoon':
+      return <FiCoffee className="text-amber-600" />;
+    case 'Evening':
+      return <FiSunset className="text-orange-500" />;
+    case 'Night':
+      return <FiMoon className="text-indigo-500" />;
+    case 'Breakfast':
+      return <FiCoffee className="text-amber-500" />;
+    case 'Lunch':
+      return <FiMapPin className="text-emerald-500" />;
+    case 'Dinner':
+      return <FiMoon className="text-purple-500" />;
+    case 'Leisure Time':
+      return <FiMapPin className="text-teal-500" />;
+    default:
+      return <FiClock className="text-slate-500" />;
+  }
+};
+
+const normalizeDayHeaders = (text = '') => {
+  return text.replace(/(^|\n)\s*(?:##?\s*)?(Day\s+\d+[^\n]*)/gi, (match, prefix, dayLine) => {
+    const trimmedLine = dayLine.trim();
+    const normalizedLine = trimmedLine.toLowerCase().startsWith('day') ? `## ${trimmedLine}` : trimmedLine;
+    return `${prefix}${normalizedLine}\n`;
+  });
+};
+
+const htmlToPlainText = (html = '') => {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|li|div|h\d)>/gi, '\n')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\n{2,}/g, '\n')
+    .replace(/\s+\n/g, '\n')
+    .replace(/\n\s+/g, '\n')
+    .trim();
+};
 
 const AIItineraryGeneratorPage = () => {
   const navigate = useNavigate();
@@ -191,13 +365,14 @@ const AIItineraryGeneratorPage = () => {
           }
           
           .day-header {
-            background: #3b82f6;
+            background: linear-gradient(120deg, #f97316, #0ea5e9, #ef4444, #9333ea);
             color: white;
-            padding: 0.75rem 1.25rem;
-            border-radius: 6px;
-            margin-bottom: 1.25rem;
-            font-weight: 600;
-            font-size: 16px;
+            padding: 0.9rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 0.5px;
           }
           
           .time-slot {
@@ -485,10 +660,11 @@ const AIItineraryGeneratorPage = () => {
     
     // Convert to string in case it's not
     const text = String(itineraryText);
+    const normalizedText = normalizeDayHeaders(text);
     
     // Look for the main itinerary pattern (starts with Day 1 or ## Day 1)
-    const mainItineraryMatch = text.match(/(##?\s*Day\s+1[\s\S]*?)(?=##?\s*Travel Tips|$)/i);
-    const mainItineraryText = mainItineraryMatch ? mainItineraryMatch[0] : text;
+    const mainItineraryMatch = normalizedText.match(/(##?\s*Day\s+1[\s\S]*?)(?=##?\s*Travel Tips|$)/i);
+    const mainItineraryText = mainItineraryMatch ? mainItineraryMatch[0] : normalizedText;
     
     // Split by day sections (## Day X)
     const daySections = [];
@@ -555,7 +731,7 @@ const AIItineraryGeneratorPage = () => {
     for (const section of daySections) {
       let title = `Day ${dayNumber}`;
       let content = section;
-      
+
       // Extract day number and date from section
       const dayMatch = section.match(/^##?\s*Day\s+(\d+)(?:\s*\(([^)]+)\))?/i);
       if (dayMatch) {
@@ -564,7 +740,9 @@ const AIItineraryGeneratorPage = () => {
         // Remove the day header from content
         content = content.replace(/^##?\s*Day\s+\d+\s*(?:\([^)]+\))?\s*\n?/i, '').trim();
       }
-      
+
+      const structuredSections = buildStructuredSections(content);
+
       // Format the content with proper HTML structure
       let formattedContent = content
         // Handle time-based sections (e.g., "### Morning" or "Morning:")
@@ -619,17 +797,22 @@ const AIItineraryGeneratorPage = () => {
       }).join('');
       
       // Add to processed days
+      const ensuredSections = structuredSections.length
+        ? structuredSections
+        : buildStructuredSections(htmlToPlainText(finalContent));
+
       processedDays.push({
         day: `Day ${dayNumber}`,
         title: title,
-        content: finalContent
+        content: finalContent,
+        sections: ensuredSections
       });
       
       dayNumber++;
     }
     
     // Add travel tips if found
-    const tipsMatch = text.match(/##?\s*Travel Tips[\s\S]*/i);
+    const tipsMatch = normalizedText.match(/##?\s*Travel Tips[\s\S]*/i);
     if (tipsMatch) {
       const tipsContent = tipsMatch[0]
         .replace(/##?\s*Travel Tips\s*/i, '')
@@ -872,23 +1055,70 @@ const AIItineraryGeneratorPage = () => {
               </div>
             </div>
 
-            <div className="space-y-8" id="itinerary-content">
+            <div className="space-y-6" id="itinerary-content">
               {itineraryDays.length > 0 ? (
                 itineraryDays.map((day, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 bg-white bg-opacity-20 rounded-full p-2">
-                          <span className="text-white font-bold text-lg">{day.day}</span>
+                    <div
+                      className="px-6 py-4"
+                      style={{
+                        background: 'linear-gradient(120deg, #f97316, #0ea5e9, #ef4444, #9333ea)'
+                      }}
+                    >
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 bg-white bg-opacity-20 rounded-full px-4 py-2 text-white font-semibold">
+                            {day.day}
+                          </div>
+                          {day.title?.toLowerCase() !== day.day?.toLowerCase() && (
+                            <p className="text-white text-lg font-semibold tracking-wide">{day.title}</p>
+                          )}
                         </div>
-                        <h3 className="ml-4 text-xl font-semibold text-white">{day.title}</h3>
                       </div>
                     </div>
                     <div className="p-6">
-                      <div 
-                        className="prose max-w-none"
-                        dangerouslySetInnerHTML={{ __html: day.content }}
-                      />
+                      {day.sections?.length ? (
+                        <div className="space-y-6">
+                          {day.sections.map((section, sectionIndex) => (
+                            <div key={`${section.title}-${sectionIndex}`} className="flex gap-4">
+                              <div className="flex flex-col items-center">
+                                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shadow-inner">
+                                  <SectionIcon title={section.title} />
+                                </div>
+                                {sectionIndex < day.sections.length - 1 && (
+                                  <span className="w-px flex-1 bg-gradient-to-b from-blue-200 to-transparent mt-2" />
+                                )}
+                              </div>
+                              <div className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl p-4 shadow-sm">
+                                <div className="flex items-center justify-between flex-wrap gap-2">
+                                  <h4 className="text-base font-semibold text-slate-900">{section.title}</h4>
+                                  <span className="text-xs uppercase tracking-wide text-slate-500">
+                                    {section.items.length} {section.items.length === 1 ? 'highlight' : 'highlights'}
+                                  </span>
+                                </div>
+                                <ul className="mt-3 space-y-3">
+                                  {section.items.map((item, itemIndex) => (
+                                    <li
+                                      key={`${item.title}-${itemIndex}`}
+                                      className="bg-white rounded-xl border border-white/60 p-3 shadow-sm"
+                                    >
+                                      <p className="text-sm font-semibold text-slate-800">{item.title}</p>
+                                      {item.description && (
+                                        <p className="text-sm text-slate-600 mt-1 leading-relaxed">{item.description}</p>
+                                      )}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div 
+                          className="prose max-w-none"
+                          dangerouslySetInnerHTML={{ __html: day.content }}
+                        />
+                      )}
                     </div>
                   </div>
                 ))
