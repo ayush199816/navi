@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp, FiDollarSign } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiStar, FiGlobe, FiChevronDown, FiChevronUp, FiDollarSign, FiActivity, FiUsers } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
@@ -10,6 +10,9 @@ const ToursPage = () => {
   const [citySearch, setCitySearch] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
+  const [activityFilter, setActivityFilter] = useState('');
+  const [tourTypeFilter, setTourTypeFilter] = useState('');
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
   // State declarations
   const [showPriceFilter, setShowPriceFilter] = useState(false);
   const [isDragging, setIsDragging] = useState(null);
@@ -30,6 +33,36 @@ const ToursPage = () => {
       min: Math.min(...prices),
       max: Math.max(...prices)
     };
+  }, [sightseeings]);
+
+  const normalizeFilterValue = (value = '') => value?.toString().trim().toLowerCase() || '';
+  const formatFilterLabel = (value = '') => {
+    if (!value) return '';
+    return value
+      .split(' ')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const activityTypeOptions = React.useMemo(() => {
+    const defaultOptions = ['sightseeing', 'transfers', 'both'];
+    const fromData = sightseeings?.map(s => normalizeFilterValue(s.activityType)).filter(Boolean) || [];
+    const uniqueValues = Array.from(new Set([...defaultOptions, ...fromData]));
+    return uniqueValues.map(value => ({
+      value,
+      label: formatFilterLabel(value)
+    }));
+  }, [sightseeings]);
+
+  const tourTypeOptions = React.useMemo(() => {
+    const defaultOptions = ['shared', 'private', 'both', 'none'];
+    const fromData = sightseeings?.map(s => normalizeFilterValue(s.tourType)).filter(Boolean) || [];
+    const uniqueValues = Array.from(new Set([...defaultOptions, ...fromData]));
+    return uniqueValues.map(value => ({
+      value,
+      label: value === 'none' ? 'Not specified' : formatFilterLabel(value)
+    }));
   }, [sightseeings]);
   
   // Handle slider drag
@@ -134,26 +167,55 @@ const ToursPage = () => {
     // Add city filter if provided
     if (cityFilter) {
       filters.city = cityFilter;
-    } else if (citySearch.trim()) {
-      filters.city = citySearch.trim();
     }
     
     // Add country filter if selected
     if (countryFilter) {
       filters.country = countryFilter;
     }
+
+    if (activityFilter) {
+      filters.activityType = activityFilter;
+    }
+
+    if (tourTypeFilter) {
+      filters.tourType = tourTypeFilter;
+    }
+
+    const trimmedSearch = citySearch.trim();
+    if (trimmedSearch) {
+      filters.search = trimmedSearch;
+    }
+    setActiveSearchTerm(trimmedSearch);
     
     dispatch(fetchGuestSightseeings(filters));
-  }, [cityFilter, citySearch, countryFilter, dispatch]);
+  }, [cityFilter, citySearch, countryFilter, activityFilter, tourTypeFilter, dispatch]);
   
   // Filter sightseeings by price on the client side
   const filteredSightseeings = React.useMemo(() => {
     if (!sightseeings) return [];
+    const normalizedActivityFilter = normalizeFilterValue(activityFilter);
+    const normalizedTourTypeFilter = normalizeFilterValue(tourTypeFilter);
+    const normalizedSearchTerm = normalizeFilterValue(activeSearchTerm);
+
     return sightseeings.filter(sightseeing => {
       const price = sightseeing.price || 0;
-      return price >= priceRange[0] && price <= priceRange[1];
+      const sightseeingActivity = normalizeFilterValue(sightseeing.activityType);
+      const sightseeingTourType = normalizeFilterValue(sightseeing.tourType);
+      const fieldsToSearch = [
+        sightseeing.name,
+        sightseeing.description,
+        sightseeing.city,
+        sightseeing.country
+      ];
+      const matchesActivity = normalizedActivityFilter ? sightseeingActivity === normalizedActivityFilter : true;
+      const matchesTourType = normalizedTourTypeFilter ? sightseeingTourType === normalizedTourTypeFilter : true;
+      const matchesSearch = normalizedSearchTerm
+        ? fieldsToSearch.some(field => normalizeFilterValue(field).includes(normalizedSearchTerm))
+        : true;
+      return price >= priceRange[0] && price <= priceRange[1] && matchesActivity && matchesTourType && matchesSearch;
     });
-  }, [sightseeings, priceRange]);
+  }, [sightseeings, priceRange, activityFilter, tourTypeFilter, activeSearchTerm]);
   
   // Initial data load and setup
   useEffect(() => {
@@ -163,6 +225,7 @@ const ToursPage = () => {
     };
     
     dispatch(fetchGuestSightseeings(initialFilters));
+    setActiveSearchTerm('');
     
     // Handle click outside to close currency dropdown
     const handleClickOutside = (event) => {
@@ -230,67 +293,110 @@ const ToursPage = () => {
         {/* Search Form */}
         <div className="bg-white p-6 rounded-2xl shadow-lg mb-12 border border-gray-100">
           <form onSubmit={handleSearch}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {/* City Input */}
-              <div className="relative flex-1">
+            <div className="space-y-4 mb-4">
+              {/* Search Input */}
+              <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiMapPin className="h-5 w-5 text-gray-400" />
+                  <FiSearch className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
                   className="block w-full pl-12 pr-4 py-3.5 text-gray-700 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
-                  placeholder="Search by sightseeing name..."
+                  placeholder="Search by tour name, city, or destination..."
                   value={citySearch}
                   onChange={(e) => setCitySearch(e.target.value)}
-                  aria-label="Search by sightseeing name"
+                  aria-label="Search tours"
                 />
               </div>
 
-              {/* City Filter */}
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiMapPin className="h-5 w-5 text-gray-400" />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* City Filter */}
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiMapPin className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    value={cityFilter}
+                    onChange={(e) => setCityFilter(e.target.value)}
+                  >
+                    <option value="">All Cities</option>
+                    {Array.from(new Set(sightseeings
+                      .filter(s => !countryFilter || s.country === countryFilter)
+                      .map(s => s.city)
+                      .filter(Boolean)))
+                      .sort()
+                      .map((city, idx) => (
+                        <option key={idx} value={city}>{city}</option>
+                      ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <FiChevronDown className="h-5 w-5 text-gray-400" />
+                  </div>
                 </div>
-                <select
-                  className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
-                  value={cityFilter}
-                  onChange={(e) => setCityFilter(e.target.value)}
-                >
-                  <option value="">All Cities</option>
-                  {Array.from(new Set(sightseeings
-                    .filter(s => !countryFilter || s.country === countryFilter)
-                    .map(s => s.city)
-                    .filter(Boolean)))
-                    .sort()
-                    .map((city, idx) => (
-                      <option key={idx} value={city}>{city}</option>
+
+                {/* Country Filter */}
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiMapPin className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    value={countryFilter}
+                    onChange={(e) => setCountryFilter(e.target.value)}
+                  >
+                    <option value="">All Destinations</option>
+                    {Array.from(new Set(sightseeings.map(s => s.country))).map((country, idx) => (
+                      <option key={idx} value={country}>{country}</option>
                     ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <FiChevronDown className="h-5 w-5 text-gray-400" />
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <FiChevronDown className="h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+
+                {/* Activity Type Filter */}
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiActivity className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    value={activityFilter}
+                    onChange={(e) => setActivityFilter(e.target.value)}
+                  >
+                    <option value="">All Activity Types</option>
+                    {activityTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <FiChevronDown className="h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+
+                {/* Tour Type Filter */}
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiUsers className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    value={tourTypeFilter}
+                    onChange={(e) => setTourTypeFilter(e.target.value)}
+                  >
+                    <option value="">All Tour Types</option>
+                    {tourTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <FiChevronDown className="h-5 w-5 text-gray-400" />
+                  </div>
                 </div>
               </div>
-
-              {/* Country Filter */}
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiMapPin className="h-5 w-5 text-gray-400" />
-                </div>
-                <select
-                  className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
-                  value={countryFilter}
-                  onChange={(e) => setCountryFilter(e.target.value)}
-                >
-                  <option value="">All Destinations</option>
-                  {Array.from(new Set(sightseeings.map(s => s.country))).map((country, idx) => (
-                    <option key={idx} value={country}>{country}</option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <FiChevronDown className="h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-
             </div>
             
             {/* Price Range Filter */}
@@ -431,6 +537,10 @@ const ToursPage = () => {
                   setCityFilter('');
                   setCountryFilter('');
                   setCitySearch('');
+                  setActivityFilter('');
+                  setTourTypeFilter('');
+                  setActiveSearchTerm('');
+                  dispatch(fetchGuestSightseeings({ isActive: true }));
                 }}
                 className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
