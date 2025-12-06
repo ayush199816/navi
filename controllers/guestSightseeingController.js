@@ -176,7 +176,7 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   let query = GuestSightseeing.find(filter);
 
   // Select fields
-  const defaultFields = 'name description price offerPrice duration inclusions images country isActive createdAt city';
+  const defaultFields = 'name description price offerPrice duration inclusions images country isActive createdAt city tourType activityType';
   if (select) {
     const fields = select.split(',').join(' ');
     console.log('Selecting fields:', fields);
