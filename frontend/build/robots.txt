@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://bookmysight.com/sitemap.xml
+
+# Block common bot paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /agent/
+Disallow: /auth/
+Disallow: /cart/
+Disallow: /checkout/
+
+# Allow specific important paths
+Allow: /tours
+Allow: /sightseeing/
+Allow: /contact
+Allow: /terms
+Allow: /
+
+# Crawl delay (optional)
+Crawl-delay: 1
