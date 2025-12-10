@@ -220,7 +220,7 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-gray-900 opacity-70"></div>
           <div className="container mx-auto px-4 z-10 text-center text-white">
             <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-gray-300">Loading amazing sightseeing experiences...</p>
+            <p className="mt-4 text-gray-300">Loading amazing sightseeing experiences... Taking some time to load, please hang on or refresh...</p>
           </div>
         </section>
       );
