@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { Link } from 'react-router-dom';
+import SEO from '../components/seo/SEO';
 import { 
   FiMapPin, 
   FiChevronLeft, 
@@ -54,6 +55,47 @@ const CURRENCY_SYMBOLS = {
 };
 
 const LandingPage = () => {
+  // Add structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "BookMySight - Book Tours & Activities Worldwide",
+    "description": "Discover and book the best tours, activities, and sightseeing experiences worldwide. Instant confirmation, best price guarantee, and 24/7 customer support.",
+    "publisher": {
+      "@type": "TravelAgency",
+      "name": "BookMySight",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://bookmysight.com/logo.png"
+      }
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": [
+        {
+          "@type": "TouristAttraction",
+          "name": "Worldwide Tours",
+          "description": "Explore the world with our curated selection of tours and activities."
+        },
+        {
+          "@type": "Service",
+          "serviceType": "Travel Booking",
+          "provider": {
+            "@type": "TravelAgency",
+            "name": "BookMySight"
+          },
+          "description": "Book your next adventure with our easy-to-use platform.",
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "USD",
+            "price": "0",
+            "description": "Competitive pricing on all tours and activities"
+          }
+        }
+      ]
+    }
+  };
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [destinations, setDestinations] = useState([]);
@@ -385,7 +427,6 @@ const LandingPage = () => {
     );
   });
 
-  // Features Section Component
   const FeaturesSection = () => (
     <section className="py-20 bg-gradient-to-b from-white to-blue-50">
       <div className="container mx-auto px-4">
@@ -591,11 +632,11 @@ const LandingPage = () => {
     ];
 
     return (
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white" aria-labelledby="how-it-works">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto mb-20">
             <span className="text-blue-600 font-semibold mb-4 inline-block">OUR PROCESS</span>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Plan Your Perfect Getaway</h2>
+            <h2 id="how-it-works" className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Plan Your Perfect Getaway</h2>
             <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
             <p className="text-xl text-gray-600">
               From dream to departure, we guide you through every step of planning your perfect trip. 
@@ -734,11 +775,11 @@ const LandingPage = () => {
     ];
 
     return (
-      <section className="py-24 bg-gradient-to-b from-white to-blue-50">
+      <section className="py-24 bg-gradient-to-b from-white to-blue-50" aria-labelledby="testimonials">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <span className="text-blue-600 font-semibold mb-4 inline-block">TRAVELER STORIES</span>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Trusted by Travelers Worldwide</h2>
+            <h2 id="testimonials" className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Trusted by Travelers Worldwide</h2>
             <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
             <p className="text-xl text-gray-600">
               Don't just take our word for it. Here's what our community of global travelers has to say about their experiences with us.
@@ -893,55 +934,62 @@ const LandingPage = () => {
  
   // Main component return
   return (
-    <div key="landing-page" className="overflow-x-hidden">
-      {/* Navigation Bar */}
-      <NavigationBar />
-      
-      {/* 1. Hero Section */}
-      <HeroSection 
-        destinations={destinations}
-        currentSlide={currentSlide}
-        loading={loading}
-        setCurrentSlide={setCurrentSlide}
-        formatPrice={formatPrice}
+    <>
+      <SEO 
+        title="Book Tours & Activities Worldwide | Best Prices Guaranteed | BookMySight"
+        description="Discover and book the best tours, activities, and sightseeing experiences worldwide. Instant confirmation, best price guarantee, and 24/7 customer support."
+        structuredData={structuredData}
       />
-      
-      {/* 2. Popular Sightseeing Section */}
-      <DestinationsSection />
-      
-      {/* 3. World Clock Section */}
-      <section id="world-clock" className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <WorldClock />
+      <main key="landing-page" className="min-h-screen flex flex-col overflow-x-hidden">
+        {/* Navigation Bar */}
+        <NavigationBar />
+        
+        {/* 1. Hero Section */}
+        <HeroSection 
+          destinations={destinations}
+          currentSlide={currentSlide}
+          loading={loading}
+          setCurrentSlide={setCurrentSlide}
+          formatPrice={formatPrice}
+        />
+        
+        {/* 2. Popular Sightseeing Section */}
+        <DestinationsSection />
+        
+        {/* 3. World Clock Section */}
+        <section id="world-clock" className="py-12">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <WorldClock />
+            </div>
           </div>
-        </div>
-      </section>
-      
-      {/* Currency Converter Section */}
-      <section id="currency-converter" className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <CurrencyConverter />
+        </section>
+        
+        {/* Currency Converter Section */}
+        <section id="currency-converter" className="py-12">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <CurrencyConverter />
+            </div>
           </div>
-        </div>
-      </section>
-      
-      {/* 4. Features Section */}
-      <FeaturesSection />
-      
-      {/* 5. How It Works Section */}
-      <HowItWorksSection />
-      
-      {/* 6. Testimonials Section */}
-      <TestimonialsSection />
-      
-      {/* 8. CTA Section */}
-      <CTASection />
-      
-      {/* 9. Footer */}
-      <Footer />
-    </div>
+        </section>
+        
+        {/* 4. Features Section */}
+        <FeaturesSection />
+        
+        {/* 5. How It Works Section */}
+        <HowItWorksSection />
+        
+        {/* 6. Testimonials Section */}
+        <TestimonialsSection />
+        
+        {/* 8. CTA Section */}
+        <CTASection />
+        
+        {/* 9. Footer */}
+        <Footer />
+      </main>
+    </>
   );
 };
 

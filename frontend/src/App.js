@@ -3,6 +3,7 @@ import { CurrencyProvider } from './contexts/CurrencyContext';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './redux/slices/authSlice';
+import { HelmetProvider } from 'react-helmet-async';
 import Modal from './components/modals/Modal';
 import CartPage from './pages/CartPage';
 
@@ -221,10 +222,11 @@ function App() {
   }, [dispatch]);
   
   return (
-    <CurrencyProvider>
-      <Modal />
-      <ChatBot />
-      <Routes>
+    <HelmetProvider>
+      <CurrencyProvider>
+        <Modal />
+        <ChatBot />
+        <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth/login" element={<Login />} />
@@ -481,7 +483,8 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </CurrencyProvider>
+      </CurrencyProvider>
+    </HelmetProvider>
   );
 }
 
