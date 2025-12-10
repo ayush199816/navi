@@ -39,10 +39,10 @@ const SightseeingNav = ({ sightseeing, children }) => {
   };
 
   const navItems = [
-    { id: 'overview', label: 'Over', icon: <FiInfo className="mr-2" /> },
-    { id: 'gallery', label: 'Gallery', icon: <FiImage className="mr-2" /> },
-    { id: 'location', label: 'Location', icon: <FiMapPin className="mr-2" /> },
-    { id: 'reviews', label: 'Reviews', icon: <FiStar className="mr-2" /> },
+    { id: 'overview', label: 'Over', icon: <FiInfo className="mr-2" />, isInternal: true },
+    { id: 'gallery', label: 'Gallery', icon: <FiImage className="mr-2" />, isExternal: true },
+    { id: 'location', label: 'Location', icon: <FiMapPin className="mr-2" />, isExternal: true },
+    { id: 'reviews', label: 'Reviews', icon: <FiStar className="mr-2" />, isExternal: true },
   ];
 
   return (
@@ -65,19 +65,32 @@ const SightseeingNav = ({ sightseeing, children }) => {
           <div className="hidden md:flex items-center space-x-8">
             <div className="flex items-center space-x-4">
               {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
-                    path.endsWith(`#${item.id}`) || 
-                    (path.endsWith(sightseeingId) && item.id === 'overview')
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300'
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </a>
+                item.isExternal ? (
+                  <a
+                    key={item.id}
+                    href="https://www.google.com/search?sca_esv=61a9446aba78e5ee&sxsrf=AE3TifN2k5vg-m3PCoAiHNSVDyGya_T8qw:1765359762819&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E-8MLiu9knu7KkiSzfgpZjoKrlaApOlm0kTxIBDiw6pWzF-dwn79R59QzJYtPMQmM9PMWYjgBHDLLb5cmiXQlhx1k3EX&q=Navigatio+ASIA+Reviews&sa=X&ved=2ahUKEwiF68DM3bKRAxUTwTgGHSCmAz8Q0bkNegQIMxAE&biw=1707&bih=772&dpr=1.13"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-2 rounded-md text-sm font-medium flex items-center text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
+                  >
+                    {item.icon}
+                    {item.label}
+                  </a>
+                ) : (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
+                      path.endsWith(`#${item.id}`) || 
+                      (path.endsWith(sightseeingId) && item.id === 'overview')
+                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300'
+                    }`}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </a>
+                )
               ))}
             </div>
             
