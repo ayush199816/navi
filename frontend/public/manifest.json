@@ -1,7 +1,7 @@
 {
   "short_name": "BookMySight",
   "name": "BookMySight - Tours & Activities",
-  "description": "Discover and book the best tours, activities, and sightseeing experiences worldwide",
+  "description": "Book amazing tours and activities worldwide",
   "icons": [
     {
       "src": "favicon.ico",
@@ -11,69 +11,18 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
+      "sizes": "192x192"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "splash-logo.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "maskable"
+      "sizes": "512x512"
     }
   ],
-  "start_url": "/?source=pwa",
+  "start_url": ".",
   "display": "standalone",
   "theme_color": "#1e40af",
   "background_color": "#ffffff",
   "orientation": "portrait",
-  "scope": "/",
-  "categories": ["travel", "tours", "activities"],
-  "screenshots": [
-    {
-      "src": "screenshots/homepage-mobile.png",
-      "type": "image/png",
-      "sizes": "375x812",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "screenshots/homepage-desktop.png",
-      "type": "image/png",
-      "sizes": "1920x1080",
-      "form_factor": "wide"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Popular Tours",
-      "short_name": "Tours",
-      "description": "Browse our most popular tours",
-      "url": "/tours?filter=popular"
-    },
-    {
-      "name": "Special Offers",
-      "short_name": "Offers",
-      "description": "Check out our special offers",
-      "url": "/offers"
-    }
-  ],
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.bookmysight.app",
-      "id": "com.bookmysight.app"
-    },
-    {
-      "platform": "itunes",
-      "url": "https://apps.apple.com/app/bookmysight/id123456789"
-    }
-  ],
-  "prefer_related_applications": false,
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "splash_pages": null
+  "scope": "/"
 }
