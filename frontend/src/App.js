@@ -53,6 +53,7 @@ import UserManagement from './pages/admin/UserManagement';
 import AgentApprovals from './pages/admin/AgentApprovals';
 import QuotesAdmin from './pages/admin/QuotesAdmin';
 import Claims from './pages/admin/Claims';
+import InvoicesAdmin from './pages/admin/InvoicesAdmin';
 import GuestSightseeingBookings from './pages/admin/GuestSightseeingBookings';
 import SightseeingListAdmin from './pages/admin/SightseeingList';
 import GuestSightseeings from './pages/admin/GuestSightseeings';
@@ -391,6 +392,11 @@ function App() {
           <Route path="admin/quotes" element={
             <ProtectedRoute roles={['admin', 'operations']}>
               <QuotesAdmin />
+            </ProtectedRoute>
+          } />
+          <Route path="admin/invoices" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <InvoicesAdmin />
             </ProtectedRoute>
           } />
           <Route path="admin/claims" element={

@@ -17,7 +17,8 @@ import {
   PhoneIcon,
   CurrencyDollarIcon,
   GiftIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  ReceiptPercentIcon
 } from '@heroicons/react/24/outline';
 
 const MainLayout = () => {
@@ -70,6 +71,8 @@ const MainLayout = () => {
     { name: 'All Bookings', href: '/operations/bookings', icon: CreditCardIcon, roles: ['operations'] },
     { name: 'All Quotes', href: '/admin/quotes', icon: DocumentTextIcon, roles: ['admin'] },
     { name: 'All Quotes', href: '/operations/quotes', icon: DocumentTextIcon, roles: ['operations'] },
+    { name: 'Invoices', href: '/admin/invoices', icon: ReceiptPercentIcon, roles: ['admin'] },
+    { name: 'Invoices', href: '/operations/invoices', icon: ReceiptPercentIcon, roles: ['operations'] },
     { name: 'Payment Claims', href: '/admin/claims', icon: CurrencyDollarIcon, roles: ['admin', 'operations'] },
     { name: 'Wallet Transactions', href: '/admin/wallet-transactions', icon: CurrencyDollarIcon, roles: ['admin'] },
     { name: 'Wallet Transactions', href: '/operations/wallet-transactions', icon: CurrencyDollarIcon, roles: ['operations'] },

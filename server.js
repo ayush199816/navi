@@ -137,6 +137,7 @@ const routes = [
   { path: '/api/test', route: require('./routes/test') },
   { path: '/api/payments', route: require('./routes/payment') },
   { path: '/api/payment-tracking', route: require('./routes/paymentTracking') },
+  { path: '/api/invoices', route: require('./routes/invoice') },
 ];
 
 // Apply protect middleware to all routes except public ones
