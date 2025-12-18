@@ -2,10 +2,12 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import GuestSightseeings from '../pages/admin/GuestSightseeings';
 import GuestSightseeingForm from '../pages/admin/GuestSightseeingForm';
+import InvoicesAdmin from '../pages/admin/InvoicesAdmin';
 
 const AdminRoutes = () => {
   return (
     <Routes>
+      <Route path="invoices" element={<InvoicesAdmin />} />
       <Route path="guest-sightseeings" element={<GuestSightseeings />} />
       <Route 
         path="guest-sightseeings/new" 
