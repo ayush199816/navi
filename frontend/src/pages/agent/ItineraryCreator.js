@@ -108,6 +108,7 @@ const ItineraryCreator = (props) => {
     children: 0,
     budget: '',
     notes: '',
+    additionalNotes: '',
     hotels: [
       { name: '', checkIn: '', checkOut: '', roomType: '', confirmationNumber: '' }
     ],
@@ -1089,6 +1090,67 @@ const ItineraryCreator = (props) => {
         pdf.restoreGraphicsState();
       }
       
+      // Add Notes and Instructions section if notes exist
+      if (formData.additionalNotes && formData.additionalNotes.trim() !== '') {
+        const notesText = formData.additionalNotes.trim();
+        const sectionSpacing = 20;
+        const headerHeight = 18;
+        const boxPadding = 14;
+        const lineHeightPx = 14;
+        const boxWidth = pageWidth - (2 * margin);
+        const textMaxWidth = boxWidth - (boxPadding * 2);
+        const splitText = pdf.splitTextToSize(notesText, textMaxWidth);
+        const textHeight = splitText.length * lineHeightPx;
+        const boxHeight = textHeight + (boxPadding * 2);
+        const requiredHeight = sectionSpacing + headerHeight + 10 + boxHeight;
+
+        if (currentY + requiredHeight > pageHeight - margin) {
+          currentPage++;
+          currentY = addNewPage(pdf, currentPage);
+        }
+
+        // Section heading
+        currentY += sectionSpacing;
+        pdf.setPage(currentPage);
+        pdf.setFontSize(14);
+        pdf.setTextColor(15, 23, 42);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Notes & Instructions', margin, currentY);
+
+        // Divider
+        pdf.setDrawColor(224, 224, 224);
+        pdf.setLineWidth(0.6);
+        pdf.line(margin, currentY + 5, pageWidth - margin, currentY + 5);
+
+        // Styled box background
+        currentY += 12;
+        const boxY = currentY;
+        pdf.setFillColor(249, 250, 251);
+        pdf.setDrawColor(229, 231, 235);
+        pdf.setLineWidth(0.8);
+        pdf.roundedRect(margin, boxY, boxWidth, boxHeight, 6, 6, 'FD');
+
+        // Notes text
+        pdf.setFontSize(11);
+        pdf.setTextColor(60, 64, 72);
+        pdf.setFont(undefined, 'normal');
+
+        let textY = boxY + boxPadding + 2;
+        for (const line of splitText) {
+          if (textY > pageHeight - margin - 20) {
+            currentPage++;
+            currentY = addNewPage(pdf, currentPage);
+            pdf.setFontSize(11);
+            pdf.setTextColor(60, 64, 72);
+            textY = margin + boxPadding;
+          }
+          pdf.text(line, margin + boxPadding, textY);
+          textY += lineHeightPx;
+        }
+
+        currentY = boxY + boxHeight;
+      }
+      
       // Add a thank you message on the last page
       pdf.setPage(currentPage);
       pdf.setFontSize(10);
@@ -1269,6 +1331,23 @@ const ItineraryCreator = (props) => {
             </div>
           </div>
         </section>
+
+        {/* Notes and Instructions */}
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="text-lg font-medium mb-4">Notes and Instructions</h2>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Additional Notes for the Traveler
+            </label>
+            <textarea
+              value={formData.additionalNotes}
+              onChange={(e) => setFormData({...formData, additionalNotes: e.target.value})}
+              rows={4}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              placeholder="Add any special instructions, notes, or important information for the traveler..."
+            />
+          </div>
+        </div>
 
         {/* Price Toggle */}
         <div className="bg-white p-6 rounded-lg shadow">

@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 
 const CreateInvoiceModal = ({ 
   open, 
@@ -269,271 +268,344 @@ const CreateInvoiceModal = ({
     }
   };
 
-  // Format currency with Rupee symbol
+  // Format currency without symbol
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+      style: 'decimal',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount).replace('₹', '₹ '); // Ensure space after Rupee symbol
-  };
-
-  const generateInvoiceHTML = () => {
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Invoice ${formData.invoiceNumber}</title>
-        <style>
-          body { 
-            font-family: Arial, sans-serif; 
-            font-size: 10px; 
-            line-height: 1.3; 
-            margin: 0; 
-            padding: 10px; 
-            color: #333; 
-          }
-          .container { 
-            max-width: 800px; 
-            margin: 0 auto; 
-          }
-          .header { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 15px; 
-          }
-          .company-logo { 
-            max-width: 100px; 
-            max-height: 60px; 
-            margin-bottom: 10px; 
-          }
-          .company-details { 
-            margin-bottom: 10px; 
-            font-size: 9px;
-          }
-          .invoice-title { 
-            text-align: center; 
-            margin: 10px 0; 
-            font-size: 12px;
-          }
-          .invoice-details { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 15px; 
-            font-size: 9px;
-          }
-          .invoice-info { 
-            flex: 1; 
-            font-size: 9px;
-          }
-          .customer-info { 
-            flex: 1; 
-            font-size: 9px;
-          }
-          table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 10px 0; 
-            font-size: 9px;
-          }
-          th, td { 
-            border: 1px solid #ddd; 
-            padding: 6px; 
-            text-align: left; 
-            font-size: 9px;
-          }
-          th { 
-            background-color: #f5f5f5; 
-            font-weight: 600; 
-          }
-          .text-right { 
-            text-align: right; 
-          }
-          .total-row { 
-            font-weight: bold; 
-            background-color: #f9f9f9; 
-          }
-          .terms { 
-            margin-top: 20px; 
-            padding-top: 10px; 
-            border-top: 1px solid #eee; 
-            font-size: 8px;
-          }
-          .footer { 
-            margin-top: 25px; 
-            text-align: center; 
-            font-size: 8px; 
-            color: #777; 
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <div>
-              ${formData.companyLogo ? `<img src="${formData.companyLogo}" alt="Company Logo" class="company-logo">` : ''}
-              <div class="company-details">
-                <h2>${formData.companyName}</h2>
-                <p>${formData.companyAddress.replace(/\n/g, '<br>')}</p>
-                ${formData.companyGstin ? `<p><strong>GSTIN:</strong> ${formData.companyGstin}</p>` : ''}
-              </div>
-            </div>
-            <div>
-              <h1 class="invoice-title" style="font-size: 14px; margin: 5px 0;">TAX INVOICE</h1>
-              <p style="margin: 2px 0; font-size: 9px;"><strong>Invoice #:</strong> ${formData.invoiceNumber}</p>
-              <p style="margin: 2px 0; font-size: 9px;"><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-              <p style="margin: 2px 0; font-size: 9px;"><strong>Due Date:</strong> ${new Date(formData.dueDate).toLocaleDateString()}</p>
-            </div>
-          </div>
-          
-          <div class="invoice-details">
-            <div class="customer-info">
-              <h3 style="font-size: 10px; margin: 5px 0;">Bill To:</h3>
-              <p><strong>${formData.customerName}</strong></p>
-              <p>${formData.customerEmail}</p>
-              <p>${formData.customerPhone}</p>
-              ${formData.customerAddress ? `<p>${formData.customerAddress.replace(/\n/g, '<br>')}</p>` : ''}
-              ${formData.customerGstin ? `<p><strong>GSTIN:</strong> ${formData.customerGstin}</p>` : ''}
-            </div>
-          </div>
-          
-          <table>
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th class="text-right">Qty</th>
-                <th class="text-right">Rate (₹)</th>
-                <th class="text-right">Amount (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${formData.items.map(item => `
-                <tr>
-                  <td>${item.description}${item.details ? `<br><small>${item.details}</small>` : ''}</td>
-                  <td class="text-right">${item.quantity}</td>
-                  <td class="text-right">${formatCurrency(item.rate)}</td>
-                  <td class="text-right" style="font-size: 9px;">${formatCurrency(item.quantity * item.rate)}</td>
-                </tr>
-              `).join('')}
-              <tr>
-                <td colspan="3" class="text-right"><strong>Subtotal:</strong></td>
-                <td class="text-right">${formatCurrency(formData.subtotal)}</td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Tax (${formData.taxRate}%):</strong></td>
-                <td class="text-right">${formatCurrency(formData.tax)}</td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-right">
-                  <strong>${formData.tcsClaimed ? `TCS (${formData.tcsRate}%):` : 'TCS:'}</strong>
-                  ${!formData.tcsClaimed ? '<br><small class="text-gray-500">Not claimed on this invoice</small>' : ''}
-                </td>
-                <td class="text-right">${formData.tcsClaimed ? formatCurrency(formData.tcs) : 'N/A'}</td>
-              </tr>
-              <tr class="total-row">
-                <td colspan="3" class="text-right"><strong>Total Amount:</strong></td>
-                <td class="text-right">${formatCurrency(formData.total)}</td>
-              </tr>
-              <tr>
-                <td colspan="4" class="text-right py-2">
-                  <div class="text-sm text-gray-600">
-                    ${formData.paymentReceived 
-                      ? `<span style="color: #15803d; font-size: 9px;">✓ Payment received on ${new Date(formData.paymentDate).toLocaleDateString()}</span>` 
-                      : '<span style="font-size: 9px;">Payment pending</span>'}
-                  </div>
-                </td>
-              </tr>
-              ${formData.installments.length > 1 ? `
-                <tr>
-                  <td colspan="4" class="py-2">
-                    <div class="text-sm">
-                      <strong style="font-size: 9px;">Payment Schedule:</strong>
-                      <ul class="list-disc pl-5 mt-1">
-                        ${formData.installments.map(inst => `
-                          <li class="${inst.status === 'paid' ? 'text-green-600' : inst.status === 'overdue' ? 'text-red-600' : ''}">
-                            ${formatCurrency(inst.amount)} due on ${new Date(inst.dueDate).toLocaleDateString()}
-                            <span style="font-size: 8px; ${inst.status === 'paid' ? 'color: #15803d;' : inst.status === 'overdue' ? 'color: #b91c1c;' : ''}">
-                              ${inst.status === 'paid' ? ' (Paid)' : inst.status === 'overdue' ? ' (Overdue)' : ''}
-                            </span>
-                          </li>
-                        `).join('')}
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              ` : ''}
-            </tbody>
-          </table>
-          
-          ${formData.notes ? `
-            <div class="terms">
-              <h3 style="font-size: 10px; margin: 5px 0;">Notes:</h3>
-              <p>${formData.notes.replace(/\n/g, '<br>')}</p>
-            </div>
-          ` : ''}
-          
-          <div class="terms">
-            <h3 style="font-size: 10px; margin: 5px 0;">Terms & Conditions:</h3>
-            <p>${formData.terms.replace(/\n/g, '<br>')}</p>
-          </div>
-          
-          <div class="footer">
-            <p>Thank you for your business!</p>
-            <p>${formData.companyName} | ${formData.companyAddress.replace(/\n/g, ' | ')}</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+      maximumFractionDigits: 2,
+      useGrouping: true
+    }).format(amount);
   };
 
   const handleDownload = async () => {
     try {
       setLoading(true);
       
-      // Generate the invoice HTML
-      const invoiceContent = generateInvoiceHTML();
-      
-      // Create a temporary div to render the invoice
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm';
-      tempDiv.style.padding = '20mm';
-      tempDiv.style.background = 'white';
-      tempDiv.style.boxShadow = '0 0 10px rgba(0,0,0,0.1)';
-      tempDiv.innerHTML = invoiceContent;
-      document.body.appendChild(tempDiv);
-      
-      // Use html2canvas to capture the invoice as an image
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        logging: false,
-        allowTaint: true,
-        scrollY: -window.scrollY
-      });
-      
-      // Create PDF
-      const imgData = canvas.toDataURL('image/png');
+      // Create a new PDF document
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
+
+      // Set document properties
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 15;
+      const contentWidth = pageWidth - (2 * margin);
+      let yPos = margin;
       
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      // Add a helper function to add text with word wrap
+      const addText = (text, x, y, maxWidth, lineHeight = 5, fontSize = 10, align = 'left') => {
+        const splitText = pdf.splitTextToSize(text, maxWidth);
+        pdf.setFontSize(fontSize);
+        pdf.text(splitText, x, y, { align });
+        return y + (splitText.length * lineHeight);
+      };
+
+      // Add header with company details and logo
+      const logoHeight = 20; // Height in mm
+      const logoWidth = 60; // Width in mm
+      const logoRightMargin = 10; // Space between logo and text
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Add company logo if available
+      if (formData.companyLogo) {
+        try {
+          // Add logo to the left side
+          await new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+              // Calculate aspect ratio
+              const aspectRatio = this.width / this.height;
+              const logoDisplayWidth = Math.min(logoWidth, logoHeight * aspectRatio);
+              
+              // Add image to PDF
+              pdf.addImage(
+                this.src,
+                'PNG',
+                margin,
+                margin,
+                logoDisplayWidth,
+                logoDisplayWidth / aspectRatio
+              );
+              resolve();
+            };
+            img.onerror = resolve; // Skip if image fails to load
+            img.src = formData.companyLogo;
+          });
+        } catch (error) {
+          console.error('Error loading logo:', error);
+        }
+      }
+      
+      // Add company name and details to the right of the logo
+      const textStartX = formData.companyLogo ? margin + logoWidth + logoRightMargin : margin;
+      const textWidth = contentWidth - (formData.companyLogo ? (logoWidth + logoRightMargin) : 0);
+      
+      pdf.setFont('helvetica', 'bold');
+      yPos = addText(formData.companyName, textStartX, margin, textWidth, 6, 14);
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      const addressLines = formData.companyAddress.split('\n');
+      addressLines.forEach(line => {
+        yPos = addText(line, textStartX, yPos + 2, textWidth, 5, 9);
+      });
+      
+      if (formData.companyGstin) {
+        yPos = addText(`GSTIN: ${formData.companyGstin}`, textStartX, yPos + 2, textWidth, 5, 9);
+      }
+
+      // Add invoice title and details on the right
+      pdf.setFont('helvetica', 'bold');
+      yPos = margin;
+      yPos = addText('TAX INVOICE', pageWidth - margin, yPos, contentWidth / 2, 6, 16, 'right');
+      
+      pdf.setFont('helvetica', 'normal');
+      yPos = addText(`Invoice #: ${formData.invoiceNumber}`, pageWidth - margin, yPos + 6, contentWidth / 2, 5, 10, 'right');
+      yPos = addText(`Date: ${new Date().toLocaleDateString()}`, pageWidth - margin, yPos + 4, contentWidth / 2, 5, 10, 'right');
+      yPos = addText(`Due Date: ${new Date(formData.dueDate).toLocaleDateString()}`, pageWidth - margin, yPos + 4, contentWidth / 2, 5, 10, 'right');
+      
+      // Add customer details
+      yPos = Math.max(yPos, margin + 40); // Ensure minimum space for header
+      yPos += 10;
+      
+      pdf.setFont('helvetica', 'bold');
+      yPos = addText('Bill To:', margin, yPos, contentWidth, 6, 10);
+      
+      pdf.setFont('helvetica', 'normal');
+      yPos = addText(formData.customerName, margin + 5, yPos + 2, contentWidth - 5, 5, 10);
+      
+      if (formData.customerEmail) {
+        yPos = addText(formData.customerEmail, margin + 5, yPos + 2, contentWidth - 5, 5, 10);
+      }
+      
+      if (formData.customerPhone) {
+        yPos = addText(formData.customerPhone, margin + 5, yPos + 2, contentWidth - 5, 5, 10);
+      }
+      
+      if (formData.customerAddress) {
+        const addressLines = formData.customerAddress.split('\n');
+        addressLines.forEach(line => {
+          yPos = addText(line, margin + 5, yPos + 2, contentWidth - 5, 5, 10);
+        });
+      }
+      
+      if (formData.customerGstin) {
+        yPos = addText(`GSTIN: ${formData.customerGstin}`, margin + 5, yPos + 2, contentWidth - 5, 5, 10);
+      }
+      
+      // Add items table
+      yPos += 10;
+      
+      // Table header
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, yPos, contentWidth, 8, 'F');
+      
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(9);
+      pdf.text('Description', margin + 2, yPos + 5);
+      pdf.text('Qty', margin + contentWidth - 80, yPos + 5, { align: 'right' });
+      pdf.text('Rate', margin + contentWidth - 50, yPos + 5, { align: 'right' });
+      pdf.text('Amount', margin + contentWidth - 10, yPos + 5, { align: 'right' });
+      
+      yPos += 10;
+      
+      // Table rows
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      
+      formData.items.forEach(item => {
+        // Check if we need a new page
+        if (yPos > 250) {
+          pdf.addPage();
+          yPos = margin;
+        }
+        
+        // Draw row background
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(margin, yPos, contentWidth, 10, 'F');
+        
+        // Draw top border
+        pdf.setDrawColor(220, 220, 220);
+        pdf.line(margin, yPos, margin + contentWidth, yPos);
+        
+        // Add item details
+        const descriptionLines = pdf.splitTextToSize(item.description, contentWidth - 120);
+        const detailsLines = item.details ? pdf.splitTextToSize(item.details, contentWidth - 120) : [];
+        
+        const rowHeight = Math.max(10, (descriptionLines.length + detailsLines.length) * 5 + 4);
+        
+        // Draw description with word wrap
+        pdf.text(descriptionLines, margin + 2, yPos + 5);
+        
+        // Draw details in smaller font if they exist
+        if (item.details) {
+          pdf.setFontSize(8);
+          pdf.setTextColor(100, 100, 100);
+          pdf.text(detailsLines, margin + 2, yPos + 5 + (descriptionLines.length * 5));
+          pdf.setFontSize(9);
+          pdf.setTextColor(0, 0, 0);
+        }
+        
+        // Draw quantity, rate, and amount
+        pdf.text(item.quantity.toString(), margin + contentWidth - 80, yPos + 5, { align: 'right' });
+        pdf.text(formatCurrency(item.rate), margin + contentWidth - 50, yPos + 5, { align: 'right' });
+        pdf.text(formatCurrency(item.quantity * item.rate), margin + contentWidth - 10, yPos + 5, { align: 'right' });
+        
+        yPos += rowHeight;
+      });
+      
+      // Add totals
+      yPos += 5;
+      pdf.setFont('helvetica', 'bold');
+      
+      // Subtotal
+      pdf.text('Subtotal:', margin + contentWidth - 50, yPos, { align: 'right' });
+      pdf.text(formatCurrency(formData.subtotal), margin + contentWidth - 10, yPos, { align: 'right' });
+      
+      // Tax
+      yPos += 6;
+      pdf.text(`Tax (${formData.taxRate}%):`, margin + contentWidth - 50, yPos, { align: 'right' });
+      pdf.text(formatCurrency(formData.tax), margin + contentWidth - 10, yPos, { align: 'right' });
+      
+      // TCS
+      yPos += 6;
+      if (formData.tcsClaimed) {
+        pdf.text(`TCS (${formData.tcsRate}%):`, margin + contentWidth - 50, yPos, { align: 'right' });
+        pdf.text(formatCurrency(formData.tcs), margin + contentWidth - 10, yPos, { align: 'right' });
+      } else {
+        pdf.text('TCS:', margin + contentWidth - 50, yPos, { align: 'right' });
+        pdf.text('N/A', margin + contentWidth - 10, yPos, { align: 'right' });
+      }
+      
+      // Total
+      yPos += 8;
+      pdf.setFontSize(11);
+      pdf.text('Total Amount:', margin + contentWidth - 50, yPos, { align: 'right' });
+      pdf.text(formatCurrency(formData.total), margin + contentWidth - 10, yPos, { align: 'right' });
+      
+      // Payment status and details
+      yPos += 8;
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.text('Payment Summary:', margin, yPos);
+      
+      if (formData.paymentReceived) {
+        // Show payment received status
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor('#15803d');
+        yPos = addText(
+          `✓ Full payment received on ${new Date(formData.paymentDate).toLocaleDateString('en-IN')}`, 
+          margin, 
+          yPos + 5, 
+          contentWidth, 
+          5, 
+          9
+        );
+      } else if (formData.installments && formData.installments.length > 0) {
+        // Show installment details
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(0, 0, 0);
+        yPos += 5;
+        
+        // Calculate paid and pending amounts
+        const paidInstallments = formData.installments.filter(i => i.status === 'paid');
+        const paidAmount = paidInstallments.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
+        const pendingInstallments = formData.installments.filter(i => i.status !== 'paid');
+        const pendingAmount = pendingInstallments.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
+        
+        // Show paid amount if any
+        if (paidAmount > 0) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Paid Amount:', margin, yPos);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(formatCurrency(paidAmount), margin + 40, yPos);
+          yPos += 5;
+        }
+        
+        // Show pending amount
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Pending Amount:', margin, yPos);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor('#b91c1c');
+        pdf.text(formatCurrency(pendingAmount), margin + 50, yPos);
+        pdf.setTextColor(0, 0, 0);
+        yPos += 7;
+        
+        // Show installment schedule
+        if (pendingInstallments.length > 0) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(9);
+          pdf.text('Upcoming Payments:', margin, yPos);
+          yPos += 5;
+          
+          pdf.setFont('helvetica', 'normal');
+          pendingInstallments.forEach(installment => {
+            const dueDate = new Date(installment.dueDate);
+            const today = new Date();
+            const isOverdue = dueDate < today;
+            
+            if (isOverdue) {
+              pdf.setTextColor('#b91c1c');
+              pdf.text('⚠️ ', margin, yPos);
+            }
+            
+            pdf.text(
+              `${formatCurrency(installment.amount)} due on ${dueDate.toLocaleDateString('en-IN')}${isOverdue ? ' (Overdue)' : ''}`, 
+              margin + 5, 
+              yPos
+            );
+            
+            yPos += 5;
+            pdf.setTextColor(0, 0, 0);
+          });
+        }
+      } else {
+        // No payment received and no installments
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor('#b91c1c');
+        pdf.text('Payment pending', margin, yPos + 5);
+      }
+      
+      pdf.setTextColor(0, 0, 0);
+      
+      // Add notes if they exist
+      if (formData.notes) {
+        yPos += 15;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.text('Notes:', margin, yPos);
+        
+        pdf.setFont('helvetica', 'normal');
+        const notesLines = pdf.splitTextToSize(formData.notes, contentWidth);
+        yPos = addText(notesLines, margin + 5, yPos + 5, contentWidth - 5, 5, 9);
+      }
+      
+      // Add terms and conditions
+      yPos += 10;
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(9);
+      pdf.text('Terms & Conditions:', margin, yPos);
+      
+      pdf.setFont('helvetica', 'normal');
+      const termsLines = pdf.splitTextToSize(formData.terms, contentWidth);
+      yPos = addText(termsLines, margin + 5, yPos + 5, contentWidth - 5, 5, 9);
+      
+      // Add footer
+      yPos = 280;
+      pdf.setFont('helvetica', 'italic');
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text('Thank you for your business!', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 4;
+      pdf.text(`${formData.companyName} | ${formData.companyAddress.replace(/\n/g, ' | ')}`, pageWidth / 2, yPos, { align: 'center' });
       
       // Save the PDF
       pdf.save(`invoice-${formData.invoiceNumber}.pdf`);
-      
-      // Clean up
-      document.body.removeChild(tempDiv);
       
     } catch (error) {
       console.error('Error generating PDF:', error);
