@@ -64,6 +64,7 @@ import WalletTransactions from './pages/operations/WalletTransactions';
 import PackageList from './pages/operations/PackageList';
 import AddSeller from './pages/operations/AddSeller';
 import SightseeingListOps from './pages/operations/SightseeingList';
+import Invoices from './pages/operations/Invoices';
 
 // Sales Pages
 import SalesLeads from './pages/sales/leads/SalesLeads';
@@ -459,6 +460,11 @@ function App() {
           <Route path="operations/quotes" element={
             <ProtectedRoute roles={['admin', 'operations']}>
               <QuotesAdmin />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/invoices" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <Invoices />
             </ProtectedRoute>
           } />
 
