@@ -29,6 +29,204 @@ const SECTION_KEYWORDS = [
   'Dinner'
 ];
 
+const COUNTRY_OPTIONS = [
+  'Afghanistan',
+  'Albania',
+  'Algeria',
+  'Andorra',
+  'Angola',
+  'Antigua and Barbuda',
+  'Argentina',
+  'Armenia',
+  'Australia',
+  'Austria',
+  'Azerbaijan',
+  'Bahamas',
+  'Bahrain',
+  'Bangladesh',
+  'Barbados',
+  'Belarus',
+  'Belgium',
+  'Belize',
+  'Benin',
+  'Bhutan',
+  'Bolivia',
+  'Bosnia and Herzegovina',
+  'Botswana',
+  'Brazil',
+  'Brunei',
+  'Bulgaria',
+  'Burkina Faso',
+  'Burundi',
+  'Cabo Verde',
+  'Cambodia',
+  'Cameroon',
+  'Canada',
+  'Central African Republic',
+  'Chad',
+  'Chile',
+  'China',
+  'Colombia',
+  'Comoros',
+  'Democratic Republic of the Congo',
+  'Republic of the Congo',
+  'Costa Rica',
+  "Cote d'Ivoire",
+  'Croatia',
+  'Cuba',
+  'Cyprus',
+  'Czech Republic',
+  'Denmark',
+  'Djibouti',
+  'Dominica',
+  'Dominican Republic',
+  'Ecuador',
+  'Egypt',
+  'El Salvador',
+  'Equatorial Guinea',
+  'Eritrea',
+  'Estonia',
+  'Eswatini',
+  'Ethiopia',
+  'Fiji',
+  'Finland',
+  'France',
+  'Gabon',
+  'Gambia',
+  'Georgia',
+  'Germany',
+  'Ghana',
+  'Greece',
+  'Grenada',
+  'Guatemala',
+  'Guinea',
+  'Guinea-Bissau',
+  'Guyana',
+  'Haiti',
+  'Honduras',
+  'Hungary',
+  'Iceland',
+  'India',
+  'Indonesia',
+  'Iran',
+  'Iraq',
+  'Ireland',
+  'Israel',
+  'Italy',
+  'Jamaica',
+  'Japan',
+  'Jordan',
+  'Kazakhstan',
+  'Kenya',
+  'Kiribati',
+  'Kuwait',
+  'Kyrgyzstan',
+  'Laos',
+  'Latvia',
+  'Lebanon',
+  'Lesotho',
+  'Liberia',
+  'Libya',
+  'Liechtenstein',
+  'Lithuania',
+  'Luxembourg',
+  'Madagascar',
+  'Malawi',
+  'Malaysia',
+  'Maldives',
+  'Mali',
+  'Malta',
+  'Marshall Islands',
+  'Mauritania',
+  'Mauritius',
+  'Mexico',
+  'Micronesia',
+  'Moldova',
+  'Monaco',
+  'Mongolia',
+  'Montenegro',
+  'Morocco',
+  'Mozambique',
+  'Myanmar',
+  'Namibia',
+  'Nauru',
+  'Nepal',
+  'Netherlands',
+  'New Zealand',
+  'Nicaragua',
+  'Niger',
+  'Nigeria',
+  'North Korea',
+  'North Macedonia',
+  'Norway',
+  'Oman',
+  'Pakistan',
+  'Palau',
+  'Panama',
+  'Papua New Guinea',
+  'Paraguay',
+  'Peru',
+  'Philippines',
+  'Poland',
+  'Portugal',
+  'Qatar',
+  'Romania',
+  'Russia',
+  'Rwanda',
+  'Saint Kitts and Nevis',
+  'Saint Lucia',
+  'Saint Vincent and the Grenadines',
+  'Samoa',
+  'San Marino',
+  'Sao Tome and Principe',
+  'Saudi Arabia',
+  'Senegal',
+  'Serbia',
+  'Seychelles',
+  'Sierra Leone',
+  'Singapore',
+  'Slovakia',
+  'Slovenia',
+  'Solomon Islands',
+  'Somalia',
+  'South Africa',
+  'South Korea',
+  'South Sudan',
+  'Spain',
+  'Sri Lanka',
+  'Sudan',
+  'Suriname',
+  'Sweden',
+  'Switzerland',
+  'Syria',
+  'Taiwan',
+  'Tajikistan',
+  'Tanzania',
+  'Thailand',
+  'Timor-Leste',
+  'Togo',
+  'Tonga',
+  'Trinidad and Tobago',
+  'Tunisia',
+  'Turkey',
+  'Turkmenistan',
+  'Tuvalu',
+  'Uganda',
+  'Ukraine',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States',
+  'Uruguay',
+  'Uzbekistan',
+  'Vanuatu',
+  'Vatican City',
+  'Venezuela',
+  'Vietnam',
+  'Yemen',
+  'Zambia',
+  'Zimbabwe'
+];
+
 const createSectionRegex = () => {
   const pattern = SECTION_KEYWORDS.map(keyword => keyword.replace(/\s+/g, '\\s+')).join('|');
   return new RegExp(`^(?:(${pattern}))\\s*(?:-|:)?`, 'gim');
@@ -189,6 +387,9 @@ const AIItineraryGeneratorPage = () => {
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState('');
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   // Removed unused itineraryRef
 
   const handleChange = (e) => {
@@ -197,6 +398,45 @@ const AIItineraryGeneratorPage = () => {
       ...prev,
       [name]: value
     }));
+
+    if (name === 'destination') {
+      fetchSightseeingSuggestions(value);
+    }
+  };
+
+  const fetchSightseeingSuggestions = async (selectedDestination) => {
+    if (!selectedDestination) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    try {
+      // Fetch more suggestions than we need (20) to ensure we have enough for random selection
+      const response = await axios.get(
+        `/api/guest-sightseeing?country=${encodeURIComponent(selectedDestination)}&limit=20`
+      );
+      
+      let items = response?.data?.data || [];
+      
+      // If we have more than 5 items, randomly select 5
+      if (items.length > 5) {
+        // Create a copy of the array to avoid mutating the original
+        const shuffled = [...items].sort(() => 0.5 - Math.random());
+        // Take first 5 items
+        items = shuffled.slice(0, 5);
+      }
+      
+      setSuggestions(items);
+      setShowSuggestions(true);
+    } catch (fetchError) {
+      console.error('Error fetching sightseeing suggestions:', fetchError);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setLoadingSuggestions(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -895,25 +1135,23 @@ const AIItineraryGeneratorPage = () => {
                     Destination
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                    <input
-                      type="text"
-                      name="destination"
+                    <select
                       id="destination"
+                      name="destination"
                       value={formData.destination}
                       onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="e.g., Tokyo, Japan"
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
-                    />
+                    >
+                      <option value="">Select a destination</option>
+                      {COUNTRY_OPTIONS.map(country => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
@@ -1024,6 +1262,81 @@ const AIItineraryGeneratorPage = () => {
                     <p className="text-sm text-red-700">{error}</p>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {showSuggestions && (
+              <div className="mt-6 p-5 bg-gray-50 border border-gray-200 rounded-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Suggested sightseeing in {formData.destination}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowSuggestions(false)}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                {loadingSuggestions ? (
+                  <div className="flex justify-center py-6">
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500" />
+                  </div>
+                ) : suggestions.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    {suggestions.map((sightseeing) => {
+                      const urlFriendlyName = sightseeing.name
+                        ?.toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-') || 'details';
+
+                      return (
+                        <a
+                          key={sightseeing._id}
+                          href={`/sightseeing/${sightseeing._id}/${urlFriendlyName}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-200 hover:shadow transition"
+                        >
+                          <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            {sightseeing.images?.[0] ? (
+                              <img
+                                src={sightseeing.images[0]}
+                                alt={sightseeing.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <FiMapPin className="w-6 h-6" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-base font-semibold text-gray-900 line-clamp-1">
+                              {sightseeing.name}
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                              {sightseeing.description || 'Explore this exciting experience.'}
+                            </p>
+                            <div className="mt-2 flex items-center text-xs text-gray-500">
+                              <FiMapPin className="w-4 h-4 mr-1" />
+                              <span>
+                                {[sightseeing.city, sightseeing.country].filter(Boolean).join(', ')}
+                              </span>
+                            </div>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No sightseeing suggestions available for this country yet.
+                  </p>
+                )}
               </div>
             )}
           </div>

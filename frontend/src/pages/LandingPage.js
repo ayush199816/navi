@@ -352,7 +352,7 @@ const LandingPage = () => {
                 
                 {currentExperience && (
                   <Link 
-                    to={`/sightseeing/${currentExperience._id}`}
+                    to={`/sightseeing/${currentExperience._id}/${currentExperience.name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')}`}
                     className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-full text-base sm:text-lg transition-all duration-300 transform hover:scale-105 flex-1 flex items-center justify-center backdrop-blur-sm border-2 border-white/20 hover:border-white/30 shadow-lg hover:shadow-xl min-w-[180px] sm:min-w-[220px]"
                   >
                     <FiMapPin className="mr-2 w-5 h-5" /> View Experience
@@ -566,7 +566,11 @@ const LandingPage = () => {
                       className="block text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                       onClick={(e) => {
                         e.preventDefault();
-                        window.location.href = `/sightseeing/${destination._id}`;
+                        const urlFriendlyName = destination.name.toLowerCase()
+                          .replace(/[^\w\s-]/g, '')
+                          .replace(/\s+/g, '-')
+                          .replace(/-+/g, '-');
+                        window.location.href = `/sightseeing/${destination._id}/${urlFriendlyName}`;
                       }}
                     >
                       View Details
