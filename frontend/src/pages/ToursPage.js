@@ -593,7 +593,12 @@ const ToursPage = () => {
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/sightseeing/${sightseeing._id}`);
+                          const urlFriendlyName = sightseeing.name
+                            .toLowerCase()
+                            .replace(/[^\w\s-]/g, '') // Remove special characters
+                            .replace(/\s+/g, '-')      // Replace spaces with hyphens
+                            .replace(/-+/g, '-');       // Replace multiple hyphens with single one
+                          navigate(`/sightseeing/${sightseeing._id}/${urlFriendlyName}`);
                         }}
                       >
                         View Details
