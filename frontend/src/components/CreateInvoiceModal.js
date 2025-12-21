@@ -268,16 +268,14 @@ const CreateInvoiceModal = ({
     }
   };
 
-  // Format currency with Rupee symbol
+  // Format currency without symbol
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+      style: 'decimal',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-      currencyDisplay: 'symbol',
       useGrouping: true
-    }).format(amount).replace(/\s?₹(\s?)/, '₹\u00A0'); // Replace with non-breaking space
+    }).format(amount);
   };
 
   const handleDownload = async () => {
@@ -407,9 +405,9 @@ const CreateInvoiceModal = ({
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(9);
       pdf.text('Description', margin + 2, yPos + 5);
-      pdf.text('Qty', margin + contentWidth - 100, yPos + 5, { align: 'right' });
-      pdf.text('Rate (₹)', margin + contentWidth - 70, yPos + 5, { align: 'right' });
-      pdf.text('Amount (₹)', margin + contentWidth - 20, yPos + 5, { align: 'right' });
+      pdf.text('Qty', margin + contentWidth - 80, yPos + 5, { align: 'right' });
+      pdf.text('Rate', margin + contentWidth - 50, yPos + 5, { align: 'right' });
+      pdf.text('Amount', margin + contentWidth - 10, yPos + 5, { align: 'right' });
       
       yPos += 10;
       
@@ -451,9 +449,9 @@ const CreateInvoiceModal = ({
         }
         
         // Draw quantity, rate, and amount
-        pdf.text(item.quantity.toString(), margin + contentWidth - 100, yPos + 5, { align: 'right' });
-        pdf.text(formatCurrency(item.rate), margin + contentWidth - 70, yPos + 5, { align: 'right' });
-        pdf.text(formatCurrency(item.quantity * item.rate), margin + contentWidth - 20, yPos + 5, { align: 'right' });
+        pdf.text(item.quantity.toString(), margin + contentWidth - 80, yPos + 5, { align: 'right' });
+        pdf.text(formatCurrency(item.rate), margin + contentWidth - 50, yPos + 5, { align: 'right' });
+        pdf.text(formatCurrency(item.quantity * item.rate), margin + contentWidth - 10, yPos + 5, { align: 'right' });
         
         yPos += rowHeight;
       });
@@ -463,43 +461,116 @@ const CreateInvoiceModal = ({
       pdf.setFont('helvetica', 'bold');
       
       // Subtotal
-      pdf.text('Subtotal:', margin + contentWidth - 70, yPos, { align: 'right' });
-      pdf.text(formatCurrency(formData.subtotal), margin + contentWidth - 20, yPos, { align: 'right' });
+      pdf.text('Subtotal:', margin + contentWidth - 50, yPos, { align: 'right' });
+      pdf.text(formatCurrency(formData.subtotal), margin + contentWidth - 10, yPos, { align: 'right' });
       
       // Tax
       yPos += 6;
-      pdf.text(`Tax (${formData.taxRate}%):`, margin + contentWidth - 70, yPos, { align: 'right' });
-      pdf.text(formatCurrency(formData.tax), margin + contentWidth - 20, yPos, { align: 'right' });
+      pdf.text(`Tax (${formData.taxRate}%):`, margin + contentWidth - 50, yPos, { align: 'right' });
+      pdf.text(formatCurrency(formData.tax), margin + contentWidth - 10, yPos, { align: 'right' });
       
       // TCS
       yPos += 6;
       if (formData.tcsClaimed) {
-        pdf.text(`TCS (${formData.tcsRate}%):`, margin + contentWidth - 70, yPos, { align: 'right' });
-        pdf.text(formatCurrency(formData.tcs), margin + contentWidth - 20, yPos, { align: 'right' });
+        pdf.text(`TCS (${formData.tcsRate}%):`, margin + contentWidth - 50, yPos, { align: 'right' });
+        pdf.text(formatCurrency(formData.tcs), margin + contentWidth - 10, yPos, { align: 'right' });
       } else {
-        pdf.text('TCS:', margin + contentWidth - 70, yPos, { align: 'right' });
-        pdf.text('N/A', margin + contentWidth - 20, yPos, { align: 'right' });
+        pdf.text('TCS:', margin + contentWidth - 50, yPos, { align: 'right' });
+        pdf.text('N/A', margin + contentWidth - 10, yPos, { align: 'right' });
       }
       
       // Total
       yPos += 8;
       pdf.setFontSize(11);
-      pdf.text('Total Amount:', margin + contentWidth - 70, yPos, { align: 'right' });
-      pdf.text(formatCurrency(formData.total), margin + contentWidth - 20, yPos, { align: 'right' });
+      pdf.text('Total Amount:', margin + contentWidth - 50, yPos, { align: 'right' });
+      pdf.text(formatCurrency(formData.total), margin + contentWidth - 10, yPos, { align: 'right' });
       
-      // Payment status
+      // Payment status and details
       yPos += 8;
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(9);
-      pdf.setTextColor(formData.paymentReceived ? '#15803d' : '#b91c1c');
-      pdf.text(
-        formData.paymentReceived 
-          ? `✓ Payment received on ${new Date(formData.paymentDate).toLocaleDateString()}`
-          : 'Payment pending',
-        margin + contentWidth - 20, 
-        yPos, 
-        { align: 'right' }
-      );
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.text('Payment Summary:', margin, yPos);
+      
+      if (formData.paymentReceived) {
+        // Show payment received status
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor('#15803d');
+        yPos = addText(
+          `✓ Full payment received on ${new Date(formData.paymentDate).toLocaleDateString('en-IN')}`, 
+          margin, 
+          yPos + 5, 
+          contentWidth, 
+          5, 
+          9
+        );
+      } else if (formData.installments && formData.installments.length > 0) {
+        // Show installment details
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(0, 0, 0);
+        yPos += 5;
+        
+        // Calculate paid and pending amounts
+        const paidInstallments = formData.installments.filter(i => i.status === 'paid');
+        const paidAmount = paidInstallments.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
+        const pendingInstallments = formData.installments.filter(i => i.status !== 'paid');
+        const pendingAmount = pendingInstallments.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0);
+        
+        // Show paid amount if any
+        if (paidAmount > 0) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Paid Amount:', margin, yPos);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(formatCurrency(paidAmount), margin + 40, yPos);
+          yPos += 5;
+        }
+        
+        // Show pending amount
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Pending Amount:', margin, yPos);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor('#b91c1c');
+        pdf.text(formatCurrency(pendingAmount), margin + 50, yPos);
+        pdf.setTextColor(0, 0, 0);
+        yPos += 7;
+        
+        // Show installment schedule
+        if (pendingInstallments.length > 0) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(9);
+          pdf.text('Upcoming Payments:', margin, yPos);
+          yPos += 5;
+          
+          pdf.setFont('helvetica', 'normal');
+          pendingInstallments.forEach(installment => {
+            const dueDate = new Date(installment.dueDate);
+            const today = new Date();
+            const isOverdue = dueDate < today;
+            
+            if (isOverdue) {
+              pdf.setTextColor('#b91c1c');
+              pdf.text('⚠️ ', margin, yPos);
+            }
+            
+            pdf.text(
+              `${formatCurrency(installment.amount)} due on ${dueDate.toLocaleDateString('en-IN')}${isOverdue ? ' (Overdue)' : ''}`, 
+              margin + 5, 
+              yPos
+            );
+            
+            yPos += 5;
+            pdf.setTextColor(0, 0, 0);
+          });
+        }
+      } else {
+        // No payment received and no installments
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor('#b91c1c');
+        pdf.text('Payment pending', margin, yPos + 5);
+      }
+      
       pdf.setTextColor(0, 0, 0);
       
       // Add notes if they exist
