@@ -100,7 +100,7 @@ const InvoicesAdmin = () => {
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
-    <RequireAuth allowedRoles={['admin', 'operations']}>
+    <RequireAuth roles={['admin', 'operations']}>
       <div className="max-w-7xl mx-auto p-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Invoices</h2>
