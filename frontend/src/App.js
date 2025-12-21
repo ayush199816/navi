@@ -235,7 +235,7 @@ function App() {
         <Route path="/auth/register" element={<SimpleRegister />} />
         <Route path="/register" element={<GuestRegister />} />
         <Route path="/tours" element={<ToursPage />} />
-        <Route path="/sightseeing/:id" element={<SightseeingDetailPage />} />
+        <Route path="/sightseeing/:id/:name?" element={<SightseeingDetailPage />} />
         <Route path="/ai-itinerary-generator" element={<AIItineraryGeneratorPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
