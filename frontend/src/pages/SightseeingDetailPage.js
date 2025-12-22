@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
-import { FiCalendar, FiPlus, FiMinus, FiShoppingCart, FiMapPin, FiClock, FiStar, FiPackage, FiTag, FiGlobe, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiCalendar, FiPlus, FiMinus, FiShoppingCart, FiMapPin, FiClock, FiStar, FiPackage, FiTag, FiGlobe, FiChevronDown, FiChevronUp, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
-import { getGuestSightseeingById, clearCurrentSightseeing } from '../redux/slices/guestSightseeingSlice';
+import { getGuestSightseeingById, clearCurrentSightseeing, fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
 import { addToCart } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
@@ -18,6 +18,10 @@ const SightseeingDetailPage = () => {
   const [pax, setPax] = useState(1);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [recommendedSightseeings, setRecommendedSightseeings] = useState([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
+  const [similarSightseeings, setSimilarSightseeings] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
   const currencyDropdownRef = useRef(null);
   
   // Get currency context
@@ -88,6 +92,175 @@ const SightseeingDetailPage = () => {
       isMounted = false;
     };
   }, [id, dispatch, navigate]);
+
+  // Fetch recommended sightseeings when current sightseeing loads
+  useEffect(() => {
+    // Clear recommendations when sightseeing changes
+    setRecommendedSightseeings([]);
+    
+    const fetchRecommended = async () => {
+      if (!sightseeing.city && !sightseeing.country) return;
+      
+      setLoadingRecommended(true);
+      try {
+        const params = {
+          limit: 6,
+          excludeId: sightseeing._id,
+        };
+        
+        // Add city filter if available
+        if (sightseeing.city) {
+          params.city = sightseeing.city;
+        }
+        
+        // Add country filter if available
+        if (sightseeing.country) {
+          params.country = sightseeing.country;
+        }
+        
+        const result = await dispatch(fetchGuestSightseeings(params)).unwrap();
+        setRecommendedSightseeings(result.data || []);
+      } catch (error) {
+        console.error('Failed to fetch recommended sightseeings:', error);
+      } finally {
+        setLoadingRecommended(false);
+      }
+    };
+
+    if (sightseeing._id) {
+      fetchRecommended();
+    }
+  }, [sightseeing._id, sightseeing.city, sightseeing.country, dispatch]);
+
+  // Auto refresh recommendations on initial page load
+  useEffect(() => {
+    const autoRefreshOnLoad = async () => {
+      if (sightseeing._id && (sightseeing.city || sightseeing.country)) {
+        // Clear old recommendations first
+        setRecommendedSightseeings([]);
+        
+        setLoadingRecommended(true);
+        try {
+          const params = {
+            limit: 6,
+            excludeId: sightseeing._id,
+          };
+          
+          // Add city filter if available
+          if (sightseeing.city) {
+            params.city = sightseeing.city;
+          }
+          
+          // Add country filter if available
+          if (sightseeing.country) {
+            params.country = sightseeing.country;
+          }
+          
+          const result = await dispatch(fetchGuestSightseeings(params)).unwrap();
+          setRecommendedSightseeings(result.data || []);
+        } catch (error) {
+          console.error('Failed to auto refresh recommended sightseeings:', error);
+        } finally {
+          setLoadingRecommended(false);
+        }
+      }
+    };
+
+    // Small delay to ensure the page is fully loaded
+    const timer = setTimeout(autoRefreshOnLoad, 400);
+    
+    return () => clearTimeout(timer);
+  }, [dispatch, sightseeing._id, sightseeing.city, sightseeing.country]); // Add missing dependencies
+
+  // Fetch similar sightseeings based on similar names
+  useEffect(() => {
+    // Clear similar sightseeings when sightseeing changes
+    setSimilarSightseeings([]);
+    
+    const fetchSimilarSightseeings = async () => {
+      if (!sightseeing._id || !sightseeing.name) return;
+      
+      setLoadingSimilar(true);
+      try {
+        // Extract meaningful keywords from the current sightseeing name
+        const nameWords = sightseeing.name.toLowerCase()
+          .split(/[^a-zA-Z0-9]+/)
+          .filter(word => word.length > 2);
+        
+        // Filter out generic terms and focus on specific tour types
+        const genericTerms = [
+          'the', 'a', 'an', 'and', 'or', 'with', 'on', 'for', 'in', 
+          'experience', 'tour', 'show', 'ultimate', 'adventure', 'package', 
+          'tickets', 'seating', 'regular', 'deluxe', 'shared', 'transfers',
+          'adult', 'kids', 'child', 'family', 'private', 'public'
+        ];
+        
+        // Keep specific terms that indicate the actual activity
+        const relevantKeywords = nameWords.filter(word => !genericTerms.includes(word));
+        
+        // If we have specific keywords, use them; otherwise use the most meaningful words
+        let searchTerms;
+        if (relevantKeywords.length > 0) {
+          searchTerms = relevantKeywords.slice(0, 2); // Use top 2 specific keywords
+        } else {
+          // Fallback: use the first meaningful words but avoid generic ones
+          searchTerms = nameWords.slice(0, 2);
+        }
+        
+        const params = {
+          limit: 6,
+          excludeId: sightseeing._id,
+          search: searchTerms.join(' '),
+        };
+        
+        const result = await dispatch(fetchGuestSightseeings(params)).unwrap();
+        setSimilarSightseeings(result.data || []);
+      } catch (error) {
+        console.error('Failed to fetch similar sightseeings:', error);
+      } finally {
+        setLoadingSimilar(false);
+      }
+    };
+
+    if (sightseeing._id && sightseeing.name) {
+      fetchSimilarSightseeings();
+    }
+  }, [dispatch, sightseeing._id, sightseeing.name]);
+
+  // Manual refresh function
+  const refreshRecommendations = async () => {
+    if (!sightseeing.city && !sightseeing.country) {
+      toast.info('No location information available for recommendations');
+      return;
+    }
+    
+    setLoadingRecommended(true);
+    try {
+      const params = {
+        limit: 6,
+        excludeId: sightseeing._id,
+      };
+      
+      // Add city filter if available
+      if (sightseeing.city) {
+        params.city = sightseeing.city;
+      }
+      
+      // Add country filter if available
+      if (sightseeing.country) {
+        params.country = sightseeing.country;
+      }
+      
+      const result = await dispatch(fetchGuestSightseeings(params)).unwrap();
+      setRecommendedSightseeings(result.data || []);
+      toast.success('Recommendations refreshed!');
+    } catch (error) {
+      console.error('Failed to refresh recommended sightseeings:', error);
+      toast.error('Failed to refresh recommendations');
+    } finally {
+      setLoadingRecommended(false);
+    }
+  };
 
   const handleAddToCart = () => {
     if (!sightseeing) return;
@@ -439,6 +612,180 @@ const SightseeingDetailPage = () => {
               </div>
             </div>
           </div>
+          
+          {/* Similar Sightseeing Section */}
+          {similarSightseeings.length > 0 && (
+            <div className="mt-12 bg-white rounded-xl shadow-lg p-6 md:p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Similar Sightseeing Options</h2>
+                <p className="text-gray-600">
+                  More tours similar to "{sightseeing.name}"
+                </p>
+              </div>
+              
+              {loadingSimilar ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {similarSightseeings.map((similar) => (
+                    <div key={similar._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                      {/* Image */}
+                      <div className="h-48 w-full">
+                        <img 
+                          src={similar.images?.[0] || '/placeholder-sightseeing.jpg'} 
+                          alt={similar.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
+                          {similar.name}
+                        </h3>
+                        
+                        <div className="flex items-center text-gray-600 text-sm mb-2">
+                          <FiMapPin className="mr-1" />
+                          <span>{similar.city || 'Location not specified'}</span>
+                        </div>
+                        
+                        <div className="flex items-center text-gray-600 text-sm mb-3">
+                          <FiClock className="mr-1" />
+                          <span>{similar.duration || 'Not specified'}</span>
+                        </div>
+                        
+                        {/* Price */}
+                        <div className="mb-4">
+                          <div className="text-lg font-bold text-blue-600">
+                            {formatPrice(similar.offerPrice || similar.price || 0)}
+                            {similar.offerPrice && (
+                              <span className="ml-2 text-sm text-gray-500 line-through">
+                                {formatPrice(similar.price || 0)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600">per person</p>
+                        </div>
+                        
+                        {/* View Details Button */}
+                        <button
+                          onClick={() => navigate(`/sightseeing/${similar._id}/${encodeURIComponent(similar.name.toLowerCase().replace(/\s+/g, '-'))}`)}
+                          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* View All Similar Button */}
+              <div className="mt-8 text-center">
+                <button
+                  onClick={() => navigate('/tours')}
+                  className="inline-flex items-center px-6 py-3 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 transition-colors duration-200 font-medium"
+                >
+                  View All Similar Tours
+                  <FiChevronRight className="ml-2" />
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Recommended Sightseeing Section */}
+          {recommendedSightseeings.length > 0 && (
+            <div className="mt-12 bg-white rounded-xl shadow-lg p-6 md:p-8">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Recommended Sightseeing Options</h2>
+                  <p className="text-gray-600">
+                    Discover more amazing experiences in {sightseeing.city || sightseeing.country || 'this destination'}
+                  </p>
+                </div>
+                <button
+                  onClick={refreshRecommendations}
+                  disabled={loadingRecommended}
+                  className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiRefreshCw className={`mr-2 ${loadingRecommended ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+              
+              {loadingRecommended ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recommendedSightseeings.map((recommended) => (
+                    <div key={recommended._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                      {/* Image */}
+                      <div className="h-48 w-full">
+                        <img 
+                          src={recommended.images?.[0] || '/placeholder-sightseeing.jpg'} 
+                          alt={recommended.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
+                          {recommended.name}
+                        </h3>
+                        
+                        <div className="flex items-center text-gray-600 text-sm mb-2">
+                          <FiMapPin className="mr-1" />
+                          <span>{recommended.city || 'Location not specified'}</span>
+                        </div>
+                        
+                        <div className="flex items-center text-gray-600 text-sm mb-3">
+                          <FiClock className="mr-1" />
+                          <span>{recommended.duration || 'Not specified'}</span>
+                        </div>
+                        
+                        {/* Price */}
+                        <div className="mb-4">
+                          <div className="text-lg font-bold text-blue-600">
+                            {formatPrice(recommended.offerPrice || recommended.price || 0)}
+                            {recommended.offerPrice && (
+                              <span className="ml-2 text-sm text-gray-500 line-through">
+                                {formatPrice(recommended.price || 0)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600">per person</p>
+                        </div>
+                        
+                        {/* View Details Button */}
+                        <button
+                          onClick={() => navigate(`/sightseeing/${recommended._id}/${encodeURIComponent(recommended.name.toLowerCase().replace(/\s+/g, '-'))}`)}
+                          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* View All Button */}
+              <div className="mt-8 text-center">
+                <button
+                  onClick={() => navigate('/tours')}
+                  className="inline-flex items-center px-6 py-3 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 font-medium"
+                >
+                  View All Sightseeing Options
+                  <FiChevronRight className="ml-2" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
