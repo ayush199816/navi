@@ -46,6 +46,7 @@ import MyClaims from './pages/agent/MyClaims';
 import ItineraryBuilder from './pages/agent/ItineraryBuilder';
 import ItineraryCreator from './pages/agent/ItineraryCreator';
 import NotificationsPage from './pages/notifications/NotificationsPage';
+import Attendance from './pages/operations/Attendance';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -56,6 +57,7 @@ import Claims from './pages/admin/Claims';
 import InvoicesAdmin from './pages/admin/InvoicesAdmin';
 import GuestSightseeingBookings from './pages/admin/GuestSightseeingBookings';
 import SightseeingListAdmin from './pages/admin/SightseeingList';
+import AttendanceAdmin from './pages/admin/AttendanceAdmin';
 import GuestSightseeings from './pages/admin/GuestSightseeings';
 
 // Operations Pages
@@ -425,6 +427,11 @@ function App() {
               {React.createElement(require('./pages/admin/GuestSightseeingForm').default)}
             </ProtectedRoute>
           } />
+          <Route path="admin/attendance" element={
+            <ProtectedRoute roles={['admin']}>
+              <AttendanceAdmin />
+            </ProtectedRoute>
+          } />
 
           {/* Operations Routes */}
           <Route path="operations/dashboard" element={
@@ -465,6 +472,11 @@ function App() {
           <Route path="operations/invoices" element={
             <ProtectedRoute roles={['admin', 'operations']}>
               <Invoices />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/attendance" element={
+            <ProtectedRoute roles={['operations']}>
+              <Attendance />
             </ProtectedRoute>
           } />
 
