@@ -411,7 +411,7 @@ exports.updateItinerary = async (req, res) => {
     }
     
     // Check if user is the one who created the itinerary
-    if (itinerary.createdBy.toString() !== req.user.id) {
+    if (req.user.role === 'agent' && itinerary.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this itinerary',
@@ -454,7 +454,7 @@ exports.createQuoteFromItinerary = async (req, res) => {
     }
     
     // Check if user is the one who created the itinerary
-    if (itinerary.createdBy.toString() !== req.user.id) {
+    if (req.user.role === 'agent' && itinerary.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to create a quote from this itinerary',
