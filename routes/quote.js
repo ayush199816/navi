@@ -49,14 +49,14 @@ const upload = multer({
 router.use(protect);
 
 // Routes for agents
-router.get('/my-quotes', authorize('agent'), isApprovedAgent, getMyQuotes);
-router.post('/from-package', authorize('agent'), isApprovedAgent, createQuoteFromPackage);
+router.get('/my-quotes', authorize('agent', 'operations'), isApprovedAgent, getMyQuotes);
+router.post('/from-package', authorize('agent', 'operations'), isApprovedAgent, createQuoteFromPackage);
 
 // Routes for all authenticated users
 router.get('/:id', getQuote);
-router.post('/', authorize('agent'), isApprovedAgent, upload.array('images', 5), createQuote);
+router.post('/', authorize('agent', 'operations'), isApprovedAgent, upload.array('images', 5), createQuote);
 // Route for agents to respond to quotes
-router.put('/:id/response', authorize('agent'), isApprovedAgent, respondToQuote);
+router.put('/:id/response', authorize('agent', 'operations'), isApprovedAgent, respondToQuote);
 
 // Routes for operations team, admin, and sales
 router.get('/', authorize('admin', 'operations', 'sales'), getQuotes);

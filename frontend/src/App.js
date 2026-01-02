@@ -341,17 +341,17 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="agent/itineraries" element={
-            <ProtectedRoute roles={['agent']}>
+            <ProtectedRoute roles={['agent', 'operations']}>
               <MyItineraries />
             </ProtectedRoute>
           } />
           <Route path="agent/itineraries/create" element={
-            <ProtectedRoute roles={['agent']}>
+            <ProtectedRoute roles={['agent', 'operations']}>
               <ItineraryCreator />
             </ProtectedRoute>
           } />
           <Route path="agent/itineraries/edit/:id" element={
-            <ProtectedRoute roles={['agent']}>
+            <ProtectedRoute roles={['agent', 'operations']}>
               <ItineraryCreator editMode={true} />
             </ProtectedRoute>
           } />

@@ -81,6 +81,7 @@ const MainLayout = () => {
 
     // Sightseeing Management
     { name: 'Manage Sightseeing', href: '/operations/sightseeing', icon: MapIcon, roles: ['operations'] },
+    { name: 'Itineraries', href: '/agent/itineraries', icon: MapIcon, roles: ['operations'] },
     
     // Sales
     { name: 'Sales Leads', href: '/sales/leads', icon: PhoneIcon, roles: ['admin', 'sales'] },

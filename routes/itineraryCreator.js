@@ -35,7 +35,7 @@ router.get('/debug/list', async (req, res) => {
 router.use(protect);
 
 // Get all itineraries for the logged-in agent
-router.get('/agent', authorize('agent'), isApprovedAgent, async (req, res) => {
+router.get('/agent', authorize('agent', 'operations'), isApprovedAgent, async (req, res) => {
   try {
     // Get user ID from the authenticated request
     const agentId = req.user?.id;
@@ -50,7 +50,9 @@ router.get('/agent', authorize('agent'), isApprovedAgent, async (req, res) => {
     
     console.log(`Fetching itineraries for agent: ${agentId}`);
     
-    const itineraries = await Itinerary.find({ createdBy: agentId })
+    // For operations, show all itineraries; for agents, show only their own
+    const filter = req.user.role === 'operations' ? {} : { createdBy: agentId };
+    const itineraries = await Itinerary.find(filter)
       .select('title destination arrivalDate departureDate status createdAt')
       .sort({ createdAt: -1 });
     
