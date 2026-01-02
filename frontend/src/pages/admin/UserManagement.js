@@ -120,25 +120,47 @@ setIsLoading(false);
 
   const columns = [
     {
-      title: 'Name',
+      title: 'User',
       dataIndex: 'name',
       key: 'name',
-      render: (text) => text || 'N/A',
+      render: (text, record) => (
+        <div className="d-flex align-items-center">
+          <div className="user-avatar me-3">
+            {text?.charAt(0)?.toUpperCase() || 'N'}
+          </div>
+          <div>
+            <div className="fw-semibold text-dark">{text || 'N/A'}</div>
+            <div className="text-muted small">{record.email}</div>
+            {record.phone && <div className="text-muted small">{record.phone}</div>}
+          </div>
+        </div>
+      ),
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
+      title: 'Company',
+      dataIndex: 'companyName',
+      key: 'companyName',
+      render: (text) => text || <span className="text-muted">-</span>,
     },
     {
       title: 'Role',
       dataIndex: 'role',
       key: 'role',
-      render: (role) => (
-        <Tag color={role === 'admin' ? 'gold' : role === 'agent' ? 'blue' : 'default'}>
-          {role?.toUpperCase() || 'N/A'}
-        </Tag>
-      ),
+      render: (role) => {
+        const roleColors = {
+          admin: 'gold',
+          operations: 'purple',
+          sales: 'green',
+          agent: 'blue',
+          accounts: 'orange',
+          user: 'default'
+        };
+        return (
+          <Tag color={roleColors[role] || 'default'}>
+            {role?.toUpperCase() || 'N/A'}
+          </Tag>
+        );
+      },
     },
     {
       title: 'Status',
@@ -151,10 +173,16 @@ setIsLoading(false);
       ),
     },
     {
+      title: 'Joined',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => date ? new Date(date).toLocaleDateString() : '-',
+    },
+    {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <Space size="middle">
+        <Space size="small">
           {!record.isApproved && (
             <Button 
               type="primary" 
@@ -190,8 +218,47 @@ setIsLoading(false);
 
   return (
     <div className="p-4">
-      <Card className="mb-4">
-        <Title level={4} className="mb-4">User Management</Title>
+      <style jsx>{`
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          font-size: 1rem;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .ant-table-thead > tr > th {
+          background: #f8f9fa;
+          font-weight: 600;
+          border-bottom: 2px solid #dee2e6;
+        }
+        .ant-table-tbody > tr:hover > td {
+          background: #f0f8ff !important;
+        }
+      `}</style>
+      <Card className="mb-4 shadow-sm">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <Title level={4} className="mb-0">User Management</Title>
+            <p className="text-muted mb-0">Manage all users and their permissions</p>
+          </div>
+          <div className="d-flex gap-2">
+            <Badge count={users.filter(u => !u.isApproved).length} showZero>
+              <Button 
+                type="primary" 
+                icon={<UserAddOutlined />} 
+                onClick={() => setIsCreateModalVisible(true)}
+              >
+                Add User
+              </Button>
+            </Badge>
+          </div>
+        </div>
         
         <Row gutter={[16, 16]} className="mb-4">
           <Col xs={24} sm={12} md={8} lg={6}>
@@ -214,7 +281,10 @@ setIsLoading(false);
             >
               <Option value="all">All Roles</Option>
               <Option value="admin">Admin</Option>
+              <Option value="operations">Operations</Option>
+              <Option value="sales">Sales</Option>
               <Option value="agent">Agent</Option>
+              <Option value="accounts">Accounts</Option>
               <Option value="user">User</Option>
             </Select>
           </Col>
@@ -233,7 +303,7 @@ setIsLoading(false);
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Button 
-              type="primary" 
+              type="default" 
               icon={<ReloadOutlined />} 
               onClick={loadUsers}
               loading={isLoading}
@@ -243,16 +313,6 @@ setIsLoading(false);
               Refresh
             </Button>
           </Col>
-          <div style={{ marginBottom: 16 }}>
-            <Button 
-              type="primary" 
-              icon={<UserAddOutlined />} 
-              onClick={() => setIsCreateModalVisible(true)}
-              style={{ marginRight: 8 }}
-            >
-              Add User
-            </Button>
-          </div>
         </Row>
 
         <Table
@@ -260,8 +320,15 @@ setIsLoading(false);
           dataSource={filteredUsers}
           rowKey="_id"
           loading={isLoading}
-          pagination={{ pageSize: 10 }}
-          scroll={{ x: true }}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => `Showing ${range[0]}-${range[1]} of ${total} users`,
+            pageSizeOptions: ['10', '20', '50', '100']
+          }}
+          scroll={{ x: 1200 }}
+          size="middle"
         />
       </Card>
       {/* Create User Modal */}

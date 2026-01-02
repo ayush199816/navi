@@ -65,6 +65,7 @@ const MainLayout = () => {
     { name: 'User Management', href: '/admin/users', icon: UserGroupIcon, roles: ['admin'] },
     { name: 'Agent Approvals', href: '/admin/approvals', icon: UserGroupIcon, roles: ['admin', 'accounts'] },
     { name: 'Guest Sightseeings', href: '/admin/guest-sightseeings', icon: MapIcon, roles: ['admin'] },
+    { name: 'Attendance', href: '/admin/attendance', icon: UserIcon, roles: ['admin'] },
     
     // Operations specific
     { name: 'All Bookings', href: '/admin/bookings', icon: CreditCardIcon, roles: ['admin'] },
@@ -82,6 +83,7 @@ const MainLayout = () => {
     // Sightseeing Management
     { name: 'Manage Sightseeing', href: '/operations/sightseeing', icon: MapIcon, roles: ['operations'] },
     { name: 'Itineraries', href: '/agent/itineraries', icon: MapIcon, roles: ['operations'] },
+    { name: 'Attendance', href: '/operations/attendance', icon: UserIcon, roles: ['operations'] },
     
     // Sales
     { name: 'Sales Leads', href: '/sales/leads', icon: PhoneIcon, roles: ['admin', 'sales'] },
