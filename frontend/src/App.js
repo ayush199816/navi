@@ -59,6 +59,9 @@ import GuestSightseeingBookings from './pages/admin/GuestSightseeingBookings';
 import SightseeingListAdmin from './pages/admin/SightseeingList';
 import AttendanceAdmin from './pages/admin/AttendanceAdmin';
 import GuestSightseeings from './pages/admin/GuestSightseeings';
+import PackageCalculator from './pages/admin/PackageCalculator';
+import CalculatorSightseeingManagement from './pages/admin/CalculatorSightseeingManagement';
+import CalculatorTransferManagement from './pages/admin/CalculatorTransferManagement';
 
 // Operations Pages
 import BookingsAdmin from './pages/operations/BookingsAdmin';
@@ -67,6 +70,7 @@ import PackageList from './pages/operations/PackageList';
 import AddSeller from './pages/operations/AddSeller';
 import SightseeingListOps from './pages/operations/SightseeingList';
 import Invoices from './pages/operations/Invoices';
+import PackageCalculatorOps from './pages/operations/PackageCalculator';
 
 // Sales Pages
 import SalesLeads from './pages/sales/leads/SalesLeads';
@@ -432,6 +436,21 @@ function App() {
               <AttendanceAdmin />
             </ProtectedRoute>
           } />
+          <Route path="admin/package-calculator" element={
+            <ProtectedRoute roles={['admin']}>
+              <PackageCalculator />
+            </ProtectedRoute>
+          } />
+          <Route path="admin/calculator-sightseeing" element={
+            <ProtectedRoute roles={['admin']}>
+              <CalculatorSightseeingManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="admin/calculator-transfers" element={
+            <ProtectedRoute roles={['admin']}>
+              <CalculatorTransferManagement />
+            </ProtectedRoute>
+          } />
 
           {/* Operations Routes */}
           <Route path="operations/dashboard" element={
@@ -477,6 +496,11 @@ function App() {
           <Route path="operations/attendance" element={
             <ProtectedRoute roles={['operations']}>
               <Attendance />
+            </ProtectedRoute>
+          } />
+          <Route path="operations/package-calculator" element={
+            <ProtectedRoute roles={['admin', 'operations']}>
+              <PackageCalculatorOps />
             </ProtectedRoute>
           } />
 

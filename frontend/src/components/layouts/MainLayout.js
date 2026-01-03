@@ -65,6 +65,9 @@ const MainLayout = () => {
     { name: 'User Management', href: '/admin/users', icon: UserGroupIcon, roles: ['admin'] },
     { name: 'Agent Approvals', href: '/admin/approvals', icon: UserGroupIcon, roles: ['admin', 'accounts'] },
     { name: 'Guest Sightseeings', href: '/admin/guest-sightseeings', icon: MapIcon, roles: ['admin'] },
+    { name: 'Package Calculator', href: '/admin/package-calculator', icon: CurrencyDollarIcon, roles: ['admin'] },
+    { name: 'Calculator Sightseeing', href: '/admin/calculator-sightseeing', icon: MapIcon, roles: ['admin'] },
+    { name: 'Calculator Transfers', href: '/admin/calculator-transfers', icon: CurrencyDollarIcon, roles: ['admin'] },
     { name: 'Attendance', href: '/admin/attendance', icon: UserIcon, roles: ['admin'] },
     
     // Operations specific
@@ -82,6 +85,7 @@ const MainLayout = () => {
 
     // Sightseeing Management
     { name: 'Manage Sightseeing', href: '/operations/sightseeing', icon: MapIcon, roles: ['operations'] },
+    { name: 'Package Calculator', href: '/operations/package-calculator', icon: CurrencyDollarIcon, roles: ['admin', 'operations'] },
     { name: 'Itineraries', href: '/agent/itineraries', icon: MapIcon, roles: ['operations'] },
     { name: 'Attendance', href: '/operations/attendance', icon: UserIcon, roles: ['operations'] },
     
