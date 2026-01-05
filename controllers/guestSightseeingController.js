@@ -7,81 +7,97 @@ const asyncHandler = require('../middleware/async');
 const { cloudinary, uploadToCloudinary } = require('../config/cloudinary');
 const stream = require('stream');
 
-// @desc    Upload images for guest sightseeing
-// @route   POST /api/guest-sightseeing/upload
-// @access  Private/Admin
+// @desc    Upload images and videos for guest sightseeing
+// @route   POST /api/guest-sightseeing/upload
+// @access  Private/Admin
 const uploadGuestSightseeingImages = asyncHandler(async (req, res, next) => {
-  try {
-    if (!req.files || req.files.length === 0) {
-      return next(new ErrorResponse('Please upload at least one image', 400));
-    }
+  try {
+    if (!req.files || req.files.length === 0) {
+      return next(new ErrorResponse('Please upload at least one image or video', 400));
+    }
 
-    // Process uploaded files
-    const uploadPromises = req.files.map(file => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { 
-            folder: 'navi/guestsightseeing',
-            transformation: [
-              { width: 800, height: 600, crop: 'limit', quality: 'auto' },
-              { fetch_format: 'auto' }
-            ]
-          },
-          (error, result) => {
-            if (error) {
-              console.error('Cloudinary upload error:', error);
-              reject(new Error('Failed to upload image to Cloudinary'));
-            } else {
-              resolve({
-                url: result.secure_url,
-                public_id: result.public_id,
-                width: result.width,
-                height: result.height,
-                format: result.format
-              });
-            }
-          }
-        );
+    // Process uploaded files
+    const uploadPromises = req.files.map(file => {
+      return new Promise((resolve, reject) => {
+        const isVideo = file.mimetype.startsWith('video/');
+        const uploadOptions = {
+          folder: 'navi/guestsightseeing',
+          resource_type: isVideo ? 'video' : 'image'
+        };
+        
+        // Only apply transformations to images
+        if (!isVideo) {
+          uploadOptions.transformation = [
+            { width: 800, height: 600, crop: 'limit', quality: 'auto' },
+            { fetch_format: 'auto' }
+          ];
+        }
+        
+        const stream = cloudinary.uploader.upload_stream(
+          uploadOptions,
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              reject(new Error('Failed to upload file to Cloudinary'));
+            } else {
+              resolve({
+                url: result.secure_url,
+                public_id: result.public_id,
+                width: result.width,
+                height: result.height,
+                format: result.format,
+                resource_type: result.resource_type,
+                duration: result.duration // Video duration in seconds
+              });
+            }
+          }
+        );
 
-        // Create a buffer stream for Cloudinary
-        const bufferStream = require('stream').PassThrough();
-        bufferStream.end(file.buffer);
-        bufferStream.pipe(stream);
-      });
-    });
+        // Create a buffer stream for Cloudinary
+        const bufferStream = require('stream').PassThrough();
+        bufferStream.end(file.buffer);
+        bufferStream.pipe(stream);
+      });
+    });
 
-    // Wait for all uploads to complete
-    const uploadedFiles = await Promise.all(uploadPromises);
+    // Wait for all uploads to complete
+    const uploadedFiles = await Promise.all(uploadPromises);
 
-    res.status(200).json({
-      success: true,
-      count: uploadedFiles.length,
-      data: uploadedFiles
-    });
-  } catch (error) {
-    console.error('Error in uploadGuestSightseeingImages:', error);
-    return next(new ErrorResponse('Error uploading images', 500));
-  }
+    // Separate images and videos for response
+    const images = uploadedFiles.filter(file => file.resource_type === 'image');
+    const videos = uploadedFiles.filter(file => file.resource_type === 'video');
+
+    res.status(200).json({
+      success: true,
+      count: uploadedFiles.length,
+      data: uploadedFiles,
+      images: images,
+      videos: videos
+    });
+  } catch (error) {
+    console.error('Error in uploadGuestSightseeingImages:', error);
+    return next(new ErrorResponse('Error uploading files', 500));
+  }
 });
 
 // Middleware to handle file uploads using multer
 const handleFileUploads = (req, res, next) => {
-  upload.array('images')(req, res, (error) => {
-    if (error) {
-      if (error.code === 'LIMIT_FILE_SIZE') {
-        return next(new ErrorResponse('File size too large. Max 5MB per file.', 400));
-      } else if (error.message === 'Only image files are allowed!') {
-        return next(new ErrorResponse('Only image files are allowed!', 400));
-      }
-      return next(new ErrorResponse('Error uploading files', 500));
-    }
-    next();
-  });
+  upload.array('images')(req, res, (error) => {
+    if (error) {
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return next(new ErrorResponse('File size too large. Max 50MB per file.', 400));
+      } else if (error.message === 'Only image and video files are allowed!') {
+        return next(new ErrorResponse('Only image and video files are allowed!', 400));
+      }
+      return next(new ErrorResponse('Error uploading files', 500));
+    }
+    next();
+  });
 };
 
-// @desc    Get all guest sightseeing
-// @route   GET /api/guest-sightseeing
-// @access  Public
+// @desc    Get all guest sightseeing
+// @route   GET /api/guest-sightseeing
+// @access  Public
 const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   console.log(' [GET] /api/guest-sightseeing');
   console.log(' Request query:', JSON.stringify(req.query, null, 2));
@@ -571,48 +587,25 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
       // If sent as regular form fields
       sightseeingData = { ...req.body };
       
-      // Convert string arrays if needed
-      if (sightseeingData.images && typeof sightseeingData.images === 'string') {
-        try {
-          sightseeingData.images = JSON.parse(sightseeingData.images);
-        } catch (e) {
-          // If it's not a JSON string, treat it as a single URL
-          sightseeingData.images = [sightseeingData.images];
-        }
-      }
-    }
-    
-    // Handle file uploads if any
-    if (req.files && req.files.length > 0) {
-      try {
-        // Upload each file to Cloudinary
-        const uploadPromises = req.files.map(file => {
-          if (!file.buffer) {
-            throw new Error('No file buffer found');
-          }
-          return uploadToCloudinary(file.buffer);
-        });
-        
-        // Wait for all uploads to complete and get the secure URLs
-        const results = await Promise.all(uploadPromises);
-        const uploadedImageUrls = results.map(result => result.secure_url);
-        
-        // Combine with any existing image URLs
-        const existingImages = Array.isArray(sightseeingData.images) ? sightseeingData.images : [];
-        sightseeingData.images = [...existingImages, ...uploadedImageUrls];
-        
-        console.log('Successfully uploaded images:', uploadedImageUrls);
-        
-      } catch (uploadError) {
-        console.error('Error uploading images:', uploadError);
-        return next(new ErrorResponse('Error uploading images: ' + uploadError.message, 500));
-      }
-    }
-    
-    // Ensure images is an array
-    if (!sightseeingData.images || !Array.isArray(sightseeingData.images)) {
-      sightseeingData.images = [];
-    }
+      // Convert string arrays if needed
+     if (sightseeingData.images && typeof sightseeingData.images === 'string') {
+       try {
+         sightseeingData.images = JSON.parse(sightseeingData.images);
+       } catch (e) {
+         // If it's not a JSON string, treat it as a single URL
+         sightseeingData.images = [sightseeingData.images];
+       }
+     }
+     
+     // Handle videos array similarly
+     if (sightseeingData.videos && typeof sightseeingData.videos === 'string') {
+       try {
+         sightseeingData.videos = JSON.parse(sightseeingData.videos);
+       } catch (e) {
+         // If it's not a JSON string, treat it as a single URL
+         sightseeingData.videos = [sightseeingData.videos];
+       }
+     }
     
     // Convert string arrays if needed
     if (typeof sightseeingData.inclusions === 'string') {
@@ -640,9 +633,55 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
     }
     
     // Ensure tourType is set and valid
-    if (!sightseeingData.tourType || !['shared', 'private', 'both'].includes(sightseeingData.tourType)) {
       console.log('Invalid or missing tourType, defaulting to shared');
       sightseeingData.tourType = 'shared';
+    }
+    
+    // Handle file uploads if any
+    if (req.files && req.files.length > 0) {
+      try {
+        // Upload each file to Cloudinary
+        const uploadPromises = req.files.map(file => {
+          if (!file.buffer) {
+            throw new Error('No file buffer found');
+          }
+          const isVideo = file.mimetype.startsWith('video/');
+          return uploadToCloudinary(file.buffer, isVideo);
+        });
+        
+        // Wait for all uploads to complete and get secure URLs
+        const results = await Promise.all(uploadPromises);
+        
+        // Separate images and videos
+        const uploadedImageUrls = results
+          .filter(result => result.resource_type === 'image')
+          .map(result => result.secure_url);
+        const uploadedVideoUrls = results
+          .filter(result => result.resource_type === 'video')
+          .map(result => result.secure_url);
+        
+        // Combine with any existing URLs
+        const existingImages = Array.isArray(sightseeingData.images) ? sightseeingData.images : [];
+        const existingVideos = Array.isArray(sightseeingData.videos) ? sightseeingData.videos : [];
+        
+        sightseeingData.images = [...existingImages, ...uploadedImageUrls];
+        sightseeingData.videos = [...existingVideos, ...uploadedVideoUrls];
+        
+        console.log('Successfully uploaded images:', uploadedImageUrls);
+        console.log('Successfully uploaded videos:', uploadedVideoUrls);
+        
+      } catch (uploadError) {
+        console.error('Error uploading files:', uploadError);
+        return next(new ErrorResponse('Error uploading files: ' + uploadError.message, 500));
+      }
+    }
+    
+    // Ensure images and videos arrays exist
+    if (!sightseeingData.images || !Array.isArray(sightseeingData.images)) {
+      sightseeingData.images = [];
+    }
+    if (!sightseeingData.videos || !Array.isArray(sightseeingData.videos)) {
+      sightseeingData.videos = [];
     }
     
     // Convert prices to numbers

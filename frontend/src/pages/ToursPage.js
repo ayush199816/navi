@@ -551,17 +551,37 @@ const ToursPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredSightseeings.map((sightseeing) => (
                 <div key={sightseeing._id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-                  {sightseeing.images && sightseeing.images.length > 0 ? (
-                    <img 
-                      src={sightseeing.images[0].startsWith('http') ? sightseeing.images[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.images[0]}`} 
-                      alt={sightseeing.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400">No image available</span>
-                    </div>
-                  )}
+                  {/* Media Section - Images and Videos */}
+                  <div className="relative h-48">
+                    {sightseeing.images && sightseeing.images.length > 0 ? (
+                      <img 
+                        src={sightseeing.images[0].startsWith('http') ? sightseeing.images[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.images[0]}`} 
+                        alt={sightseeing.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : sightseeing.videos && sightseeing.videos.length > 0 ? (
+                      <div className="relative w-full h-full">
+                        <video
+                          src={sightseeing.videos[0].startsWith('http') ? sightseeing.videos[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.videos[0]}`}
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                        />
+                        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                          </svg>
+                          Video
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No media available</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="p-4">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-semibold text-gray-900">{sightseeing.name}</h3>
