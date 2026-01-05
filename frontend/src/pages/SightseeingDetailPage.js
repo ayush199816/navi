@@ -376,11 +376,35 @@ const SightseeingDetailPage = () => {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {/* Image Gallery */}
             <div className="relative h-96 w-full">
-              <img 
-                src={sightseeing.images?.[0] || '/placeholder-sightseeing.jpg'} 
-                alt={sightseeing.name}
-                className="w-full h-full object-cover"
-              />
+              {sightseeing.images && sightseeing.images.length > 0 ? (
+                <img 
+                  src={sightseeing.images[0].startsWith('http') ? sightseeing.images[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.images[0]}`} 
+                  alt={sightseeing.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : sightseeing.videos && sightseeing.videos.length > 0 ? (
+                <div className="relative w-full h-full">
+                  <video
+                    src={sightseeing.videos[0].startsWith('http') ? sightseeing.videos[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.videos[0]}`}
+                    className="w-full h-full object-cover"
+                    controls
+                    poster={sightseeing.images && sightseeing.images.length > 0 ? 
+                      (sightseeing.images[0].startsWith('http') ? sightseeing.images[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.images[0]}`) : 
+                      undefined
+                    }
+                  />
+                  <div className="absolute top-4 left-4 bg-red-600 text-white text-sm px-3 py-1 rounded-full flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                    </svg>
+                    Video Available
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-96 bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400">No media available</span>
+                </div>
+              )}
               <div className="absolute bottom-4 right-4 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full flex items-center">
                 <FiStar className="mr-1" />
                 {sightseeing.rating?.toFixed(1) || 'New'}
@@ -613,6 +637,41 @@ const SightseeingDetailPage = () => {
             </div>
           </div>
           
+          {/* Video Gallery Section */}
+          {sightseeing.videos && sightseeing.videos.length > 0 && (
+            <div className="mt-12 bg-white rounded-xl shadow-lg p-6 md:p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Video Gallery</h2>
+                <p className="text-gray-600">
+                  Watch videos to get a better feel for this amazing experience
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sightseeing.videos.map((video, index) => (
+                  <div key={index} className="relative overflow-hidden rounded-lg border border-gray-200">
+                    <video
+                      src={video.startsWith('http') ? video : `${process.env.REACT_APP_API_URL}/${video}`}
+                      className="w-full h-48 object-cover"
+                      controls
+                      preload="metadata"
+                      poster={sightseeing.images && sightseeing.images.length > 0 ? 
+                        (sightseeing.images[0].startsWith('http') ? sightseeing.images[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.images[0]}`) : 
+                        undefined
+                      }
+                    />
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                      </svg>
+                      Video {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {/* Similar Sightseeing Section */}
           {similarSightseeings.length > 0 && (
             <div className="mt-12 bg-white rounded-xl shadow-lg p-6 md:p-8">
@@ -631,13 +690,35 @@ const SightseeingDetailPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {similarSightseeings.map((similar) => (
                     <div key={similar._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                      {/* Image */}
+                      {/* Media - Image or Video */}
                       <div className="h-48 w-full">
-                        <img 
-                          src={similar.images?.[0] || '/placeholder-sightseeing.jpg'} 
-                          alt={similar.name}
-                          className="w-full h-full object-cover"
-                        />
+                        {similar.images && similar.images.length > 0 ? (
+                          <img 
+                            src={similar.images[0].startsWith('http') ? similar.images[0] : `${process.env.REACT_APP_API_URL}/${similar.images[0]}`} 
+                            alt={similar.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : similar.videos && similar.videos.length > 0 ? (
+                          <div className="relative w-full h-full">
+                            <video
+                              src={similar.videos[0].startsWith('http') ? similar.videos[0] : `${process.env.REACT_APP_API_URL}/${similar.videos[0]}`}
+                              className="w-full h-full object-cover"
+                              muted
+                              loop
+                              playsInline
+                            />
+                            <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                              </svg>
+                              Video
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-400">No media</span>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Content */}
@@ -723,13 +804,35 @@ const SightseeingDetailPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {recommendedSightseeings.map((recommended) => (
                     <div key={recommended._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                      {/* Image */}
+                      {/* Media - Image or Video */}
                       <div className="h-48 w-full">
-                        <img 
-                          src={recommended.images?.[0] || '/placeholder-sightseeing.jpg'} 
-                          alt={recommended.name}
-                          className="w-full h-full object-cover"
-                        />
+                        {recommended.images && recommended.images.length > 0 ? (
+                          <img 
+                            src={recommended.images[0].startsWith('http') ? recommended.images[0] : `${process.env.REACT_APP_API_URL}/${recommended.images[0]}`} 
+                            alt={recommended.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : recommended.videos && recommended.videos.length > 0 ? (
+                          <div className="relative w-full h-full">
+                            <video
+                              src={recommended.videos[0].startsWith('http') ? recommended.videos[0] : `${process.env.REACT_APP_API_URL}/${recommended.videos[0]}`}
+                              className="w-full h-full object-cover"
+                              muted
+                              loop
+                              playsInline
+                            />
+                            <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                              </svg>
+                              Video
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-400">No media</span>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Content */}

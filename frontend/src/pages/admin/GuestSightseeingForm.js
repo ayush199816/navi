@@ -37,133 +37,139 @@ const baseInputClasses =
 const textareaClasses = `${baseInputClasses} min-h-[140px] align-top`;
 
 const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCancel }) => {
-  const dispatch = useDispatch();
-  const isEditMode = !!propSightseeing?._id;
-  const { error, success } = useSelector((state) => state.guestSightseeings);
-  // Only USD is supported as per requirements
-  const [formData, setFormData] = useState({
-    name: '',
-    country: '',
-    city: '',
-    description: '',
-    price: '',
-    priceCurrency: 'USD', // Default currency
-    offerPrice: '',
-    offerPriceCurrency: 'USD', // Default currency
-    duration: 'Not specified',
-    inclusions: ['No inclusions specified'],
-    isActive: true,
-    images: [],
-    keywords: [],
-    tourType: 'shared', // Default to shared
-    activityType: 'Sightseeing', // Default to Sightseeing
-    aboutTour: 'No detailed description available.',
-    highlights: ['No highlights available'],
-    meetingPoint: 'To be advised upon booking',
-    whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
-  });
-  const [newInclusion, setNewInclusion] = useState('');
-  const [newHighlight, setNewHighlight] = useState('');
-  const [newWhatToBring, setNewWhatToBring] = useState('');
-  const [newKeyword, setNewKeyword] = useState('');
-  const [imagePreviews, setImagePreviews] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const dispatch = useDispatch();
+  const isEditMode = !!propSightseeing?._id;
+  const { error, success } = useSelector((state) => state.guestSightseeings);
+  // Only USD is supported as per requirements
+  const [formData, setFormData] = useState({
+    name: '',
+    country: '',
+    city: '',
+    description: '',
+    price: '',
+    priceCurrency: 'USD', // Default currency
+    offerPrice: '',
+    offerPriceCurrency: 'USD', // Default currency
+    duration: 'Not specified',
+    inclusions: ['No inclusions specified'],
+    isActive: true,
+    images: [],
+    videos: [],
+    keywords: [],
+    tourType: 'shared', // Default to shared
+    activityType: 'Sightseeing', // Default to Sightseeing
+    aboutTour: 'No detailed description available.',
+    highlights: ['No highlights available'],
+    meetingPoint: 'To be advised upon booking',
+    whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+  });
+  const [newInclusion, setNewInclusion] = useState('');
+  const [newHighlight, setNewHighlight] = useState('');
+  const [newWhatToBring, setNewWhatToBring] = useState('');
+  const [newKeyword, setNewKeyword] = useState('');
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [videoPreviews, setVideoPreviews] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (propSightseeing) {
-      const safeSightseeing = JSON.parse(JSON.stringify(propSightseeing));
-      console.log('Raw propSightseeing in form:', safeSightseeing);
-      const defaultValues = {
-        name: '',
-        country: '',
-        city: '',
-        description: '',
-        price: '',
-        priceCurrency: 'USD',
-        offerPrice: '',
-        offerPriceCurrency: 'USD',
-        duration: 'Not specified',
-        inclusions: ['No inclusions specified'],
-        isActive: true,
-        images: [],
-        keywords: [],
-        tourType: 'shared',
-        activityType: 'Sightseeing',
-        aboutTour: 'No detailed description available.',
-        highlights: ['No highlights available'],
-        meetingPoint: 'To be advised upon booking',
-        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
-      };
-      // Create new form data with defaults and override with prop values
-      const newFormData = { ...defaultValues };
-      // Only override with prop values that are not undefined or null
-      Object.keys(safeSightseeing).forEach(key => {
-        if (safeSightseeing[key] !== undefined && safeSightseeing[key] !== null) {
-          // Special handling for arrays to ensure they are properly initialized
-          if (Array.isArray(defaultValues[key])) {
-            newFormData[key] = Array.isArray(safeSightseeing[key])
-              ? [...safeSightseeing[key]]
-              : [];
-          } else {
-            newFormData[key] = safeSightseeing[key];
-          }
-        }
-      });
-      // Ensure required fields have proper values
-      if (!newFormData.tourType) {
-        newFormData.tourType = 'shared';
-      }
-      if (!newFormData.activityType) {
-        newFormData.activityType = 'Sightseeing';
-      }
-      if (!newFormData.city) {
-        newFormData.city = '';
-      }
-      // Handle array fields to ensure they are properly initialized
-      if (!Array.isArray(newFormData.inclusions) || newFormData.inclusions.length === 0) {
-        newFormData.inclusions = ['No inclusions specified'];
-      }
-      if (!Array.isArray(newFormData.keywords)) {
-        newFormData.keywords = [];
-      }
-      if (!Array.isArray(newFormData.highlights) || newFormData.highlights.length === 0) {
-        newFormData.highlights = ['No highlights available'];
-      }
-      if (!Array.isArray(newFormData.whatToBring) || newFormData.whatToBring.length === 0) {
-        newFormData.whatToBring = ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'];
-      }
-      console.log('Setting form data:', newFormData);
-      setFormData(newFormData);
-      setImagePreviews(propSightseeing.images || []);
-    } else {
-      // Reset form if no sightseeing is provided
-      setFormData({
-        name: '',
-        country: '',
-        city: '',
-        description: '',
-        price: '',
-        priceCurrency: 'USD',
-        offerPrice: '',
-        offerPriceCurrency: 'USD',
-        duration: 'Not specified',
-        inclusions: ['No inclusions specified'],
-        isActive: true,
-        images: [],
-        keywords: [],
-        tourType: 'shared',
-        activityType: 'Sightseeing',
-        aboutTour: 'No detailed description available.',
-        highlights: ['No highlights available'],
-        meetingPoint: 'To be advised upon booking',
-        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
-      });
-      setImagePreviews([]);
-      setNewInclusion('');
-      setNewHighlight('');
-      setNewWhatToBring('');
-    }
-  }, [propSightseeing]);
+  useEffect(() => {
+    if (propSightseeing) {
+      const safeSightseeing = JSON.parse(JSON.stringify(propSightseeing));
+      console.log('Raw propSightseeing in form:', safeSightseeing);
+      const defaultValues = {
+        name: '',
+        country: '',
+        city: '',
+        description: '',
+        price: '',
+        priceCurrency: 'USD',
+        offerPrice: '',
+        offerPriceCurrency: 'USD',
+        duration: 'Not specified',
+        inclusions: ['No inclusions specified'],
+        isActive: true,
+        images: [],
+        videos: [],
+        keywords: [],
+        tourType: 'shared',
+        activityType: 'Sightseeing',
+        aboutTour: 'No detailed description available.',
+        highlights: ['No highlights available'],
+        meetingPoint: 'To be advised upon booking',
+        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+      };
+      // Create new form data with defaults and override with prop values
+      const newFormData = { ...defaultValues };
+      // Only override with prop values that are not undefined or null
+      Object.keys(safeSightseeing).forEach(key => {
+        if (safeSightseeing[key] !== undefined && safeSightseeing[key] !== null) {
+          // Special handling for arrays to ensure they are properly initialized
+          if (Array.isArray(defaultValues[key])) {
+            newFormData[key] = Array.isArray(safeSightseeing[key])
+              ? [...safeSightseeing[key]]
+              : [];
+          } else {
+            newFormData[key] = safeSightseeing[key];
+          }
+        }
+      });
+      // Ensure required fields have proper values
+      if (!newFormData.tourType) {
+        newFormData.tourType = 'shared';
+      }
+      if (!newFormData.activityType) {
+        newFormData.activityType = 'Sightseeing';
+      }
+      if (!newFormData.city) {
+        newFormData.city = '';
+      }
+      // Handle array fields to ensure they are properly initialized
+      if (!Array.isArray(newFormData.inclusions) || newFormData.inclusions.length === 0) {
+        newFormData.inclusions = ['No inclusions specified'];
+      }
+      if (!Array.isArray(newFormData.keywords)) {
+        newFormData.keywords = [];
+      }
+      if (!Array.isArray(newFormData.highlights) || newFormData.highlights.length === 0) {
+        newFormData.highlights = ['No highlights available'];
+      }
+      if (!Array.isArray(newFormData.whatToBring) || newFormData.whatToBring.length === 0) {
+        newFormData.whatToBring = ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'];
+      }
+      console.log('Setting form data:', newFormData);
+      setFormData(newFormData);
+      setImagePreviews(propSightseeing.images || []);
+      setVideoPreviews(propSightseeing.videos || []);
+    } else {
+      // Reset form if no sightseeing is provided
+      setFormData({
+        name: '',
+        country: '',
+        city: '',
+        description: '',
+        price: '',
+        priceCurrency: 'USD',
+        offerPrice: '',
+        offerPriceCurrency: 'USD',
+        duration: 'Not specified',
+        inclusions: ['No inclusions specified'],
+        isActive: true,
+        images: [],
+        videos: [],
+        keywords: [],
+        tourType: 'shared',
+        activityType: 'Sightseeing',
+        aboutTour: 'No detailed description available.',
+        highlights: ['No highlights available'],
+        meetingPoint: 'To be advised upon booking',
+        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+      });
+      setImagePreviews([]);
+      setVideoPreviews([]);
+      setNewInclusion('');
+      setNewHighlight('');
+      setNewWhatToBring('');
+    }
+  }, [propSightseeing]);
 
   useEffect(() => {
     if (success && onSuccess) {
@@ -203,58 +209,115 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     }));
   };
 
-  const handleImageChange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-    const formData = new FormData();
-    files.forEach(file => {
-      formData.append('images', file);
-    });
-    try {
-      const response = await api.post('/guest-sightseeing/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-     
-      if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        const newImageUrls = response.data.data.map(item =>
-          typeof item === 'string' ? item : item.url || item.secure_url
-        );
-       
-        const newImages = newImageUrls.map(url => ({
-          url,
-          name: url.split('/').pop()
-        }));
-       
-        setImagePreviews(prev => [...prev, ...newImages]);
-        setFormData(prev => ({
-          ...prev,
-          images: [...prev.images, ...newImageUrls]
-        }));
-       
-        toast.success(`${files.length} image(s) uploaded successfully`);
-      } else {
-        throw new Error('Invalid response format from server');
-      }
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      toast.error(error.response?.data?.message || 'Failed to upload images');
-    }
-  };
+  const handleImageChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    // Separate images and videos
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const videoFiles = files.filter(file => file.type.startsWith('video/'));
 
-  const handleRemoveImage = (index) => {
-    const newPreviews = [...imagePreviews];
-    newPreviews.splice(index, 1);
-    setImagePreviews(newPreviews);
-    // Update form data
-    setFormData(prev => ({
-      ...prev,
-      images: newPreviews.map(img => (typeof img === 'string' ? img : img.name))
-    }));
-  };
+    if (imageFiles.length > 0) {
+      const formData = new FormData();
+      imageFiles.forEach(file => {
+        formData.append('images', file);
+      });
+      try {
+        const response = await api.post('/guest-sightseeing/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          const newImageUrls = response.data.data.map(item =>
+            typeof item === 'string' ? item : item.url || item.secure_url
+          );
+          
+          const newImages = newImageUrls.map(url => ({
+            url,
+            name: url.split('/').pop()
+          }));
+          
+          setImagePreviews(prev => [...prev, ...newImages]);
+          setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, ...newImageUrls]
+          }));
+          
+          toast.success(`${imageFiles.length} image(s) uploaded successfully`);
+        } else {
+          throw new Error('Invalid response format from server');
+        }
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        toast.error(error.response?.data?.message || 'Failed to upload images');
+      }
+    }
+    
+    if (videoFiles.length > 0) {
+      const formData = new FormData();
+      videoFiles.forEach(file => {
+        formData.append('images', file); // Backend expects 'images' field for both
+      });
+      try {
+        const response = await api.post('/guest-sightseeing/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          const newVideoUrls = response.data.data
+            .filter(item => item.resource_type === 'video')
+            .map(item => typeof item === 'string' ? item : item.url || item.secure_url);
+          
+          const newVideos = newVideoUrls.map(url => ({
+            url,
+            name: url.split('/').pop(),
+            type: 'video'
+          }));
+          
+          setVideoPreviews(prev => [...prev, ...newVideos]);
+          setFormData(prev => ({
+            ...prev,
+            videos: [...prev.videos, ...newVideoUrls]
+          }));
+          
+          toast.success(`${videoFiles.length} video(s) uploaded successfully`);
+        } else {
+          throw new Error('Invalid response format from server');
+        }
+      } catch (error) {
+        console.error('Error uploading videos:', error);
+        toast.error(error.response?.data?.message || 'Failed to upload videos');
+      }
+    }
+  };
 
-  const handleSubmit = async (e) => {
+  const handleRemoveImage = (index) => {
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1);
+    setImagePreviews(newPreviews);
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      images: newPreviews.map(img => (typeof img === 'string' ? img : img.name))
+    }));
+  };
+
+  const handleRemoveVideo = (index) => {
+    const newPreviews = [...videoPreviews];
+    newPreviews.splice(index, 1);
+    setVideoPreviews(newPreviews);
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      videos: newPreviews.map(video => (typeof video === 'string' ? video : video.name))
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -911,13 +974,13 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                   <PhotoIcon className="h-10 w-10 text-slate-400" />
                   <div className="text-sm text-slate-600">
                     <label
-                      htmlFor="file-upload"
+                      htmlFor="file-upload-images"
                       className="cursor-pointer font-semibold text-blue-600 transition hover:text-blue-700"
                     >
-                      <span>Upload files</span>
+                      <span>Upload images</span>
                       <input
-                        id="file-upload"
-                        name="file-upload"
+                        id="file-upload-images"
+                        name="file-upload-images"
                         type="file"
                         className="sr-only"
                         multiple
@@ -929,57 +992,113 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                   </div>
                   <p className="text-xs text-slate-400">PNG, JPG up to 10MB each</p>
                 </div>
+              </div>
 
-                {imagePreviews.length > 0 && (
-                  <div className="mt-5">
-                    <h4 className="text-sm font-semibold text-slate-700">Uploaded images</h4>
-                    <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                      {imagePreviews.map((img, index) => (
-                        <div
-                          key={`${typeof img === 'string' ? img : img.url}-${index}`}
-                          className="group relative overflow-hidden rounded-2xl border border-slate-200"
-                        >
-                          <img
-                            src={typeof img === 'string' ? img : img.url}
-                            alt={`Preview ${index + 1}`}
-                            className="h-32 w-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(index)}
-                            className="absolute right-2 top-2 rounded-full bg-rose-500/90 p-1 text-white opacity-0 transition group-hover:opacity-100"
-                            title="Remove image"
-                          >
-                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Videos</label>
+                <div className="mt-3 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 px-6 py-10 text-center">
+                  <PhotoIcon className="h-10 w-10 text-slate-400" />
+                  <div className="text-sm text-slate-600">
+                    <label
+                      htmlFor="file-upload-videos"
+                      className="cursor-pointer font-semibold text-blue-600 transition hover:text-blue-700"
+                    >
+                      <span>Upload videos</span>
+                      <input
+                        id="file-upload-videos"
+                        name="file-upload-videos"
+                        type="file"
+                        className="sr-only"
+                        multiple
+                        accept="video/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                    <span className="text-slate-400"> or drag & drop</span>
                   </div>
-                )}
+                  <p className="text-xs text-slate-400">MP4, MOV, AVI up to 50MB each</p>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Visibility toggle</p>
-                  <p className="text-xs text-slate-500">Inactive sightseeings will stay hidden from customers.</p>
+              {imagePreviews.length > 0 && (
+                <div className="mt-5">
+                  <h4 className="text-sm font-semibold text-slate-700">Uploaded images</h4>
+                  <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                    {imagePreviews.map((img, index) => (
+                      <div
+                        key={`${typeof img === 'string' ? img : img.url}-${index}`}
+                        className="group relative overflow-hidden rounded-2xl border border-slate-200"
+                      >
+                        <img
+                          src={typeof img === 'string' ? img : img.url}
+                          alt={`Preview ${index + 1}`}
+                          className="h-32 w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute right-2 top-2 rounded-full bg-rose-500/90 p-1 text-white opacity-0 transition group-hover:opacity-100"
+                          title="Remove image"
+                        >
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <label className="inline-flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-                  <input
-                    id="isActive"
-                    name="isActive"
-                    type="checkbox"
-                    checked={formData.isActive}
-                    onChange={handleChange}
-                    className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-slate-700">
-                    {formData.isActive ? 'Active & bookable' : 'Inactive'}
-                  </span>
-                </label>
-              </div>
+              )}
+
+              {videoPreviews.length > 0 && (
+                <div className="mt-5">
+                  <h4 className="text-sm font-semibold text-slate-700">Uploaded videos</h4>
+                  <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                    {videoPreviews.map((video, index) => (
+                      <div
+                        key={`${typeof video === 'string' ? video : video.url}-${index}`}
+                        className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                      >
+                        <video
+                          src={typeof video === 'string' ? video : video.url}
+                          className="h-32 w-full object-cover"
+                          controls
+                          preload="metadata"
+                        />
+                        <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-xs p-1 rounded">
+                          <span className="font-medium">Video {index + 1}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveVideo(index)}
+                          className="absolute top-2 right-2 rounded-full bg-rose-500/90 p-1 text-white opacity-0 transition group-hover:opacity-100"
+                          title="Remove video"
+                        >
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <>
+                    <p className="text-xs text-slate-500">Inactive sightseeings will stay hidden from customers.</p>
+                    <label className="inline-flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
+                      <input
+                        id="isActive"
+                        name="isActive"
+                        type="checkbox"
+                        checked={formData.isActive}
+                        onChange={handleChange}
+                        className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-slate-700">
+                        {formData.isActive ? 'Active & bookable' : 'Inactive'}
+                      </span>
+                    </label>
+                  </>
+                </div>
+              )}
             </div>
           </SectionCard>
 

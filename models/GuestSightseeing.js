@@ -156,6 +156,25 @@ const guestSightseeingSchema = new mongoose.Schema({
       },
       message: 'Images must be an array of valid URLs'
     }
+  },
+  videos: {
+    type: [String],
+    default: [],
+    validate: {
+      validator: function(videos) {
+        // Validate that each video is a valid URL
+        if (!Array.isArray(videos)) return false;
+        return videos.every(video => {
+          try {
+            new URL(video);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        });
+      },
+      message: 'Videos must be an array of valid URLs'
+    }
   }
 }, {
   timestamps: true,
