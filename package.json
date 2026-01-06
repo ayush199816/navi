@@ -46,6 +46,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "path-to-regexp": "^6.2.1",
     "rc-slider": "^11.1.9",
+    "react-helmet": "^6.1.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {

@@ -5,59 +5,49 @@
                             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <!-- Main Pages -->
   <url>
-    <loc>https://bookmysight.com/</loc>
-    <lastmod>2025-12-15</lastmod>
+    <loc>https://www.bookmysight.com/</loc>
+    <lastmod>2026-01-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://bookmysight.com/tours</loc>
-    <lastmod>2025-12-15</lastmod>
+    <loc>https://www.bookmysight.com/tours</loc>
+    <lastmod>2026-01-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://bookmysight.com/ai-itinerary-generator</loc>
-    <lastmod>2025-12-15</lastmod>
+    <loc>https://www.bookmysight.com/ai-itinerary-generator</loc>
+    <lastmod>2026-01-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <!-- Additional Important Pages -->
   <url>
-    <loc>https://bookmysight.com/about</loc>
-    <lastmod>2025-12-15</lastmod>
+    <loc>https://www.bookmysight.com/contact</loc>
+    <lastmod>2026-01-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://bookmysight.com/contact</loc>
-    <lastmod>2025-12-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://bookmysight.com/terms</loc>
-    <lastmod>2025-12-15</lastmod>
+    <loc>https://www.bookmysight.com/terms</loc>
+    <lastmod>2026-01-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  
+  <!-- Sightseeing Pages -->
   <url>
-    <loc>https://bookmysight.com/privacy</loc>
-    <lastmod>2025-12-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://www.bookmysight.com/sightseeing/68d27681d47029a42963b92d/phi-phi-islands-big-boat-tour-with-lunch-on-shared-transfers</loc>
+    <lastmod>2026-01-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://bookmysight.com/contact</loc>
-    <lastmod>2025-12-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://bookmysight.com/terms</loc>
-    <lastmod>2025-12-10</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://www.bookmysight.com/sightseeing/68c683f391803c4b2b9cb5a9</loc>
+    <lastmod>2026-01-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
