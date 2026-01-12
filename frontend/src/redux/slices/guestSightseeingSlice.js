@@ -22,6 +22,27 @@ export const getGuestSightseeingById = createAsyncThunk(
   }
 );
 
+export const getGuestSightseeingByPath = createAsyncThunk(
+  'guestSightseeings/getByPath',
+  async ({ country, city, slug }, { rejectWithValue }) => {
+    try {
+      const response = await api.get(
+        `/guest-sightseeing/by-path/${encodeURIComponent(country)}/${encodeURIComponent(city)}/${encodeURIComponent(slug)}`
+      );
+
+      const sightseeingData = response.data.data || response.data;
+
+      if (!sightseeingData) {
+        throw new Error('No sightseeing data received');
+      }
+
+      return sightseeingData;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch sightseeing');
+    }
+  }
+);
+
 export const fetchGuestSightseeings = createAsyncThunk(
   'guestSightseeings/fetchAll',
   async (params = {}, { rejectWithValue }) => {
@@ -168,6 +189,22 @@ const guestSightseeingSlice = createSlice({
       state.currentSightseeing = action.payload;
     })
     .addCase(getGuestSightseeingById.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+      state.currentSightseeing = null;
+    })
+
+    // Handle getGuestSightseeingByPath
+    .addCase(getGuestSightseeingByPath.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+      state.currentSightseeing = null;
+    })
+    .addCase(getGuestSightseeingByPath.fulfilled, (state, action) => {
+      state.loading = false;
+      state.currentSightseeing = action.payload;
+    })
+    .addCase(getGuestSightseeingByPath.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload;
       state.currentSightseeing = null;

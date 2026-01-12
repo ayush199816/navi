@@ -5,14 +5,15 @@ import { FiCalendar, FiPlus, FiMinus, FiShoppingCart, FiMapPin, FiClock, FiStar,
 import { useCurrency } from '../contexts/CurrencyContext';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
-import { getGuestSightseeingById, clearCurrentSightseeing, fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
+import { getGuestSightseeingByPath, clearCurrentSightseeing, fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
 import { addToCart } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { buildSightseeingUrl } from '../utils/sightseeingUrl';
 
 const SightseeingDetailPage = () => {
-  const { id } = useParams();
+  const { country, city, slug } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [pax, setPax] = useState(1);
@@ -57,8 +58,8 @@ const SightseeingDetailPage = () => {
   }, [currencyDropdownRef]);
 
   useEffect(() => {
-    if (!id) {
-      toast.error('Invalid sightseeing ID');
+    if (!country || !city || !slug) {
+      toast.error('Invalid sightseeing URL');
       navigate('/tours');
       return;
     }
@@ -70,8 +71,8 @@ const SightseeingDetailPage = () => {
         if (isMounted) {
           dispatch(clearCurrentSightseeing());
         }
-        
-        const result = await dispatch(getGuestSightseeingById(id)).unwrap();
+
+        const result = await dispatch(getGuestSightseeingByPath({ country, city, slug })).unwrap();
         
         if (isMounted) {
           if (!result) {
@@ -91,7 +92,7 @@ const SightseeingDetailPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [id, dispatch, navigate]);
+  }, [country, city, slug, dispatch, navigate]);
 
   // Fetch recommended sightseeings when current sightseeing loads
   useEffect(() => {
@@ -752,7 +753,7 @@ const SightseeingDetailPage = () => {
                         
                         {/* View Details Button */}
                         <button
-                          onClick={() => navigate(`/sightseeing/${similar._id}/${encodeURIComponent(similar.name.toLowerCase().replace(/\s+/g, '-'))}`)}
+                          onClick={() => navigate(buildSightseeingUrl(similar))}
                           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
                         >
                           View Details
@@ -866,7 +867,7 @@ const SightseeingDetailPage = () => {
                         
                         {/* View Details Button */}
                         <button
-                          onClick={() => navigate(`/sightseeing/${recommended._id}/${encodeURIComponent(recommended.name.toLowerCase().replace(/\s+/g, '-'))}`)}
+                          onClick={() => navigate(buildSightseeingUrl(recommended))}
                           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
                         >
                           View Details

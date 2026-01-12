@@ -7,6 +7,15 @@ const asyncHandler = require('../middleware/async');
 const { cloudinary, uploadToCloudinary } = require('../config/cloudinary');
 const stream = require('stream');
 
+const slugify = (value = '') => value
+  .toString()
+  .toLowerCase()
+  .trim()
+  .replace(/["']/g, '')
+  .replace(/[^\w\s-]/g, '')
+  .replace(/\s+/g, '-')
+  .replace(/-+/g, '-');
+
 // @desc    Upload images and videos for guest sightseeing
 // @route   POST /api/guest-sightseeing/upload
 // @access  Private/Admin
@@ -516,7 +525,7 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
 
 // @desc    Get single guest sightseeing
 // @route   GET /api/guest-sightseeing/:id
-// @access  Public
+// @access   Public
 const getGuestSightseeing = asyncHandler(async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -560,6 +569,45 @@ const getGuestSightseeing = asyncHandler(async (req, res, next) => {
     
     next(new ErrorResponse('Server error', 500));
   }
+});
+
+// @desc    Get single guest sightseeing by country/city/slug
+// @route   GET /api/guest-sightseeing/by-path/:country/:city/:slug
+// @access  Public
+const getGuestSightseeingByPath = asyncHandler(async (req, res, next) => {
+  const { country, city, slug } = req.params;
+
+  if (!country || !city || !slug) {
+    return next(new ErrorResponse('Country, city and slug are required', 400));
+  }
+
+  const decodedCountry = decodeURIComponent(country);
+  const decodedCity = decodeURIComponent(city);
+  const decodedSlug = decodeURIComponent(slug);
+
+  const candidates = await GuestSightseeing.find({
+    country: { $regex: `^${decodedCountry.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' },
+    city: { $regex: `^${decodedCity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+  }).lean();
+
+  const sightseeing = candidates.find(item => slugify(item?.name) === slugify(decodedSlug));
+
+  if (!sightseeing) {
+    return next(new ErrorResponse('Sightseeing not found', 404));
+  }
+
+  if (!sightseeing.duration) {
+    sightseeing.duration = 'Not specified';
+  }
+
+  if (!sightseeing.inclusions || sightseeing.inclusions.length === 0) {
+    sightseeing.inclusions = ['No inclusions specified'];
+  }
+
+  res.status(200).json({
+    success: true,
+    data: sightseeing
+  });
 });
 
 // @desc    Create new guest sightseeing
@@ -700,7 +748,7 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
           }
           return [String(parsed)];
         } catch (e) {
-          // If not valid JSON, treat as a single string value
+          // If parsing fails, treat it as a single string value
           return [value];
         }
       } else if (Array.isArray(value)) {
@@ -765,11 +813,11 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
     console.error('Error creating sightseeing:', error);
     next(new ErrorResponse('Failed to create sightseeing: ' + error.message, 500));
   }
-}); // <--- The missing closing brace was here
+});
 
 // @desc    Update guest sightseeing
 // @route   PUT /api/guest-sightseeing/:id
-// @access  Private/Admin
+// @access   Private/Admin
 const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
   try {
     console.log('Update request body:', req.body);
@@ -811,7 +859,7 @@ const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
       updates.offerPrice = undefined;
     }
     
-     // Ensure inclusions is an array and handle nested arrays
+    // Ensure inclusions is an array and handle nested arrays
     if (updates.inclusions !== undefined) {
       if (!Array.isArray(updates.inclusions)) {
         updates.inclusions = [updates.inclusions];
@@ -944,7 +992,7 @@ const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
 
 // @desc    Delete guest sightseeing
 // @route   DELETE /api/guest-sightseeing/:id
-// @access  Private/Admin
+// @access   Private/Admin
 const deleteGuestSightseeing = asyncHandler(async (req, res, next) => {
   const sightseeing = await GuestSightseeing.findById(req.params.id);
 
@@ -974,6 +1022,7 @@ const deleteGuestSightseeing = asyncHandler(async (req, res, next) => {
 module.exports = {
   getGuestSightseeings,
   getGuestSightseeing,
+  getGuestSightseeingByPath,
   createGuestSightseeing,
   updateGuestSightseeing,
   deleteGuestSightseeing,

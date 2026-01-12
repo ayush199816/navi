@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://bookmysight.com/sitemap.xml
+Sitemap: https://www.bookmysight.com/sitemap.xml
 
 # Block common bot paths
 Disallow: /api/
