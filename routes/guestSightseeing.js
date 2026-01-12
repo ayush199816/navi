@@ -9,6 +9,7 @@ const { upload } = require('../config/cloudinary');
 const {
   getGuestSightseeings,
   getGuestSightseeing,
+  getGuestSightseeingByPath,
   createGuestSightseeing,
   updateGuestSightseeing,
   deleteGuestSightseeing,
@@ -88,6 +89,7 @@ router.use(publicRouter);
 
 // Public GET routes
 router.get('/', advancedResults(GuestSightseeing), getGuestSightseeings);
+router.get('/by-path/:country/:city/:slug', getGuestSightseeingByPath);
 router.get('/:id', getGuestSightseeing);
 
 // Protected routes

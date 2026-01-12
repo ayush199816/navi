@@ -16,6 +16,7 @@ import ChatBot from './components/ChatBot';
 import LandingPage from './pages/LandingPage';
 import ToursPage from './pages/ToursPage';
 import SightseeingDetailPage from './pages/SightseeingDetailPage';
+import LegacySightseeingRedirect from './pages/LegacySightseeingRedirect';
 import Dashboard from './pages/Dashboard';
 import GuestDashboard from './pages/guest/GuestDashboard';
 import Checkout from './pages/guest/Checkout';
@@ -242,7 +243,8 @@ function App() {
         <Route path="/auth/register" element={<SimpleRegister />} />
         <Route path="/register" element={<GuestRegister />} />
         <Route path="/tours" element={<ToursPage />} />
-        <Route path="/sightseeing/:id/:name?" element={<SightseeingDetailPage />} />
+        <Route path="/sightseeing/:country/:city/:slug" element={<SightseeingDetailPage />} />
+        <Route path="/sightseeing/:id/:name?" element={<LegacySightseeingRedirect />} />
         <Route path="/ai-itinerary-generator" element={<AIItineraryGeneratorPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />

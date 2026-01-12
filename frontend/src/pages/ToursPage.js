@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchGuestSightseeings } from '../redux/slices/guestSightseeingSlice';
 import SightseeingNav from '../components/sightseeing/SightseeingNav';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { buildSightseeingUrl } from '../utils/sightseeingUrl';
 
 const ToursPage = () => {
   const [citySearch, setCitySearch] = useState('');
@@ -613,12 +614,7 @@ const ToursPage = () => {
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const urlFriendlyName = sightseeing.name
-                            .toLowerCase()
-                            .replace(/[^\w\s-]/g, '') // Remove special characters
-                            .replace(/\s+/g, '-')      // Replace spaces with hyphens
-                            .replace(/-+/g, '-');       // Replace multiple hyphens with single one
-                          navigate(`/sightseeing/${sightseeing._id}/${urlFriendlyName}`);
+                          navigate(buildSightseeingUrl(sightseeing));
                         }}
                       >
                         View Details

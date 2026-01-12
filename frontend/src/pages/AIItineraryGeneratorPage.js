@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { buildSightseeingUrl } from '../utils/sightseeingUrl';
 import {
   FiDownload,
   FiMessageSquare,
@@ -1287,16 +1288,10 @@ const AIItineraryGeneratorPage = () => {
                 ) : suggestions.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4">
                     {suggestions.map((sightseeing) => {
-                      const urlFriendlyName = sightseeing.name
-                        ?.toLowerCase()
-                        .replace(/[^\w\s-]/g, '')
-                        .replace(/\s+/g, '-')
-                        .replace(/-+/g, '-') || 'details';
-
                       return (
                         <a
                           key={sightseeing._id}
-                          href={`/sightseeing/${sightseeing._id}/${urlFriendlyName}`}
+                          href={buildSightseeingUrl(sightseeing)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-200 hover:shadow transition"

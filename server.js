@@ -216,7 +216,128 @@ const connectDB = async () => {
 if (process.env.NODE_ENV === 'production') {
   // Set static folder
   const staticPath = path.join(__dirname, '../frontend/build');
+
+  let sitemapCache = {
+    xml: null,
+    generatedAt: 0
+  };
+
+  app.get('/sitemap.xml', async (req, res, next) => {
+    try {
+      const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+      const now = Date.now();
+      if (sitemapCache.xml && now - sitemapCache.generatedAt < CACHE_TTL_MS) {
+        res.type('application/xml');
+        return res.status(200).send(sitemapCache.xml);
+      }
+
+      const siteUrl = 'https://www.bookmysight.com';
+      const GuestSightseeing = require('./models/GuestSightseeing');
+
+      const slugify = (value = '') => value
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/["']/g, '')
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+
+      const staticUrls = [
+        { loc: `${siteUrl}/`, changefreq: 'daily', priority: '1.0' },
+        { loc: `${siteUrl}/tours`, changefreq: 'daily', priority: '0.9' },
+        { loc: `${siteUrl}/ai-itinerary-generator`, changefreq: 'weekly', priority: '0.8' },
+        { loc: `${siteUrl}/contact`, changefreq: 'monthly', priority: '0.7' },
+        { loc: `${siteUrl}/terms`, changefreq: 'monthly', priority: '0.5' }
+      ];
+
+      const sightseeings = await GuestSightseeing.find(
+        { country: { $exists: true, $ne: '' }, city: { $exists: true, $ne: '' }, name: { $exists: true, $ne: '' } },
+        { name: 1, country: 1, city: 1, updatedAt: 1 }
+      ).lean();
+
+      const urlsXml = [];
+
+      staticUrls.forEach(u => {
+        urlsXml.push(
+          `  <url>\n` +
+          `    <loc>${u.loc}</loc>\n` +
+          `    <changefreq>${u.changefreq}</changefreq>\n` +
+          `    <priority>${u.priority}</priority>\n` +
+          `  </url>`
+        );
+      });
+
+      sightseeings.forEach(s => {
+        const country = slugify(s.country);
+        const city = slugify(s.city);
+        const slug = slugify(s.name);
+        if (!country || !city || !slug) return;
+
+        const loc = `${siteUrl}/sightseeing/${encodeURIComponent(country)}/${encodeURIComponent(city)}/${encodeURIComponent(slug)}`;
+        const lastmod = s.updatedAt ? new Date(s.updatedAt).toISOString().split('T')[0] : null;
+
+        urlsXml.push(
+          `  <url>\n` +
+          `    <loc>${loc}</loc>\n` +
+          (lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : '') +
+          `    <changefreq>weekly</changefreq>\n` +
+          `    <priority>0.8</priority>\n` +
+          `  </url>`
+        );
+      });
+
+      const xml =
+        `<?xml version="1.0" encoding="UTF-8"?>\n` +
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+        urlsXml.join('\n') +
+        `\n</urlset>\n`;
+
+      sitemapCache = { xml, generatedAt: now };
+
+      res.type('application/xml');
+      return res.status(200).send(xml);
+    } catch (e) {
+      return next(e);
+    }
+  });
+
   app.use(express.static(staticPath));
+
+  app.get('/sightseeing/:id/:name?', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) return next();
+
+      const GuestSightseeing = require('./models/GuestSightseeing');
+
+      const slugify = (value = '') => value
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/["']/g, '')
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+
+      const sightseeing = await GuestSightseeing.findById(id).lean();
+      if (!sightseeing) return next();
+
+      const country = slugify(sightseeing.country || '');
+      const city = slugify(sightseeing.city || '');
+      const slug = slugify(sightseeing.name || 'details');
+
+      if (!country || !city) return next();
+
+      return res.redirect(
+        301,
+        `/sightseeing/${encodeURIComponent(country)}/${encodeURIComponent(city)}/${encodeURIComponent(slug)}`
+      );
+    } catch (e) {
+      return next();
+    }
+  });
 
   // Handle React routing, return all requests to React app
   app.get('*', (req, res, next) => {
