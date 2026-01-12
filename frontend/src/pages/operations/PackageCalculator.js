@@ -15,6 +15,69 @@ import {
 import axios from 'axios';
 import { convertCurrency, getExchangeRate } from '../../utils/currencyConverter';
 
+// Searchable Select Component
+const SearchableSelect = ({ options, value, onChange, placeholder, required, filterKey = 'label', className = '' }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const filteredOptions = options.filter(option =>
+    option[filterKey].toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedOption = options.find(option => option.value === value);
+
+  const handleInputChange = (e) => {
+    setSearchTerm(e.target.value);
+    setIsOpen(true);
+  };
+
+  const handleSelect = (option) => {
+    onChange(option.value);
+    setSearchTerm(option[filterKey]);
+    setIsOpen(false);
+  };
+
+  const handleFocus = () => {
+    setIsOpen(true);
+    if (!searchTerm && selectedOption) {
+      setSearchTerm(selectedOption[filterKey]);
+    }
+  };
+
+  const handleBlur = () => {
+    // Delay closing to allow click on option
+    setTimeout(() => setIsOpen(false), 200);
+  };
+
+  return (
+    <div className={`relative ${className}`}>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={handleInputChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        required={required}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      {isOpen && filteredOptions.length > 0 && (
+        <div className="absolute left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          {filteredOptions.map(option => (
+            <div
+              key={option.value}
+              onClick={() => handleSelect(option)}
+              className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm leading-5 whitespace-normal break-words"
+            >
+              {option[filterKey]}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PackageCalculator = () => {
   const [calculators, setCalculators] = useState([]);
   const [sightseeings, setSightseeings] = useState([]);
@@ -756,19 +819,18 @@ const handleSubmit = async (e) => {
                   </div>
                   {formData.adultSightseeings.map((item, index) => (
                     <div key={index} className="flex gap-2 mb-2">
-                      <select
+                      <SearchableSelect
+                        options={sightseeings.map(sightseeing => ({
+                          value: sightseeing._id,
+                          label: `${sightseeing.name} - Adult: ${sightseeing.currency} ${sightseeing.adultPrice}`
+                        }))}
                         value={item.sightseeingId}
-                        onChange={(e) => updateAdultSightseeing(index, 'sightseeingId', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={(value) => updateAdultSightseeing(index, 'sightseeingId', value)}
+                        placeholder="Select Sightseeing"
                         required
-                      >
-                        <option value="">Select Sightseeing</option>
-                        {sightseeings.map(sightseeing => (
-                          <option key={sightseeing._id} value={sightseeing._id}>
-                            {sightseeing.name} - Adult: {sightseeing.currency} {sightseeing.adultPrice}
-                          </option>
-                        ))}
-                      </select>
+                        filterKey="label"
+                        className="flex-1 min-w-[260px]"
+                      />
                       <input
                         type="number"
                         value={item.adultPrice}
@@ -817,19 +879,18 @@ const handleSubmit = async (e) => {
                   </div>
                   {formData.childSightseeings.map((item, index) => (
                     <div key={index} className="flex gap-2 mb-2">
-                      <select
+                      <SearchableSelect
+                        options={sightseeings.map(sightseeing => ({
+                          value: sightseeing._id,
+                          label: `${sightseeing.name} - Child: ${sightseeing.currency} ${sightseeing.childPrice}`
+                        }))}
                         value={item.sightseeingId}
-                        onChange={(e) => updateChildSightseeing(index, 'sightseeingId', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={(value) => updateChildSightseeing(index, 'sightseeingId', value)}
+                        placeholder="Select Sightseeing"
                         required
-                      >
-                        <option value="">Select Sightseeing</option>
-                        {sightseeings.map(sightseeing => (
-                          <option key={sightseeing._id} value={sightseeing._id}>
-                            {sightseeing.name} - Child: {sightseeing.currency} {sightseeing.childPrice}
-                          </option>
-                        ))}
-                      </select>
+                        filterKey="label"
+                        className="flex-1 min-w-[260px]"
+                      />
                       <input
                         type="number"
                         value={item.childPrice}
@@ -878,19 +939,18 @@ const handleSubmit = async (e) => {
                   </div>
                   {formData.transfers.map((item, index) => (
                     <div key={index} className="flex gap-2 mb-2">
-                      <select
+                      <SearchableSelect
+                        options={transfers.map(transfer => ({
+                          value: transfer._id,
+                          label: `${transfer.name} (${transfer.transferType}) - ${transfer.fromLocation} to ${transfer.toLocation} - ${transfer.currency} ${transfer.price}`
+                        }))}
                         value={item.transferId}
-                        onChange={(e) => updateTransfer(index, 'transferId', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={(value) => updateTransfer(index, 'transferId', value)}
+                        placeholder="Select Transfer"
                         required
-                      >
-                        <option value="">Select Transfer</option>
-                        {transfers.map(transfer => (
-                          <option key={transfer._id} value={transfer._id}>
-                            {transfer.name} ({transfer.transferType}) - {transfer.fromLocation} to {transfer.toLocation} - {transfer.currency} {transfer.price}
-                          </option>
-                        ))}
-                      </select>
+                        filterKey="label"
+                        className="flex-1 min-w-[260px]"
+                      />
                       <input
                         type="number"
                         value={item.transferPrice}
