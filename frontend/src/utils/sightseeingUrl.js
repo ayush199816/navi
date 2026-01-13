@@ -8,8 +8,8 @@ export const slugify = (value = '') => value
   .replace(/-+/g, '-');
 
 export const buildSightseeingUrl = (sightseeing) => {
-  const country = slugify(sightseeing?.country || '');
-  const city = slugify(sightseeing?.city || '');
+  const country = sightseeing?.country || '';
+  const city = sightseeing?.city || '';
   const slug = slugify(sightseeing?.name || 'details');
 
   if (!country || !city) {

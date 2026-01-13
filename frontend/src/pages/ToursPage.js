@@ -251,7 +251,7 @@ const ToursPage = () => {
         <div className="relative ml-4" ref={currencyDropdownRef}>
           <button 
             onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-            className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors focus:outline-none"
+            className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors focus:outline-none"
           >
             <FiGlobe className="w-5 h-5" />
             <span className="font-medium">{selectedCurrency}</span>
@@ -272,7 +272,7 @@ const ToursPage = () => {
                       setSelectedCurrency(code);
                       setShowCurrencyDropdown(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                    className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-orange-50 text-blue-900' : 'text-gray-700 hover:bg-gray-100'}`}
                   >
                     {code} ({symbol})
                   </button>
@@ -302,7 +302,7 @@ const ToursPage = () => {
                 </div>
                 <input
                   type="text"
-                  className="block w-full pl-12 pr-4 py-3.5 text-gray-700 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  className="block w-full pl-12 pr-4 py-3.5 text-gray-700 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
                   placeholder="Search by tour name, city, or destination..."
                   value={citySearch}
                   onChange={(e) => setCitySearch(e.target.value)}
@@ -317,7 +317,7 @@ const ToursPage = () => {
                     <FiMapPin className="h-5 w-5 text-gray-400" />
                   </div>
                   <select
-                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
                     value={cityFilter}
                     onChange={(e) => setCityFilter(e.target.value)}
                   >
@@ -342,7 +342,7 @@ const ToursPage = () => {
                     <FiMapPin className="h-5 w-5 text-gray-400" />
                   </div>
                   <select
-                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
                     value={countryFilter}
                     onChange={(e) => setCountryFilter(e.target.value)}
                   >
@@ -362,7 +362,7 @@ const ToursPage = () => {
                     <FiActivity className="h-5 w-5 text-gray-400" />
                   </div>
                   <select
-                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
                     value={activityFilter}
                     onChange={(e) => setActivityFilter(e.target.value)}
                   >
@@ -382,7 +382,7 @@ const ToursPage = () => {
                     <FiUsers className="h-5 w-5 text-gray-400" />
                   </div>
                   <select
-                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
+                    className="block w-full pl-12 pr-10 py-3.5 text-gray-700 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none transition-all duration-200 cursor-pointer"
                     value={tourTypeFilter}
                     onChange={(e) => setTourTypeFilter(e.target.value)}
                   >
@@ -405,7 +405,7 @@ const ToursPage = () => {
               <button 
                 type="button"
                 onClick={() => setShowPriceFilter(!showPriceFilter)}
-                className="flex items-center text-sm text-gray-600 hover:text-blue-600 mb-2"
+                className="flex items-center text-sm text-gray-600 hover:text-orange-600 mb-2"
               >
                 <FiDollarSign className="mr-1" />
                 <span>Price Range</span>
@@ -433,7 +433,7 @@ const ToursPage = () => {
                   >
                     <div className="relative w-full h-1 bg-gray-200 rounded-full" ref={sliderRef}>
                       <div 
-                        className="absolute h-full bg-blue-500 rounded-full"
+                        className="absolute h-full bg-gradient-to-r from-blue-900 to-orange-600 rounded-full"
                         style={{
                           left: `${((priceRange[0] - priceRangeLimits.min) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`,
                           width: `${((priceRange[1] - priceRange[0]) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`
@@ -470,7 +470,7 @@ const ToursPage = () => {
                         className="absolute w-full h-1 appearance-none pointer-events-none opacity-0"
                       />
                       <div 
-                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full cursor-pointer -ml-2 z-10"
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-900 rounded-full cursor-pointer -ml-2 z-10"
                         style={{
                           left: `${((priceRange[0] - priceRangeLimits.min) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`,
                           transform: 'translateY(-50%) translateX(0)'
@@ -478,7 +478,7 @@ const ToursPage = () => {
                         onMouseDown={() => handleMouseDown('min')}
                       />
                       <div 
-                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full cursor-pointer -ml-2 z-10"
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-900 rounded-full cursor-pointer -ml-2 z-10"
                         style={{
                           left: `${((priceRange[1] - priceRangeLimits.min) / (priceRangeLimits.max - priceRangeLimits.min)) * 100}%`,
                           transform: 'translateY(-50%) translateX(-100%)'
@@ -494,7 +494,7 @@ const ToursPage = () => {
             <div className="mt-2 flex justify-center">
               <button
                 type="submit"
-                className="w-full md:min-w-[300px] px-16 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-lg rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 whitespace-nowrap transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="w-full md:min-w-[300px] px-16 py-4 bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 text-white font-medium text-lg rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 whitespace-nowrap transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
               >
                 <FiSearch className="h-5 w-5" />
                 <span className="font-semibold">Search Tours</span>
@@ -511,7 +511,7 @@ const ToursPage = () => {
           
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading sightseeings...</p>
             </div>
           ) : error ? (
@@ -543,7 +543,7 @@ const ToursPage = () => {
                   setActiveSearchTerm('');
                   dispatch(fetchGuestSightseeings({ isActive: true }));
                 }}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-900 to-orange-600 text-white rounded-lg hover:from-blue-950 hover:to-orange-700 transition-colors"
               >
                 Reset Filters
               </button>
@@ -554,13 +554,7 @@ const ToursPage = () => {
                 <div key={sightseeing._id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
                   {/* Media Section - Images and Videos */}
                   <div className="relative h-48">
-                    {sightseeing.images && sightseeing.images.length > 0 ? (
-                      <img 
-                        src={sightseeing.images[0].startsWith('http') ? sightseeing.images[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.images[0]}`} 
-                        alt={sightseeing.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : sightseeing.videos && sightseeing.videos.length > 0 ? (
+                    {sightseeing.videos && sightseeing.videos.length > 0 ? (
                       <div className="relative w-full h-full">
                         <video
                           src={sightseeing.videos[0].startsWith('http') ? sightseeing.videos[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.videos[0]}`}
@@ -577,6 +571,12 @@ const ToursPage = () => {
                           Video
                         </div>
                       </div>
+                    ) : sightseeing.images && sightseeing.images.length > 0 ? (
+                      <img 
+                        src={sightseeing.images[0].startsWith('http') ? sightseeing.images[0] : `${process.env.REACT_APP_API_URL}/${sightseeing.images[0]}`} 
+                        alt={sightseeing.name}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
                         <span className="text-gray-400">No media available</span>
@@ -586,7 +586,7 @@ const ToursPage = () => {
                   <div className="p-4">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-semibold text-gray-900">{sightseeing.name}</h3>
-                      <div className="flex items-center bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                      <div className="flex items-center bg-orange-100 text-blue-900 text-xs font-medium px-2.5 py-0.5 rounded">
                         <FiStar className="mr-1" />
                         {sightseeing.rating || 'New'}
                       </div>
@@ -611,7 +611,7 @@ const ToursPage = () => {
                         )}
                       </div>
                       <button 
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                        className="px-4 py-2 bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(buildSightseeingUrl(sightseeing));

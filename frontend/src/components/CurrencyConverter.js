@@ -107,7 +107,7 @@ const CurrencyConverter = () => {
     <div className="bg-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 text-orange-600 mb-4">
             <FaMoneyBillWave className="w-8 h-8" />
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -116,7 +116,7 @@ const CurrencyConverter = () => {
           <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-500">
             Get the latest exchange rates and convert between currencies
           </p>
-          <div className="w-20 h-1 bg-blue-600 mx-auto mt-4"></div>
+          <div className="w-20 h-1 bg-orange-600 mx-auto mt-4"></div>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto">
@@ -148,7 +148,7 @@ const CurrencyConverter = () => {
                     id="amount"
                     value={amount}
                     onChange={handleAmountChange}
-                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md h-10 border"
+                    className="focus:ring-orange-500 focus:border-orange-500 block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md h-10 border"
                     placeholder="1.00"
                   />
                 </div>
@@ -163,7 +163,7 @@ const CurrencyConverter = () => {
                   name="from-currency"
                   value={fromCurrency}
                   onChange={(e) => setFromCurrency(e.target.value)}
-                  className="focus:ring-blue-500 focus:border-blue-500 h-10 w-full pl-3 pr-10 border border-gray-300 rounded-md bg-white py-2 text-sm"
+                  className="focus:ring-orange-500 focus:border-orange-500 h-10 w-full pl-3 pr-10 border border-gray-300 rounded-md bg-white py-2 text-sm"
                 >
                   {currencies.map((currency) => (
                     <option key={`from-${currency.code}`} value={currency.code}>
@@ -176,7 +176,7 @@ const CurrencyConverter = () => {
               <button
                 type="button"
                 onClick={handleSwapCurrencies}
-                className="mt-6 sm:mt-0 p-2 bg-blue-100 rounded-full text-blue-600 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="mt-6 sm:mt-0 p-2 bg-orange-100 rounded-full text-orange-600 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 title="Swap currencies"
               >
                 <FaExchangeAlt className="h-5 w-5" />
@@ -191,7 +191,7 @@ const CurrencyConverter = () => {
                   name="to-currency"
                   value={toCurrency}
                   onChange={(e) => setToCurrency(e.target.value)}
-                  className="focus:ring-blue-500 focus:border-blue-500 h-10 w-full pl-3 pr-10 border border-gray-300 rounded-md bg-white py-2 text-sm"
+                  className="focus:ring-orange-500 focus:border-orange-500 h-10 w-full pl-3 pr-10 border border-gray-300 rounded-md bg-white py-2 text-sm"
                 >
                   {currencies.map((currency) => (
                     <option key={`to-${currency.code}`} value={currency.code}>
@@ -202,12 +202,12 @@ const CurrencyConverter = () => {
               </div>
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <div className="mt-6 p-4 bg-orange-50 rounded-lg">
               <div className="text-center">
                 <p className="text-sm text-gray-500">
                   {amount} {fromCurrency} =
                 </p>
-                <p className="mt-1 text-3xl font-semibold text-blue-600">
+                <p className="mt-1 text-3xl font-semibold text-orange-600">
                   {isLoading ? '...' : convertedAmount.toFixed(2)} {toCurrency}
                 </p>
                 {exchangeRate && !isLoading && (

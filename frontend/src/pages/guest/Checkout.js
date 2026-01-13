@@ -480,7 +480,7 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
       </div>
     );
   }
@@ -751,7 +751,7 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
                   <button
   type="submit"
   disabled={!cashfree || isPaymentProcessing}
-  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 disabled:opacity-50"
 >
   {isPaymentProcessing ? 'Processing Payment...' : 'Proceed to Payment'}
 </button>
