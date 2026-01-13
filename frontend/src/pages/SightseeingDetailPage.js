@@ -301,7 +301,7 @@ const SightseeingDetailPage = () => {
   if (sightseeingLoading || !sightseeing || Object.keys(sightseeing).length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
     );
   }
@@ -313,7 +313,7 @@ const SightseeingDetailPage = () => {
           <h2 className="text-2xl font-semibold text-gray-700">Sightseeing not found</h2>
           <button 
             onClick={() => navigate('/')}
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-6 py-2 bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 text-white rounded-lg"
           >
             Back to Home
           </button>
@@ -332,7 +332,7 @@ const SightseeingDetailPage = () => {
           <div className="relative" ref={currencyDropdownRef}>
             <button 
               onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors focus:outline-none"
+              className="flex items-center space-x-1 text-white/90 hover:text-white transition-colors focus:outline-none"
             >
               <FiGlobe className="w-5 h-5" />
               <span className="font-medium">{selectedCurrency}</span>
@@ -353,7 +353,7 @@ const SightseeingDetailPage = () => {
                         setSelectedCurrency(code);
                         setShowCurrencyDropdown(false);
                       }}
-                      className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                      className={`w-full text-left px-4 py-2 text-sm ${selectedCurrency === code ? 'bg-orange-50 text-blue-900' : 'text-gray-700 hover:bg-gray-100'}`}
                     >
                       {code} ({symbol})
                     </button>
@@ -369,7 +369,7 @@ const SightseeingDetailPage = () => {
         <div className="max-w-6xl mx-auto">
           <button 
             onClick={() => navigate(-1)}
-            className="mb-6 text-blue-600 hover:text-blue-800 flex items-center"
+            className="mb-6 text-blue-900 hover:text-orange-600 flex items-center"
           >
             ← Back to Results
           </button>
@@ -406,7 +406,7 @@ const SightseeingDetailPage = () => {
                   <span className="text-gray-400">No media available</span>
                 </div>
               )}
-              <div className="absolute bottom-4 right-4 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full flex items-center">
+              <div className="absolute bottom-4 right-4 bg-orange-100 text-blue-900 text-sm font-medium px-2.5 py-0.5 rounded-full flex items-center">
                 <FiStar className="mr-1" />
                 {sightseeing.rating?.toFixed(1) || 'New'}
               </div>
@@ -486,7 +486,7 @@ const SightseeingDetailPage = () => {
                             selected={selectedDate}
                             onChange={(date) => setSelectedDate(date)}
                             minDate={new Date()}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
                             dateFormat="MMMM d, yyyy"
                           />
                           <FiCalendar className="absolute right-3 top-2.5 text-gray-400" />
@@ -527,7 +527,7 @@ const SightseeingDetailPage = () => {
                         </div>
                         <div className="flex justify-between text-lg font-semibold">
                           <span>Total</span>
-                          <span className="text-blue-600">
+                          <span className="text-blue-900">
                             {formatPrice((sightseeing.offerPrice || sightseeing.price || 0) * pax)}
                           </span>
                         </div>
@@ -536,7 +536,7 @@ const SightseeingDetailPage = () => {
                       <div className="pt-2">
                         <button
                           onClick={handleAddToCart}
-                          className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900"
                         >
                           <FiShoppingCart className="mr-2 h-5 w-5" />
                           Add to Cart
@@ -582,7 +582,7 @@ const SightseeingDetailPage = () => {
                         {sightseeing.meetingPoint && (
                           <div>
                             <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                              <FiMapPin className="mr-2 text-blue-600" />
+                              <FiMapPin className="mr-2 text-blue-900" />
                               Meeting Point
                             </h4>
                             <p className="text-gray-700 pl-6">{sightseeing.meetingPoint}</p>
@@ -592,7 +592,7 @@ const SightseeingDetailPage = () => {
                         {sightseeing.duration && (
                           <div>
                             <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                              <FiClock className="mr-2 text-blue-600" />
+                              <FiClock className="mr-2 text-blue-900" />
                               Duration
                             </h4>
                             <p className="text-gray-700 pl-6">{sightseeing.duration}</p>
@@ -602,12 +602,12 @@ const SightseeingDetailPage = () => {
                         {sightseeing.whatToBring && sightseeing.whatToBring.length > 0 && (
                           <div>
                             <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                              <FiPackage className="mr-2 text-blue-600" />
+                              <FiPackage className="mr-2 text-blue-900" />
                               What to Bring
                             </h4>
                             <div className="flex flex-wrap gap-2 pl-6">
                               {sightseeing.whatToBring.map((item, index) => (
-                                <span key={index} className="bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                <span key={index} className="bg-orange-50 text-blue-900 px-3 py-1 rounded-full text-sm">
                                   {item}
                                 </span>
                               ))}
@@ -618,12 +618,12 @@ const SightseeingDetailPage = () => {
                         {sightseeing.keywords && sightseeing.keywords.length > 0 && (
                           <div>
                             <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                              <FiTag className="mr-2 text-blue-600" />
+                              <FiTag className="mr-2 text-blue-900" />
                               Keywords
                             </h4>
                             <div className="flex flex-wrap gap-2 pl-6">
                               {sightseeing.keywords.map((keyword, index) => (
-                                <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                <span key={index} className="bg-orange-100 text-blue-900 px-3 py-1 rounded-full text-sm">
                                   {keyword}
                                 </span>
                               ))}
@@ -685,7 +685,7 @@ const SightseeingDetailPage = () => {
               
               {loadingSimilar ? (
                 <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -740,7 +740,7 @@ const SightseeingDetailPage = () => {
                         
                         {/* Price */}
                         <div className="mb-4">
-                          <div className="text-lg font-bold text-blue-600">
+                          <div className="text-lg font-bold text-blue-900">
                             {formatPrice(similar.offerPrice || similar.price || 0)}
                             {similar.offerPrice && (
                               <span className="ml-2 text-sm text-gray-500 line-through">
@@ -754,7 +754,7 @@ const SightseeingDetailPage = () => {
                         {/* View Details Button */}
                         <button
                           onClick={() => navigate(buildSightseeingUrl(similar))}
-                          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                          className="w-full bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 text-white py-2 px-4 rounded-md transition-colors duration-200 text-sm font-medium"
                         >
                           View Details
                         </button>
@@ -790,7 +790,7 @@ const SightseeingDetailPage = () => {
                 <button
                   onClick={refreshRecommendations}
                   disabled={loadingRecommended}
-                  className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center px-4 py-2 bg-orange-50 text-blue-900 rounded-md hover:bg-orange-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FiRefreshCw className={`mr-2 ${loadingRecommended ? 'animate-spin' : ''}`} />
                   Refresh
@@ -799,7 +799,7 @@ const SightseeingDetailPage = () => {
               
               {loadingRecommended ? (
                 <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -854,7 +854,7 @@ const SightseeingDetailPage = () => {
                         
                         {/* Price */}
                         <div className="mb-4">
-                          <div className="text-lg font-bold text-blue-600">
+                          <div className="text-lg font-bold text-blue-900">
                             {formatPrice(recommended.offerPrice || recommended.price || 0)}
                             {recommended.offerPrice && (
                               <span className="ml-2 text-sm text-gray-500 line-through">
@@ -868,7 +868,7 @@ const SightseeingDetailPage = () => {
                         {/* View Details Button */}
                         <button
                           onClick={() => navigate(buildSightseeingUrl(recommended))}
-                          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+                          className="w-full bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 text-white py-2 px-4 rounded-md transition-colors duration-200 text-sm font-medium"
                         >
                           View Details
                         </button>
@@ -882,7 +882,7 @@ const SightseeingDetailPage = () => {
               <div className="mt-8 text-center">
                 <button
                   onClick={() => navigate('/tours')}
-                  className="inline-flex items-center px-6 py-3 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 font-medium"
+                  className="inline-flex items-center px-6 py-3 border border-blue-900 text-blue-900 rounded-md hover:bg-orange-50 transition-colors duration-200 font-medium"
                 >
                   View All Sightseeing Options
                   <FiChevronRight className="ml-2" />

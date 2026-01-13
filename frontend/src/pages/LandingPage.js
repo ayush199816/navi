@@ -219,6 +219,28 @@ const LandingPage = () => {
               </div>
             </Link>
 
+            {/* Menu */}
+            <nav className={`hidden md:flex items-center space-x-8 font-medium ${isScrolled ? 'text-gray-700' : 'text-white'}`}>
+              <Link
+                to="/tours"
+                className={`transition-colors ${isScrolled ? 'hover:text-blue-700' : 'hover:text-white/90'}`}
+              >
+                Tours
+              </Link>
+              <a
+                href="#about-us"
+                className={`transition-colors ${isScrolled ? 'hover:text-blue-700' : 'hover:text-white/90'}`}
+              >
+                About Us
+              </a>
+              <Link
+                to="/contact"
+                className={`transition-colors ${isScrolled ? 'hover:text-blue-700' : 'hover:text-white/90'}`}
+              >
+                Contact Us
+              </Link>
+            </nav>
+
             {/* Currency Selector */}
             <div className="flex items-center space-x-4">
               <div className="relative" ref={currencyDropdownRef}>
@@ -226,7 +248,9 @@ const LandingPage = () => {
                   onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
                   className="flex items-center space-x-2 px-3 py-1.5 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all"
                 >
-                  <FiGlobe className="w-4 h-4" />
+                  <span className="p-1 rounded-full bg-gradient-to-r from-orange-500 to-blue-600">
+                    <FiGlobe className="w-4 h-4 text-white" />
+                  </span>
                   <span className="font-medium">{selectedCurrency}</span>
                   <FiChevronDown className={`w-4 h-4 transition-transform ${showCurrencyDropdown ? 'transform rotate-180' : ''}`} />
                 </button>
@@ -240,7 +264,7 @@ const LandingPage = () => {
                           setSelectedCurrency(code);
                           setShowCurrencyDropdown(false);
                         }}
-                        className={`w-full text-left px-4 py-2 text-sm flex items-center ${selectedCurrency === code ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                        className={`w-full text-left px-4 py-2 text-sm flex items-center ${selectedCurrency === code ? 'bg-orange-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
                       >
                         <span className="mr-2">{symbol}</span>
                         {code}
@@ -253,7 +277,7 @@ const LandingPage = () => {
               {/* Login Button */}
               <Link 
                 to="/login" 
-                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 <FiEdit3 className="w-4 h-4" />
                 <span>Login</span>
@@ -297,14 +321,28 @@ const LandingPage = () => {
                   className={`absolute inset-0 transition-opacity duration-1000 ${
                     index === currentSlide ? 'opacity-100' : 'opacity-0'
                   }`}
-                  style={{
-                    backgroundImage: `url(${experience.images[0] || 'https://source.unsplash.com/1920x1080/?sightseeing,landmark'})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    willChange: 'transform, opacity'
-                  }}
                 >
+                  {experience.videos && experience.videos.length > 0 && (!experience.images || experience.images.length === 0) ? (
+                    <video
+                      src={experience.videos[0].startsWith('http') ? experience.videos[0] : `${process.env.REACT_APP_API_URL}/${experience.videos[0]}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                  ) : (
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage: `url(${(experience.images && experience.images[0]) || 'https://source.unsplash.com/1920x1080/?sightseeing,landmark'})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        willChange: 'transform, opacity'
+                      }}
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30"></div>
                 </div>
               ))}
@@ -440,12 +478,12 @@ const LandingPage = () => {
   });
 
   const FeaturesSection = () => (
-    <section className="py-20 bg-gradient-to-b from-white to-blue-50">
+    <section id="about-us" className="py-20 bg-gradient-to-b from-white to-orange-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-20 max-w-4xl mx-auto">
-          <span className="text-blue-600 font-semibold mb-4 inline-block">WHY CHOOSE BookMySight.com</span>
+          <span className="bg-gradient-to-r from-orange-500 to-blue-600 bg-clip-text text-transparent font-semibold mb-4 inline-block">WHY CHOOSE BookMySight.com</span>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Your Journey, Our Expertise</h2>
-          <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-blue-600 mx-auto mb-8"></div>
           <p className="text-xl text-gray-600">
             We combine local knowledge with global expertise to create unforgettable travel experiences tailored just for you.
             Discover the difference that sets us apart.
@@ -458,8 +496,8 @@ const LandingPage = () => {
               key={index}
               className="bg-white p-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-center border border-gray-100"
             >
-              <div className="bg-blue-50 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                {React.cloneElement(feature.icon, { className: 'w-10 h-10 text-blue-600' })}
+              <div className="bg-orange-50 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                {React.cloneElement(feature.icon, { className: 'w-10 h-10 text-blue-900' })}
               </div>
               <h3 className="text-2xl font-bold mb-4 text-gray-900">{feature.title}</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">{feature.description}</p>
@@ -475,7 +513,7 @@ const LandingPage = () => {
               Experience the BookMySight.com difference today with our best price guarantee.
             </p>
             <Link to="/tours">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
+              <button className="bg-blue-900 hover:bg-blue-950 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
                 Start Planning Your Trip
               </button>
             </Link>
@@ -491,7 +529,7 @@ const LandingPage = () => {
       return (
         <div className="py-16 bg-white">
           <div className="container mx-auto px-4 text-center">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading amazing sightseeings...</p>
           </div>
         </div>
@@ -506,7 +544,7 @@ const LandingPage = () => {
               <p>{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="mt-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
               >
                 Retry
               </button>
@@ -522,7 +560,7 @@ const LandingPage = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Popular Sightseeings</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Discover our most sought-after sightseeing tours around the world</p>
-            <div className="w-20 h-1 bg-blue-600 mx-auto mt-4"></div>
+            <div className="w-20 h-1 bg-orange-500 mx-auto mt-4"></div>
           </div>
 
           {destinations.length > 0 ? (
@@ -533,11 +571,34 @@ const LandingPage = () => {
                   className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
                 >
                   <div className="relative h-64 overflow-hidden">
-                    <img
-                      src={destination.images[0]}
-                      alt={destination.name}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                    />
+                    {destination.videos && destination.videos.length > 0 ? (
+                      <div className="relative w-full h-full">
+                        <video
+                          src={destination.videos[0].startsWith('http') ? destination.videos[0] : `${process.env.REACT_APP_API_URL}/${destination.videos[0]}`}
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                        />
+                        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                          </svg>
+                          Video
+                        </div>
+                      </div>
+                    ) : destination.images && destination.images.length > 0 ? (
+                      <img
+                        src={destination.images[0].startsWith('http') ? destination.images[0] : `${process.env.REACT_APP_API_URL}/${destination.images[0]}`}
+                        alt={destination.name}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No media available</span>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-4 left-4 right-4">
                       <div className="flex justify-between items-center">
@@ -545,7 +606,7 @@ const LandingPage = () => {
                           <h3 className="text-white text-xl font-bold">{destination.name}</h3>
                           <div className="flex items-center text-white/80">
                             <FiMapPin className="mr-1" />
-                            <span>{destination.location}</span>
+                            <span>{destination.city || destination.location}</span>
                           </div>
                         </div>
                         <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -560,7 +621,7 @@ const LandingPage = () => {
                       <div>
                         <div>
                           <span className="text-gray-500 text-sm">From</span>
-                          <p className="text-2xl font-bold text-blue-600">
+                          <p className="text-2xl font-bold text-orange-500">
                             {formatPrice(destination.offerPrice || destination.price, selectedCurrency)}
                             {destination.offerPrice && destination.price > destination.offerPrice && (
                               <span className="ml-2 text-sm font-normal text-gray-500 line-through">
@@ -575,7 +636,7 @@ const LandingPage = () => {
                     <p className="text-gray-600 mb-4 line-clamp-2">{destination.description}</p>
                     <Link
                       to={buildSightseeingUrl(destination)}
-                      className="block text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                      className="block text-center bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                     >
                       View Details
                     </Link>
@@ -592,7 +653,7 @@ const LandingPage = () => {
           <div className="text-center mt-12">
             <Link
               to="/tours"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300"
+              className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300"
               onClick={(e) => {
                 e.preventDefault();
                 window.location.href = '/tours';
@@ -643,9 +704,9 @@ const LandingPage = () => {
       <section className="py-24 bg-white" aria-labelledby="how-it-works">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto mb-20">
-            <span className="text-blue-600 font-semibold mb-4 inline-block">OUR PROCESS</span>
+            <span className="bg-gradient-to-r from-orange-500 to-blue-900 bg-clip-text text-transparent font-semibold mb-4 inline-block">OUR PROCESS</span>
             <h2 id="how-it-works" className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Plan Your Perfect Getaway</h2>
-            <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-blue-900 mx-auto mb-8"></div>
             <p className="text-xl text-gray-600">
               From dream to departure, we guide you through every step of planning your perfect trip. 
               Our streamlined process makes travel planning simple and stress-free.
@@ -654,7 +715,7 @@ const LandingPage = () => {
 
           <div className="relative">
             {/* Timeline connector */}
-            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-100 to-blue-200 transform -translate-x-1/2"></div>
+            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-100 to-blue-100 transform -translate-x-1/2"></div>
             
             {steps.map((step, index) => (
               <div key={index} className="relative z-10 mb-16 md:mb-24 last:mb-0">
@@ -665,7 +726,7 @@ const LandingPage = () => {
                   <div className={`w-full md:w-1/2 p-6 md:p-8 ${index % 2 === 0 ? 'md:pl-16' : 'md:pr-16'}`}>
                     <div className="bg-white rounded-xl shadow-xl p-8 h-full border border-gray-100">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold mr-4">
+                        <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-blue-900 text-xl font-bold mr-4">
                           {step.step}
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900">{step.title}</h3>
@@ -673,8 +734,8 @@ const LandingPage = () => {
                       <p className="text-gray-700 mb-4">{step.description}</p>
                       <p className="text-gray-500 text-sm">{step.details}</p>
                       {index === 1 && (
-                        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                          <p className="text-sm text-blue-700">
+                        <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-100">
+                          <p className="text-sm text-blue-900">
                             <span className="font-semibold">Pro Tip:</span> Save time by using our "Build Your Trip" tool to automatically create a personalized itinerary.
                           </p>
                         </div>
@@ -684,13 +745,13 @@ const LandingPage = () => {
                   
                   {/* Step visual */}
                   <div className={`w-full md:w-1/2 p-6 md:p-8 ${index % 2 === 0 ? 'md:pr-16' : 'md:pl-16'}`}>
-                    <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 h-full flex items-center justify-center border border-gray-100 shadow-lg">
+                    <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-8 h-full flex items-center justify-center border border-gray-100 shadow-lg">
                       <div className="text-center">
-                        <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6">
+                        <div className="w-20 h-20 bg-orange-100 rounded-2xl flex items-center justify-center text-blue-900 mx-auto mb-6">
                           {React.cloneElement(step.icon, { className: 'w-10 h-10' })}
                         </div>
                         <h4 className="text-xl font-semibold text-gray-800 mb-2">Step {step.step}</h4>
-                        <p className="text-blue-600 font-medium">{step.title}</p>
+                        <p className="text-blue-900 font-medium">{step.title}</p>
                       </div>
                     </div>
                   </div>
@@ -701,17 +762,17 @@ const LandingPage = () => {
 
           {/* CTA Box */}
           <div 
-            className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 md:p-12 text-white text-center max-w-5xl mx-auto mt-16 shadow-xl"
+            className="bg-gradient-to-r from-blue-900 to-orange-600 rounded-2xl p-8 md:p-12 text-white text-center max-w-5xl mx-auto mt-16 shadow-xl"
           >
             <div className="max-w-3xl mx-auto">
               <h3 className="text-2xl md:text-3xl font-bold mb-4">Ready to Start Your Journey?</h3>
-              <p className="text-blue-100 text-lg mb-8">
+              <p className="text-white/90 text-lg mb-8">
                 Join thousands of travelers who trust us to create their perfect vacation experiences. 
                 Begin planning your dream trip today with our easy-to-use tools and expert guidance.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link to="/tours">
-                  <button className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                  <button className="bg-white text-blue-900 hover:bg-orange-50 font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105">
                     Explore Destinations
                   </button>
                 </Link>
@@ -783,12 +844,12 @@ const LandingPage = () => {
     ];
 
     return (
-      <section className="py-24 bg-gradient-to-b from-white to-blue-50" aria-labelledby="testimonials">
+      <section className="py-24 bg-gradient-to-b from-white to-orange-50" aria-labelledby="testimonials">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <span className="text-blue-600 font-semibold mb-4 inline-block">TRAVELER STORIES</span>
+            <span className="bg-gradient-to-r from-orange-500 to-blue-900 bg-clip-text text-transparent font-semibold mb-4 inline-block">TRAVELER STORIES</span>
             <h2 id="testimonials" className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Trusted by Travelers Worldwide</h2>
-            <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-blue-900 mx-auto mb-8"></div>
             <p className="text-xl text-gray-600">
               Don't just take our word for it. Here's what our community of global travelers has to say about their experiences with us.
             </p>
@@ -803,7 +864,7 @@ const LandingPage = () => {
                   key={index}
                   className="bg-white p-8 rounded-2xl shadow-xl relative border border-gray-100"
                 >
-                  <div className="absolute top-8 left-8 text-blue-100 text-5xl -z-0">
+                  <div className="absolute top-8 left-8 text-orange-100 text-5xl -z-0">
                     <FaQuoteLeft />
                   </div>
                   <div className="relative z-10">
@@ -823,7 +884,7 @@ const LandingPage = () => {
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{testimonial.author}</h4>
-                        <p className="text-blue-600 text-sm">{testimonial.role}</p>
+                        <p className="text-blue-900 text-sm">{testimonial.role}</p>
                         <div className="flex items-center text-gray-500 text-sm mt-1">
                           <FiMapPin className="w-3.5 h-3.5 mr-1" />
                           <span>{testimonial.location}</span>
@@ -839,19 +900,19 @@ const LandingPage = () => {
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-20">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">5K+</div>
+                <div className="text-4xl md:text-5xl font-bold text-blue-900 mb-2">5K+</div>
                 <p className="text-gray-600">Happy Travelers</p>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">1000+</div>
+                <div className="text-4xl md:text-5xl font-bold text-blue-900 mb-2">1000+</div>
                 <p className="text-gray-600">Trips</p>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">4.9/5</div>
+                <div className="text-4xl md:text-5xl font-bold text-blue-900 mb-2">4.9/5</div>
                 <p className="text-gray-600">Google Rating</p>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">24/7</div>
+                <div className="text-4xl md:text-5xl font-bold text-blue-900 mb-2">24/7</div>
                 <p className="text-gray-600">Support</p>
               </div>
             </div>
@@ -905,9 +966,9 @@ const LandingPage = () => {
               href="https://www.google.com/search?sca_esv=1c2c48b035966a68&sxsrf=AE3TifP9SxIBtHLACoQjv_M6NeYFgfQBDw:1755696053983&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E-8MLiu9knu7KkiSzfgpZjoKrlaApOlm0kTxIBDiw6pWzF-dwn79R59QzJYtPMQmM9PMWYjgBHDLLb5cmiXQlhx1k3EX&q=Navigatio+ASIA+Reviews&sa=X&ved=2ahUKEwioi4a9vZmPAxVe4TgGHWGOCjwQ0bkNegQILBAE&biw=1536&bih=703&dpr=1.25"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-white hover:bg-gray-50 text-blue-600 font-semibold px-8 py-3 rounded-lg border-2 border-blue-600 transition-all duration-300 hover:shadow-lg"
+              className="inline-block bg-orange-500 hover:bg-orange-600 text-blue-900 font-semibold px-8 py-3 rounded-lg border-2 border-blue-900 transition-all duration-300 hover:shadow-lg"
             >
-              Read More Stories
+              View More Reviews
             </a>
           </div>
         </div>
@@ -917,14 +978,14 @@ const LandingPage = () => {
 
   // Call to Action Section Component
   const CTASection = () => (
-    <section className="py-16 bg-blue-600 text-white">
+    <section className="py-16 bg-gradient-to-r from-orange-500 to-blue-600 text-white">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready for Your Next Adventure?</h2>
         <p className="text-xl mb-8 max-w-2xl mx-auto">Join thousands of travelers who have experienced the world with us</p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Link 
             to="/tours" 
-            className="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-full transition-colors duration-300 inline-block"
+            className="bg-white text-blue-700 hover:bg-gray-100 font-bold py-3 px-8 rounded-full transition-colors duration-300 inline-block"
           >
             Explore Tours
           </Link>
@@ -965,7 +1026,7 @@ const LandingPage = () => {
         <DestinationsSection />
         
         {/* 3. World Clock Section */}
-        <section id="world-clock" className="py-12">
+        <section id="world-clock" className="py-12 bg-orange-50">
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
               <WorldClock />
@@ -974,7 +1035,7 @@ const LandingPage = () => {
         </section>
         
         {/* Currency Converter Section */}
-        <section id="currency-converter" className="py-12">
+        <section id="currency-converter" className="py-12 bg-orange-50">
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
               <CurrencyConverter />

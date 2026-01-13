@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
-import { removeFromCart } from '../redux/slices/cartSlice';
+import { removeFromCart, updateQuantity as updateCartQuantity } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import { useCurrency } from '../contexts/CurrencyContext';
 
@@ -16,8 +16,8 @@ export default function CartPage() {
     dispatch(removeFromCart(id));
   };
 
-  const updateQuantity = (id, quantity) => {
-    dispatch(updateQuantity({ id, quantity }));
+  const handleQuantityUpdate = (id, quantity) => {
+    dispatch(updateCartQuantity({ id, quantity }));
   };
 
   if (count === 0) {
@@ -31,7 +31,7 @@ export default function CartPage() {
             <div className="mt-6">
               <Link
                 to="/tours"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900"
               >
                 Browse Tours
               </Link>
@@ -74,14 +74,14 @@ export default function CartPage() {
                     </div>
                     <div className="flex items-center mt-2">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => handleQuantityUpdate(item.id, item.quantity - 1)}
                         className="text-gray-500 hover:text-gray-700"
                       >
                         <FiMinus className="h-4 w-4" />
                       </button>
                       <span className="mx-2 text-gray-700">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => handleQuantityUpdate(item.id, item.quantity + 1)}
                         className="text-gray-500 hover:text-gray-700"
                       >
                         <FiPlus className="h-4 w-4" />
@@ -117,7 +117,7 @@ export default function CartPage() {
                   const firstItemId = items[0].id;
                   navigate(`/guest/checkout/${firstItemId}`);
                 }}
-                className="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900"
               >
                 Proceed to Checkout
               </button>
@@ -125,7 +125,7 @@ export default function CartPage() {
             <div className="mt-4 flex justify-center text-sm text-center text-gray-500">
               <p>
                 or{' '}
-                <Link to="/tours" className="text-blue-600 font-medium hover:text-blue-500">
+                <Link to="/tours" className="text-blue-900 font-medium hover:text-orange-600">
                   Continue Shopping<span aria-hidden="true"> &rarr;</span>
                 </Link>
               </p>

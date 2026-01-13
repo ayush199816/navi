@@ -46,13 +46,13 @@ const SightseeingNav = ({ sightseeing, children }) => {
   ];
 
   return (
-    <div className="bg-white shadow-sm sticky top-0 z-10">
+    <div className="bg-gradient-to-r from-blue-900 to-orange-600 shadow-sm sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <FiArrowLeft className="h-6 w-6 text-gray-600 mr-2" />
-              <span className="text-xl font-semibold text-gray-800">Back to Home</span>
+              <FiArrowLeft className="h-6 w-6 text-white/90 mr-2" />
+              <span className="text-xl font-semibold text-white">Back to Home</span>
             </Link>
           </div>
           
@@ -71,7 +71,7 @@ const SightseeingNav = ({ sightseeing, children }) => {
                     href="https://www.google.com/search?sca_esv=61a9446aba78e5ee&sxsrf=AE3TifN2k5vg-m3PCoAiHNSVDyGya_T8qw:1765359762819&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E-8MLiu9knu7KkiSzfgpZjoKrlaApOlm0kTxIBDiw6pWzF-dwn79R59QzJYtPMQmM9PMWYjgBHDLLb5cmiXQlhx1k3EX&q=Navigatio+ASIA+Reviews&sa=X&ved=2ahUKEwiF68DM3bKRAxUTwTgGHSCmAz8Q0bkNegQIMxAE&biw=1707&bih=772&dpr=1.13"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-2 rounded-md text-sm font-medium flex items-center text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
+                    className="px-3 py-2 rounded-md text-sm font-medium flex items-center text-white/80 hover:text-white hover:border-b-2 hover:border-white/60"
                   >
                     {item.icon}
                     {item.label}
@@ -83,8 +83,8 @@ const SightseeingNav = ({ sightseeing, children }) => {
                     className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
                       path.endsWith(`#${item.id}`) || 
                       (path.endsWith(sightseeingId) && item.id === 'overview')
-                        ? 'text-blue-600 border-b-2 border-blue-600'
-                        : 'text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300'
+                        ? 'text-white border-b-2 border-orange-300'
+                        : 'text-white/80 hover:text-white hover:border-b-2 hover:border-white/60'
                     }`}
                   >
                     {item.icon}
@@ -94,10 +94,10 @@ const SightseeingNav = ({ sightseeing, children }) => {
               ))}
             </div>
             
-            <div className="flex items-center space-x-4 border-l border-gray-200 pl-6 ml-2">
+            <div className="flex items-center space-x-4 border-l border-white/20 pl-6 ml-2">
               <button 
                 onClick={() => navigate('/cart')}
-                className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+                className="relative p-2 text-white/90 hover:text-white focus:outline-none"
               >
                 <FiShoppingCart className="h-5 w-5" />
                 {cartItems?.length > 0 && (
@@ -115,12 +115,12 @@ const SightseeingNav = ({ sightseeing, children }) => {
                     aria-expanded={isDropdownOpen}
                     aria-haspopup="true"
                   >
-                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <span className="text-blue-600 font-medium">
+                    <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+                      <span className="text-white font-medium">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-white">
                       {user?.name || 'User'}
                     </span>
                   </button>

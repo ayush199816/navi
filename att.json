@@ -1,0 +1,4396 @@
+﻿[
+  {
+    "name": "4 ISLAND TOUR BY LONG TAIL BOAT + LUNCH FROM KRABI - SIC (NATIONAL PARK FEES NOT INCLUDED)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "57363013e175fc479c808cb3"
+    }
+  },
+  {
+    "name": "4 ISLAND TOUR BY SPEED BOAT + LUNCH FROM KRABI - SIC (NATIONAL PARK FEES NOT INCLUDED)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2441.25,
+    "costPrice": 2612.14,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "32d55e2743825af85b16b3e4"
+    }
+  },
+  {
+    "name": "69 SHOW PATTAYA - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1417.5,
+    "costPrice": 1516.73,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "157b81f775b650ef4425b96b"
+    }
+  },
+  {
+    "name": "7 ISLAND SUNSET DINNER KRABI BY LONGTAIL BOAT - SIC  (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2520,
+    "costPrice": 2696.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "46d4249c4e24ae596ea8f42e"
+    }
+  },
+  {
+    "name": "7 ISLAND SUNSET DINNER KRABI BY SPEEDBOAT - SIC  (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3543.75,
+    "costPrice": 3791.81,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "bc3244f5ffa0aae005983ee3"
+    }
+  },
+  {
+    "name": "89 SHOW PATTAYA - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1417.5,
+    "costPrice": 1516.73,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "d52fe6804778dfb08b423fb5"
+    }
+  },
+  {
+    "name": "ALCAZAR SHOW PATTAYA  (Normal Seat) - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "32216f187661d5bffef15f30"
+    }
+  },
+  {
+    "name": "ALCAZAR SHOW PATTAYA - (VIP Seat) - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1575,
+    "costPrice": 1685.25,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5221f1498155eae4116d7d5b"
+    }
+  },
+  {
+    "name": "Angthong Island & Kayaking by Big Boat (shared. Ex National Park fee) - SIC Tour",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 4725,
+    "costPrice": 5055.75,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9b0a36765521f919e0c8345e"
+    }
+  },
+  {
+    "name": "Angthong Island & Kayaking by Speed Boat (shared. Ex National Park fee) - SIC Tour",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 5985,
+    "costPrice": 6403.95,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "ab4aac78cb5c06dcdd1f4d64"
+    }
+  },
+  {
+    "name": "ART OF PARADISE PATTAYA - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 567,
+    "costPrice": 606.69,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "538b5f0f305c60649080351b"
+    }
+  },
+  {
+    "name": "BANGKOK INDIAN  LUNCH COUPON",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 787.5,
+    "costPrice": 842.63,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "211300aae8bcb053c13a121e"
+    }
+  },
+  {
+    "name": "BANGKOK INDIAN DINNER COUPON",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 787.5,
+    "costPrice": 842.63,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "637ff1d576fd1609c6e9b294"
+    }
+  },
+  {
+    "name": "CARNIVAL MAGIC SHOW (WITHOUT DINNER ) - ONLY TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 5040,
+    "costPrice": 5392.8,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "afc157c35d7e42f1052aa608"
+    }
+  },
+  {
+    "name": "CARNIVAL MAGIC SHOW (WITH DINNER) - PVT - ONLT TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "PVT",
+    "sellingPrice": 5670,
+    "costPrice": 6066.9,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "4b67821504c1964ce91bfc86"
+    }
+  },
+  {
+    "name": "CARNIVAL MAGIC SHOW (WITH DINNER) - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 7245,
+    "costPrice": 7752.15,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9db4913b5c97e1bf6d1e1c4c"
+    }
+  },
+  {
+    "name": "CARNIVAL MAGIC SHOW (WITHOUT DINNER) - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 6615,
+    "costPrice": 7078.05,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "b932ff7f8551ccf44aab9d27"
+    }
+  },
+  {
+    "name": "Coral Island with sunset point trip by catamaran Yacht",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "1b39b1be63ffa93b2596fa76"
+    }
+  },
+  {
+    "name": "CORAL ISLAND BY SPEEDBOAT WITH LUNCH - SIC (NO ACTIVITIES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 787.5,
+    "costPrice": 842.63,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "ec085918617e7092e5486d11"
+    }
+  },
+  {
+    "name": "CROCODILE FARM PATTAYA / MILLION YEAR STONE PARK",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1417.5,
+    "costPrice": 1516.73,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "d37d9bbe6960527c94f172e7"
+    }
+  },
+  {
+    "name": "CHAO PHRAYA PRINCESS RIVER DINNER CRUISE - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3622.5,
+    "costPrice": 3876.08,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "389e2bd484b48c4d5b359650"
+    }
+  },
+  {
+    "name": "DINNER CRUISE BANGKOK (CHAO PHRAYA PRINCES) - ONLY TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2677.5,
+    "costPrice": 2864.93,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "febd1432efd3f3a30ca7bff7"
+    }
+  },
+  {
+    "name": "DINNER CRUISE BANGKOK (CHAO PHRAYA PRINCES) CHILD AGE:- 3 TO 8 YEARS",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 2520,
+    "costPrice": 2696.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c391ee8e0fc1ea57cb9ca4a7"
+    }
+  },
+  {
+    "name": "DOLPHINE SHOW (VIP SEAT) - PHUKET  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2677.5,
+    "costPrice": 2864.93,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "05e9296563f8fed4249afd42"
+    }
+  },
+  {
+    "name": "DOLPHINE SHOW (VVIP SEAT) - PHUKET - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 3150,
+    "costPrice": 3370.5,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "00689b50c452164d9de0532f"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW (DELUXE SEAT) - PHUKET - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2362.5,
+    "costPrice": 2527.88,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "1d2037eb0b25cece6af5f9b4"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW (DELUXE SEAT) - CHILD PHUKET - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c08a04e67513d3faa6fb61ec"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW (REGULAR SEAT) - PHUKET - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "7e19a2a3f3036f10a386fed5"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW (REGULAR SEAT) - CHILD - PHUKET - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c4c5f83b22ae7949ba0c8f08"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW PATTAYA ( DELUX SEAT) - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2047.5,
+    "costPrice": 2190.83,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "19e5ec9420cab5db1f426b08"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW PATTAYA ( DELUX SEAT) CHILD HEIGHT BETWEEN 80CM TO 120 CM  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "6fe32b5295b77e8378620152"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW PATTAYA ( REGULAR SEAT) - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1575,
+    "costPrice": 1685.25,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "616ea3f8cf2e2d4e1deb088f"
+    }
+  },
+  {
+    "name": "DOLPHIN SHOW PATTAYA ( REGULAR SEAT) CHILD HEIGHT BETWEEN 80CM TO 120 CM - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1260,
+    "costPrice": 1348.2,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "d62adb6bba0cb24f85643918"
+    }
+  },
+  {
+    "name": "DREAM WORLD SUPER VISA TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3150,
+    "costPrice": 3370.5,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "2cdb998ba5dced1a3d68d48f"
+    }
+  },
+  {
+    "name": "EN ROUTE SRI RACHA TIGER TOPIA (TIGER  SELF PHOTO)- PATTAYA - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1338.75,
+    "costPrice": 1432.46,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "980d95bbe1c52a64c4c692fd"
+    }
+  },
+  {
+    "name": "EN ROUTE SRI RACHA TIGER TOPIA (NORMAL ENTRY TICKET) - PATTAYA - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 787.5,
+    "costPrice": 842.63,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5331747cc81a1f0ac600baff"
+    }
+  },
+  {
+    "name": "EVENING FANTASEA SHOW PHUKET ONLY SHOW WITH SIC TRANSFER",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 5355,
+    "costPrice": 5729.85,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c78787763813b76baa8289d1"
+    }
+  },
+  {
+    "name": "EVENING FANTASEA SHOW PHUKET ONLY SHOW TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 4410,
+    "costPrice": 4718.7,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5c8402a3d5c76ff4f56a06c2"
+    }
+  },
+  {
+    "name": "EVENING FANTASEA SHOW PHUKET (DINNER + SHOW) WITH SIC TRANSFER",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 5985,
+    "costPrice": 6403.95,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "cb00ebf65c523a48aa6b84d9"
+    }
+  },
+  {
+    "name": "EVENING FANTASEA SHOW PHUKET (DINNER + SHOW) - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 5040,
+    "costPrice": 5392.8,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "238907fb0abd9cb440314c77"
+    }
+  },
+  {
+    "name": "FANTASEA SHOW + DINNER (Only TICKET) (GOLD SEAT)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 5985,
+    "costPrice": 6403.95,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "540f95463cfe1d8b8ddaed5f"
+    }
+  },
+  {
+    "name": "FANTASEA SHOW PHUKET DINNER + SHOW WITH SIC TRANSFER GOLD SEAT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 6930,
+    "costPrice": 7415.1,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "091bae7c297aeb8978fbdbca"
+    }
+  },
+  {
+    "name": "FLOATING MARKET PATTAYA - ONE SIDE BOAT - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 567,
+    "costPrice": 606.69,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "4093f15eb1492be3a5311201"
+    }
+  },
+  {
+    "name": "FLOATING MARKET PATTAYA - BOTH SIDE BOAT - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 945,
+    "costPrice": 1011.15,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c9eac39e971138a27bb3c793"
+    }
+  },
+  {
+    "name": "FROST MAGICAL ICE OF SIAM (With Boot)  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "19b7048dee48238dfe503818"
+    }
+  },
+  {
+    "name": "5 Hr Half Day City Tour Koh Samui (Including Big Buddha, Grand Father Mother Rock, Water Fall and Fruits Market) - Pvt Transfer ON CAR",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "PVT",
+    "sellingPrice": 7796.25,
+    "costPrice": 8341.99,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "12d1ee3ae311f3aa00b9123e"
+    }
+  },
+  {
+    "name": "5 Hr Half Day City Tour Koh Samui (Including Big Buddha, Grand Father Mother Rock, Water Fall and Fruits Market) - Pvt Transfer ON VAN",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "PVT",
+    "sellingPrice": 8820,
+    "costPrice": 9437.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "28a3dd286c78819fc33b1bc7"
+    }
+  },
+  {
+    "name": "Hanuman World - SIC + ( Zipline 32 Platform + Roller+Skywalk) + Meal",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 9450,
+    "costPrice": 10111.5,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e310950b1873c4b9977aeafc"
+    }
+  },
+  {
+    "name": "Hanuman World - SIC + (Zipeline 10 Platform + Roller+Skywalk)+Meal",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 7087.5,
+    "costPrice": 7583.63,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "6f55e49d1bc608d60261bf47"
+    }
+  },
+  {
+    "name": "Hanuman World - SIC + (Zipline 18 Platform + Roller+Skywalk)+Meal",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 8347.5,
+    "costPrice": 8931.83,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c9da556eb7878edb326317a6"
+    }
+  },
+  {
+    "name": "HONG ISLAND BY LONG TAIL BOAT WITHOUT LUNCH - SHARED TRANSFER (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2992.5,
+    "costPrice": 3201.98,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e8a13744a9a1109e6a5f5df0"
+    }
+  },
+  {
+    "name": "JAMES BOND ISLAND WITH LUNCH LONGTAIL BOAT SIC (NOT INCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2520,
+    "costPrice": 2696.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "03ea29c62a65ba8eb7905831"
+    }
+  },
+  {
+    "name": "JAMES BOND ISLAND WITH SPEED BOAT WITH LUNCH - SIC (EXCLUDING NATIONAL PARK FEES) + sea canoing",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3307.5,
+    "costPrice": 3539.03,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "f7eaf123cee17df41ea326f0"
+    }
+  },
+  {
+    "name": "JAMES BOND ISLAND WITH SPEED BOAT WITH LUNCH - SIC (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3150,
+    "costPrice": 3370.5,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "810fcddc756b0771d6d98bca"
+    }
+  },
+  {
+    "name": "Koh phangan to koh samui (Back - 01.00-05.00 am) Speedboat Transfer - sic  (koh Samui Hotel only in Chaweng)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2677.5,
+    "costPrice": 2864.93,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e415a496f8eed33d2135377a"
+    }
+  },
+  {
+    "name": "Koh samui to koh phangan (Go 18.00-23.00 pm) Speedboat Transfer - sic (koh Samui Hotel only in Chaweng)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2677.5,
+    "costPrice": 2864.93,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c59b14e7217fe256dac19011"
+    }
+  },
+  {
+    "name": "Koh Tao+Koh Nang Yuan in Speed boat with lunch??? & snokerling(Excl.NPF)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 6221.25,
+    "costPrice": 6656.74,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "3615eec28ecef4efc58bb1b8"
+    }
+  },
+  {
+    "name": "KRABI HOTEL TO PHUKET HOTEL TRANSFER - SIC (WED + FRI + SUN)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2677.5,
+    "costPrice": 2864.93,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "a10f3186bd5d1313425e0753"
+    }
+  },
+  {
+    "name": "KRABI INDIAN BUFFET LUNCH AND DINNER",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "6979b4f3ec3b6d93e3a437f9"
+    }
+  },
+  {
+    "name": "KRABI JUNGLE TOUR (EMERALD POOL + HOT SPRING + TIGER CAVE+LUNCH ) - SIC (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3465,
+    "costPrice": 3707.55,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c6154993e45da4947a3717b0"
+    }
+  },
+  {
+    "name": "KRABI JUNGLE TOUR (EMERALD POOL + HOT SPRING) - SIC (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2992.5,
+    "costPrice": 3201.98,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c4eff59769abc69b8e14d2a0"
+    }
+  },
+  {
+    "name": "Krabi to Phuket Transfer - Sic by ferry (ALL DAY)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2520,
+    "costPrice": 2696.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "b223ad50ab75fd1ac7a1c679"
+    }
+  },
+  {
+    "name": "Mahanakhon Skywalk + 78th Floor Rooftop Ticket (EVENING)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3937.5,
+    "costPrice": 4213.13,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "2198cf901c11021cb099ecde"
+    }
+  },
+  {
+    "name": "Mahanakhon Skywalk + 78th Floor Rooftop Ticket (EVENING) - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "f3f0169614259a6994c254ef"
+    }
+  },
+  {
+    "name": "Mahanakhon Skywalk + 78th Floor Rooftop Ticket (MORNING)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3055.5,
+    "costPrice": 3269.39,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "14e608e523a3dbd339c92f63"
+    }
+  },
+  {
+    "name": "Mahanakhon Skywalk + 78th Floor Rooftop Ticket (MORNING) - Child",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "1eb4a1a9e3bffbb7523b4b59"
+    }
+  },
+  {
+    "name": "MINI SIAM PATTAYA - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1338.75,
+    "costPrice": 1432.46,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "33e2f9103081aeb13e0dfbe6"
+    }
+  },
+  {
+    "name": "NONG NOOCH GARDEN WITH INDIAN LUNCH PATTAYA - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1968.75,
+    "costPrice": 2106.56,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e5a4ea40ea184c50ff57fa74"
+    }
+  },
+  {
+    "name": "NONG NOOCH GARDEN WITH INDIAN LUNCH PATTAYA + Bus - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2205,
+    "costPrice": 2359.35,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "d844774e5f48bb2c74d0d2d7"
+    }
+  },
+  {
+    "name": "PATTAYA INDIAN BUFFET LUNCH AND DINNER",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 866.25,
+    "costPrice": 926.89,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5bfcc56bb82d08f0367869b0"
+    }
+  },
+  {
+    "name": "Pattaya Yatch Party Pattaya -SIC (Without Alcohol)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 5670,
+    "costPrice": 6066.9,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "94943b41d410e95188c8a72b"
+    }
+  },
+  {
+    "name": "Pattaya Yatch Party Pattaya - SIC - (With Alcohol)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 6300,
+    "costPrice": 6741,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "86932dc3b9c70e3a4ae776fb"
+    }
+  },
+  {
+    "name": "PHI PHI ISLAND TRIP WITH LUNCH WITH BIG BOAT SIC (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3622.5,
+    "costPrice": 3876.08,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e8c3d0dbf1ddd013213561b6"
+    }
+  },
+  {
+    "name": "PHI PHI ISLAND TRIP WITH LUNCH WITH JET CRUISE BOAT - SIC (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3465,
+    "costPrice": 3707.55,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "ac08b2875b5663846d621028"
+    }
+  },
+  {
+    "name": "PHI PHI ISLAND TOUR WITH LUNCH WITH SPEED BOAT SIC (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2835,
+    "costPrice": 3033.45,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "2421bac62c4c712ce0c1ebbf"
+    }
+  },
+  {
+    "name": "PHI PHI ISLAND TOUR WITH LUNCH WITH SPEED BOAT SIC (INCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 4095,
+    "costPrice": 4381.65,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "ec9c79236a4da403d81b4bdb"
+    }
+  },
+  {
+    "name": "PHI PHI ISLAND TOUR WITH LUNCH WITH SPEED BOAT SIC - FROM KRABI (EXCLUDING NATIONAL PARK FEES)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 4252.5,
+    "costPrice": 4550.18,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "8e56e6291f75f34f5b7f4247"
+    }
+  },
+  {
+    "name": "EN ROUTE PHUKET CITY TOUR - 4 HR (WITHOUT BIG BUDDHA) - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "0e999539c90ab1adca45272b"
+    }
+  },
+  {
+    "name": "EN ROUTE PHUKET CITY TOUR - 4 HR (WITH BIG BUDDHA) - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "cae750008b720026ac03ae63"
+    }
+  },
+  {
+    "name": "PHUKET CITY TOUR FOR 5 HR  - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "6d392ac502284d8da80fdbe4"
+    }
+  },
+  {
+    "name": "PHUKET CITY TOUR FOR 5 HR ONLY (Exclduing Big buddha) - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "43798b66322eebf80aeb8731"
+    }
+  },
+  {
+    "name": "EN ROUTE PHUKET CITY TOUR - 4 HR (WITHOUT BIG BUDDHA) - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "bb10b43ce042b926b141e85d"
+    }
+  },
+  {
+    "name": "EN ROUTE PHUKET CITY TOUR - 4 HR (WITH BIG BUDDHA) - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "71bee81aaf13984ac4114a47"
+    }
+  },
+  {
+    "name": "PHUKET CITY TOUR FOR 5 HR  - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "8a160d6711d04dcc5492a1f3"
+    }
+  },
+  {
+    "name": "PHUKET CITY TOUR FOR 5 HR ONLY (Exclduing Big buddha) - Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 157.5,
+    "costPrice": 168.53,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "46a18d59d9be79ba967e0a53"
+    }
+  },
+  {
+    "name": "PHUKET CITY TOUR SIC (INCLUDING BIG BUDDHA TEMPLE)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2047.5,
+    "costPrice": 2190.83,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c6fe275934d2f2d368a33bd9"
+    }
+  },
+  {
+    "name": "PHUKET CITY TOUR SIC (NOT INCLUDING BIG BUDDHA TEMPLE)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "54724926f07d7edddaf6d21d"
+    }
+  },
+  {
+    "name": "PHUKET INDIAN BUFFET LUNCH / DINNER",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1260,
+    "costPrice": 1348.2,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e606f6d956e1ec7c1ed0e67c"
+    }
+  },
+  {
+    "name": "Rafting Program A - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Monkey Cave + Lunch + Jungle Walk to Waterfall - CHILD - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2992.5,
+    "costPrice": 3201.98,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "bf66f395c7838b0672c95908"
+    }
+  },
+  {
+    "name": "Rafting Program A - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Monkey Cave + Lunch + Jungle Walk to Waterfall - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3307.5,
+    "costPrice": 3539.03,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "d611bd848f4c18908b47bf83"
+    }
+  },
+  {
+    "name": "Rafting Program B - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Monkey Cave + Lunch + Jungle Walk to Waterfall + Rainforest Elephant Treakking 30 Mins - CHILD - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2992.5,
+    "costPrice": 3201.98,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "729363858735019dc2a78fac"
+    }
+  },
+  {
+    "name": "Rafting Program B - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Monkey Cave + Lunch + Jungle Walk to Waterfall + Rainforest Elephant Treakking 30 Mins - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3622.5,
+    "costPrice": 3876.08,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "a2c5cef98742cac4071306a2"
+    }
+  },
+  {
+    "name": "Rafting Program C - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Monkey Cave + Lunch + Jungle Walk to Waterfall + ATV 30 Mins - CHILD - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3622.5,
+    "costPrice": 3876.08,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "348996bd009a4fcb241b2cea"
+    }
+  },
+  {
+    "name": "Rafting Program C - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Monkey Cave + Lunch + Jungle Walk to Waterfall + ATV 30 Mins - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 4095,
+    "costPrice": 4381.65,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9274a2db1d8bda7298dc87e8"
+    }
+  },
+  {
+    "name": "Rafting Program D - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Lunch + Jungle Walk to Waterfall + ATV 30 Mins + Monkey Cave + RainForest Elephant treakking - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 4095,
+    "costPrice": 4381.65,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "79b4505f32195f82a9e85099"
+    }
+  },
+  {
+    "name": "Rafting Program D - River Rafting 5 Km with Briefing and Rafting Trainning + Flying Fox 150 M. + Lunch + Jungle Walk to Waterfall + ATV 30 Mins + Monkey Cave + RainForest Elephant treakking - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 4410,
+    "costPrice": 4718.7,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "3e55fb2b8bcc83f411035919"
+    }
+  },
+  {
+    "name": "Repley Belive it or not pattaya  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e0d0b93fe8a3e9de36b1c8d9"
+    }
+  },
+  {
+    "name": "RUSSIAN SHOW/ 69 SHOW PATTAYA  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1417.5,
+    "costPrice": 1516.73,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "d8d6a4dbc1c0d4cf5fe9112a"
+    }
+  },
+  {
+    "name": "SAFARI WORLD + MARINE PARK + LUNCH - SARED TRANSFER (WITH LUNCH)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 4095,
+    "costPrice": 4381.65,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "7b7b1f967e518741236cec07"
+    }
+  },
+  {
+    "name": "SAFARI WORLD WITH MARINE PARK + LUNCH BANGKOK - ONLY TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2992.5,
+    "costPrice": 3201.98,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "cff8e7b5ec1d647253ef4994"
+    }
+  },
+  {
+    "name": "SANTUARY OF TRUTH TEMPLE PATTAYA ( SHOW TIMIMG 11:30 AM AND 3:30 PM )  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1260,
+    "costPrice": 1348.2,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "75d64f3e04a7cb5fb157a2ec"
+    }
+  },
+  {
+    "name": "SEA AQUARIUM + AR TRICKEYE MUSEUM  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 3150,
+    "costPrice": 3370.5,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c612963354740606eac1a92d"
+    }
+  },
+  {
+    "name": "SEA AQUARIUM PHUKET TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 2677.5,
+    "costPrice": 2864.93,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "4e7606706305801a90be641b"
+    }
+  },
+  {
+    "name": "SEA AQUARIUM PHUKET TICKET - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 2205,
+    "costPrice": 2359.35,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "760e9a47f5c8a62008cdd53f"
+    }
+  },
+  {
+    "name": "SIAM OCEAN WORLD + MADDAM TUSSAD BANGKOK  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 3307.5,
+    "costPrice": 3539.03,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "b7373bd3246508bb93eab487"
+    }
+  },
+  {
+    "name": "SIAM'S AMAZING WATER AND AMUSEMENT PARK - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2598.75,
+    "costPrice": 2780.66,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "4f53586b702e3639a76bbdd6"
+    }
+  },
+  {
+    "name": "SIMILIAN ISLAND BY SPEED BOAT (INCLUDING NATIONAL PARK FEES ) SHARED TRANSFER",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 8190,
+    "costPrice": 8763.3,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "fc146b098d9e32a46ef12513"
+    }
+  },
+  {
+    "name": "SIMILIAN ISLAND BY SPEED BOAT (INCLUDING NATIONAL PARK FEES ) SHARED TRANSFER - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 6772.5,
+    "costPrice": 7246.58,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "f9d22e627e93fcf0b32ae62e"
+    }
+  },
+  {
+    "name": "SIMON CABARET SHOW NORMAL SEAT - OnlyTicket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c735f628dbd039587f981b38"
+    }
+  },
+  {
+    "name": "SIMON CABARET SHOW NORMAL SEAT - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2756.25,
+    "costPrice": 2949.19,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "fb844891566c0115f3702da3"
+    }
+  },
+  {
+    "name": "SIMON CABARET SHOW VIP SEAT - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3150,
+    "costPrice": 3370.5,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "81059fac33b352c4c4756d73"
+    }
+  },
+  {
+    "name": "TIFFANY NORMAL PATTAYA  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2756.25,
+    "costPrice": 2949.19,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "0ed343cd476495ba3d712b11"
+    }
+  },
+  {
+    "name": "TIFFANY VIP PATTAYA  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 3890.25,
+    "costPrice": 4162.57,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "24f1846669b690f8d9777131"
+    }
+  },
+  {
+    "name": "TIGER KINGDOM - SMALLEST TIGER  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2992.5,
+    "costPrice": 3201.98,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "155cbd65ef8f9d5801f02a1e"
+    }
+  },
+  {
+    "name": "TIGER KINGDOM - CHEETAH TICKET/BIG TIGER  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 3386.25,
+    "costPrice": 3623.29,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "ad4ea2e77818fbbb41af53ed"
+    }
+  },
+  {
+    "name": "TIGER KINGDOM - MEDIUM TIGER  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2677.5,
+    "costPrice": 2864.93,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "3d1f6db0e4a24f5d204bb0c1"
+    }
+  },
+  {
+    "name": "TIGER KINGDOM WALK ONLY  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1575,
+    "costPrice": 1685.25,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e2a41d28d0fdf4bcd66fda27"
+    }
+  },
+  {
+    "name": "TIGER PARK (BIGGEST) PATTAYA  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2835,
+    "costPrice": 3033.45,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "7956daf2b0fe625ac071aeeb"
+    }
+  },
+  {
+    "name": "TIGER PARK (MEDIUM) PATTAYA  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2205,
+    "costPrice": 2359.35,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "4bd7df0603e330a1e53200a0"
+    }
+  },
+  {
+    "name": "TIGER PARK (SMALLEST) PATTAYA  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 2520,
+    "costPrice": 2696.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "a0c7129e004be137e381e23f"
+    }
+  },
+  {
+    "name": "UNDERWATER WORLD PATTAYA  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "d55c9789433c5f18b44b349d"
+    }
+  },
+  {
+    "name": "YONA BEACH CLUB PHUKET DAY PASS EXPERIANCE - PVT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "PVT",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "6fbb61fcb56c8912e2170a8c"
+    }
+  },
+  {
+    "name": "YONA BEACH CLUB PHUKET DAY PASS EXPERIANCE - PVT (1500 THB CREDITS FOR FOOD & BEVERAGE ON SPOT)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "PVT",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5a25913bc69330cf23ef703f"
+    }
+  },
+  {
+    "name": "CORAL ISALAND IN PATTAYA ( IF ADD IN CORAL ISLAND TOUR )",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "97844d2ed47ad0c398f4d2f4"
+    }
+  },
+  {
+    "name": "CORAL ISLAND IN PATTAYA ( IF ADD IN CORAL ISLAND TOUR )PARASAILING",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1732.5,
+    "costPrice": 1853.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5fd9581600060e6e586968ef"
+    }
+  },
+  {
+    "name": "CORAL ISLAND IN PATTAYA ( IF ADD IN CORAL ISLAND TOUR ) BANANA BOAT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1008,
+    "costPrice": 1078.56,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "1b713f3bedac4eaa468756df"
+    }
+  },
+  {
+    "name": "CORAL ISLAND IN PATTAYA ( IF ADD IN CORAL ISLAND TOUR ) JET SKI",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1890,
+    "costPrice": 2022.3,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "72e9c0e2fd0d08061cce87d5"
+    }
+  },
+  {
+    "name": "CORAL ISLAND IN PATTAYA ( IF ADD IN CORAL ISLAND TOUR ) UNDER SEA WALK",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 4725,
+    "costPrice": 5055.75,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "14a6bf567146a4ef64d0a168"
+    }
+  },
+  {
+    "name": "CORAL ISLAND IN PATTAYA ( IF ADD IN CORAL ISLAND TOUR ) COMBO",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 8032.5,
+    "costPrice": 8594.78,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9228074d22278bb0449e2d06"
+    }
+  },
+  {
+    "name": "Bangkok City Tour Golden & Mini Reclining Ticket - SIC",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 1890,
+    "costPrice": 2022.3,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "4f773f03dddf27a82950d1dd"
+    }
+  },
+  {
+    "name": "Enroute Bangkok City Tour  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "11bc796b2183a26668dad84d"
+    }
+  },
+  {
+    "name": "Bangkok City Tour - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "7a6a3ac0b854ca086f771aa3"
+    }
+  },
+  {
+    "name": "PATTAYA ON THE WAY CITY TOUR DROP BKK HOTEL  - ENROUTE  - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "e12f15bc5543a2bf9cefe9be"
+    }
+  },
+  {
+    "name": "GRAND PALACE + EMERALD  ONLY TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 1890,
+    "costPrice": 2022.3,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "37b16343848029986b166609"
+    }
+  },
+  {
+    "name": "GOLDEN BUDDHA + MARBLE BUDDHA ONLY TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 945,
+    "costPrice": 1011.15,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "09d7caf38f67cbdf84320e9b"
+    }
+  },
+  {
+    "name": "WAT ARUN TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "91f169e1efa3250305a5d283"
+    }
+  },
+  {
+    "name": "RECLINING BUDDA TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1260,
+    "costPrice": 1348.2,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "fdc308fbbf8de3182908170a"
+    }
+  },
+  {
+    "name": "GOLDEN + MINI RECLING BUDDHA TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 787.5,
+    "costPrice": 842.63,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9936a3371e0f629791081a8b"
+    }
+  },
+  {
+    "name": "PHI PHI ISLAND PIER TO KRABI HOTEL - SIC + FERRY",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2205,
+    "costPrice": 2359.35,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "17a79f6ad21dbf6a645615a8"
+    }
+  },
+  {
+    "name": "KRABI HOTEL TO PHI PHI ISLAND PIER- SIC + FERRY",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2205,
+    "costPrice": 2359.35,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "293702d380d102ca600da7c5"
+    }
+  },
+  {
+    "name": "PHI PHI ISLAND PIER TO PHUKET HOTEL - SIC + FERRY",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2520,
+    "costPrice": 2696.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5d863f1bb0f6234c3ebfa5cd"
+    }
+  },
+  {
+    "name": "PHUKET HOTEL TO PHI PHI ISLAND PIER - SIC + FERRY",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2520,
+    "costPrice": 2696.4,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "db39f7463c7695fb6578de92"
+    }
+  },
+  {
+    "name": "DON SAK PIER TO  KOH SAMUI PIER - SIC FERRY",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "65132ff599fb34ff162fd0e0"
+    }
+  },
+  {
+    "name": "KOH SAMUI PIER TO DON SAK PIER - SIC FERRY",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 0,
+    "costPrice": 0,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "62456740a5d7d5194d7b55f1"
+    }
+  },
+  {
+    "name": "SPACE AND TIME CUBE ONLY ENTRY TICKET - ADULT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 2362.5,
+    "costPrice": 2527.88,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9c6b509f67d57024a0ab683d"
+    }
+  },
+  {
+    "name": "SPACE AND TIME CUBE ONLY ENTRY TICKET - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 2047.5,
+    "costPrice": 2190.83,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "a3d02bb1a437507e765392a2"
+    }
+  },
+  {
+    "name": "SPACE AND TIME CUBE VR EXPERIANCE TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "b215c92cbc7203d36006636e"
+    }
+  },
+  {
+    "name": "SPACE AND TIME CUBE RAIL CINEMA TICKET",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "85599b4a8afa484c0eaad7c8"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET - REGULAR SEAT - ADULT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3307.5,
+    "costPrice": 3539.03,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9f740a90a8d9abc1b8d7763d"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET - REGULAR SEAT - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 2992.5,
+    "costPrice": 3201.98,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "19974bb07fd920f350a64f6b"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET + DINNER - REGULAR SEAT - ADULT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3937.5,
+    "costPrice": 4213.13,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c76c24b30ae752498c5a18b2"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET + DINNER - REGULAR SEAT - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3622.5,
+    "costPrice": 3876.08,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "dcc8774687dcd47b6afdbc3e"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET - SILVER SEAT - ADULT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3622.5,
+    "costPrice": 3876.08,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9d9c3e4c48b264e4339bba82"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET - SILVER SEAT - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3307.5,
+    "costPrice": 3539.03,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "6f27bb950619a34607116547"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET + DINNER - SILVER SEAT - ADULT",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 4252.5,
+    "costPrice": 4550.18,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "5fbf9c4d3a3c510c629a35a8"
+    }
+  },
+  {
+    "name": "SIAM NIRAMIT SHOW PHUKET + DINNER - SILVER SEAT - CHILD",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 3937.5,
+    "costPrice": 4213.13,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "3bbbc7bea936a8469a71f896"
+    }
+  },
+  {
+    "name": "Krabi Hotel to Laemtomg Pier - shared + ferry (Pier to Hotel Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2835,
+    "costPrice": 3033.45,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "8a99be966424fb1d98bddae5"
+    }
+  },
+  {
+    "name": "Laemtomg pier to Krabi Hotel - shared + ferry (Hotel to Pier Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2835,
+    "costPrice": 3033.45,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "9c34b4d7aad5f640b8adf6ce"
+    }
+  },
+  {
+    "name": "Laemtomg pier to Phuket Hotel - shared + ferry (Hotel to Pier Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3307.5,
+    "costPrice": 3539.03,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "097d886f8e0c3d0eeed21530"
+    }
+  },
+  {
+    "name": "Phuket Hotel to Laemtomg Pier - shared + ferry (Pier to Hotel Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 3307.5,
+    "costPrice": 3539.03,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "ff8f98366d547d03d82041c0"
+    }
+  },
+  {
+    "name": "Krabi Hotel to Ton Sai Pier - shared + ferry (Pier to Hotel Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2205,
+    "costPrice": 2359.35,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "7bb07564e351db5900ab8e5f"
+    }
+  },
+  {
+    "name": "Ton Sai Pier to Krabi Hotel - shared + ferry (Hotel to Pier Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2205,
+    "costPrice": 2359.35,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "c937c3309cef759b612a4581"
+    }
+  },
+  {
+    "name": "Phuket Hotel to Ton Sai Pier - shared + ferry (Pier to Hotel Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2835,
+    "costPrice": 3033.45,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "2a885caa01504f6869bac05b"
+    }
+  },
+  {
+    "name": "Ton Sai Pier to Phuket Hotel - shared + ferry (Hotel to Pier Travel by own)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "SIC",
+    "sellingPrice": 2835,
+    "costPrice": 3033.45,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "eb4b3e494bb0048b9283b163"
+    }
+  },
+  {
+    "name": "Krabi Enroute Jungle Tour - Emerald and Hot Spring - Tickets (Excluding National Park Fees)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 945,
+    "costPrice": 1011.15,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "f4e26b6a0ce78e6592d1a668"
+    }
+  },
+  {
+    "name": "Krabi Jungle Tour - Emerald and Hot Spring - Tickets (Excluding National Park Fees)",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 945,
+    "costPrice": 1011.15,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "ad8caf70fe05209ffba2cd5d"
+    }
+  },
+  {
+    "name": "ELEPHANT JUNGLE SANCTUARY (Only Feed and Shower) - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 4189.5,
+    "costPrice": 4482.77,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "8dad57ea1c74e873746da668"
+    }
+  },
+  {
+    "name": "ELEPHANT JUNGLE SANCTUARY Half Day Visit - Only Ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "NONE",
+    "sellingPrice": 5512.5,
+    "costPrice": 5898.38,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "213d7ae35a84a092d3f1fec1"
+    }
+  },
+  {
+    "name": "Wat Arun - Temple ticket",
+    "type": "activity",
+    "country": "Thailand",
+    "transferType": "",
+    "sellingPrice": 1102.5,
+    "costPrice": 1179.68,
+    "details": "",
+    "description": "",
+    "location": "",
+    "isActive": true,
+    "createdBy": {
+      "$oid": "68c444103564926ff5a3125f"
+    },
+    "currency": "INR",
+    "createdAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-12T18:17:46.442Z"
+    },
+    "__v": 0,
+    "_id": {
+      "$oid": "999dfb8b706ae1c0198f3e44"
+    }
+  }
+]
