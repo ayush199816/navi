@@ -11,6 +11,21 @@ const CURRENCY_SYMBOLS = {
 };
 
 /**
+ * Convert amount from USD to INR
+ * Using approximate rate: 1 USD = 83 INR
+ * @param {number} amount - Amount in USD
+ * @returns {Promise<number>} Amount in INR (rounded to 2 decimal places)
+ */
+const convertUSDToINR = async (amount) => {
+  if (typeof amount !== 'number' || amount < 0) {
+    throw new Error('Invalid amount provided');
+  }
+  // Fixed rate: 1 USD = 83 INR
+  const USD_TO_INR_RATE = 83;
+  return Math.round(amount * USD_TO_INR_RATE * 100) / 100;
+};
+
+/**
  * Convert amount from THB to INR using fixed rate
  * @param {number} amount - Amount in THB
  * @returns {number} Amount in INR (rounded to 2 decimal places)
@@ -111,6 +126,7 @@ const getCurrencySymbol = (currency) => {
 
 module.exports = {
   convertCurrency,
+  convertUSDToINR,
   convertTHBToINR,
   convertINRToTHB,
   getExchangeRate,
