@@ -21,7 +21,7 @@ const convertUSDToINR = async (amount) => {
     throw new Error('Invalid amount provided');
   }
   // Fixed rate: 1 USD = 83 INR
-  const USD_TO_INR_RATE = 83;
+  const USD_TO_INR_RATE = 93.72;
   return Math.round(amount * USD_TO_INR_RATE * 100) / 100;
 };
 
