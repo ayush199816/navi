@@ -9,7 +9,8 @@ import {
   InformationCircleIcon,
   MapPinIcon,
   PhotoIcon,
-  TagIcon
+  TagIcon,
+  CalendarDaysIcon
 } from '@heroicons/react/24/outline';
 import api from '../../utils/api';
 
@@ -61,12 +62,16 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     aboutTour: 'No detailed description available.',
     highlights: ['No highlights available'],
     meetingPoint: 'To be advised upon booking',
-    whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+    whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'],
+    openDays: [],
+    closeDays: []
   });
   const [newInclusion, setNewInclusion] = useState('');
   const [newHighlight, setNewHighlight] = useState('');
   const [newWhatToBring, setNewWhatToBring] = useState('');
   const [newKeyword, setNewKeyword] = useState('');
+  const [newOpenDay, setNewOpenDay] = useState('');
+  const [newCloseDay, setNewCloseDay] = useState('');
   const [imagePreviews, setImagePreviews] = useState([]);
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,7 +100,9 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         aboutTour: 'No detailed description available.',
         highlights: ['No highlights available'],
         meetingPoint: 'To be advised upon booking',
-        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'],
+        openDays: [],
+        closeDays: []
       };
       // Create new form data with defaults and override with prop values
       const newFormData = { ...defaultValues };
@@ -161,7 +168,9 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         aboutTour: 'No detailed description available.',
         highlights: ['No highlights available'],
         meetingPoint: 'To be advised upon booking',
-        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing']
+        whatToBring: ['Comfortable walking shoes', 'camera', 'weather-appropriate clothing'],
+        openDays: [],
+        closeDays: []
       });
       setImagePreviews([]);
       setVideoPreviews([]);
@@ -324,7 +333,7 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     try {
       const formDataToSubmit = new FormData();
       const formDataCopy = { ...formData };
-      const arrayFields = ['inclusions', 'highlights', 'whatToBring', 'keywords'];
+      const arrayFields = ['inclusions', 'highlights', 'whatToBring', 'keywords', 'openDays', 'closeDays'];
 
       arrayFields.forEach(field => {
         let fieldValue = formDataCopy[field];
@@ -783,6 +792,142 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                     className="inline-flex items-center justify-center rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
                   >
                     Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Operating days"
+            description="Specify which days this sightseeing operates and which days it is closed."
+            icon={CalendarDaysIcon}
+          >
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-slate-700">Open Days</h3>
+                  <span className="text-xs font-medium text-slate-400">Days when sightseeing is available</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.openDays.map((day, index) => (
+                    <div
+                      key={`open-${day}-${index}`}
+                      className="group flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700"
+                    >
+                      <span className="capitalize">{day}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newOpenDays = [...formData.openDays];
+                          newOpenDays.splice(index, 1);
+                          setFormData(prev => ({
+                            ...prev,
+                            openDays: newOpenDays
+                          }));
+                        }}
+                        className="text-emerald-400 transition hover:text-emerald-700"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <select
+                    value={newOpenDay}
+                    onChange={(e) => setNewOpenDay(e.target.value)}
+                    className={baseInputClasses}
+                  >
+                    <option value="">Select a day</option>
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                    <option value="sunday">Sunday</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newOpenDay && !formData.openDays.includes(newOpenDay)) {
+                        setFormData(prev => ({
+                          ...prev,
+                          openDays: [...prev.openDays, newOpenDay]
+                        }));
+                        setNewOpenDay('');
+                      }
+                    }}
+                    className="inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                  >
+                    Add Open Day
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-slate-700">Close Days</h3>
+                  <span className="text-xs font-medium text-slate-400">Days when sightseeing is unavailable</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.closeDays.map((day, index) => (
+                    <div
+                      key={`close-${day}-${index}`}
+                      className="group flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-rose-700"
+                    >
+                      <span className="capitalize">{day}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newCloseDays = [...formData.closeDays];
+                          newCloseDays.splice(index, 1);
+                          setFormData(prev => ({
+                            ...prev,
+                            closeDays: newCloseDays
+                          }));
+                        }}
+                        className="text-rose-400 transition hover:text-rose-700"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <select
+                    value={newCloseDay}
+                    onChange={(e) => setNewCloseDay(e.target.value)}
+                    className={baseInputClasses}
+                  >
+                    <option value="">Select a day</option>
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                    <option value="sunday">Sunday</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newCloseDay && !formData.closeDays.includes(newCloseDay)) {
+                        setFormData(prev => ({
+                          ...prev,
+                          closeDays: [...prev.closeDays, newCloseDay]
+                        }));
+                        setNewCloseDay('');
+                      }
+                    }}
+                    className="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                  >
+                    Add Close Day
                   </button>
                 </div>
               </div>

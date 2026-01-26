@@ -772,6 +772,10 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
     sightseeingData.keywords = processArrayField(sightseeingData.keywords || []);
     sightseeingData.highlights = processArrayField(sightseeingData.highlights || []);
 
+    // Process openDays and closeDays
+    sightseeingData.openDays = processArrayField(sightseeingData.openDays || []);
+    sightseeingData.closeDays = processArrayField(sightseeingData.closeDays || []);
+
     // Ensure defaults if arrays are empty after processing
     if (sightseeingData.inclusions.length === 0) {
       sightseeingData.inclusions = ['No inclusions specified'];
@@ -968,6 +972,14 @@ const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
         if (updates.whatToBring.length === 0) {
           updates.whatToBring = ['No items specified'];
         }
+      }
+
+      // Process openDays and closeDays fields
+      if (updates.openDays !== undefined) {
+        updates.openDays = processArrayField(updates.openDays);
+      }
+      if (updates.closeDays !== undefined) {
+        updates.closeDays = processArrayField(updates.closeDays);
       }
     } catch (error) {
       console.error('Update error:', error);

@@ -87,6 +87,7 @@ const PackageCalculator = () => {
   const [loading, setLoading] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingCalculator, setViewingCalculator] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     adults: 0,
@@ -623,6 +624,11 @@ const handleSubmit = async (e) => {
 
   const totals = calculateTotals();
 
+  // Filter calculators based on search term
+  const filteredCalculators = calculators.filter(calculator =>
+    calculator.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -634,6 +640,17 @@ const handleSubmit = async (e) => {
           <Plus size={20} />
           New Calculator
         </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by package name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       {/* Calculators List */}
@@ -666,7 +683,7 @@ const handleSubmit = async (e) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {calculators.map((calculator) => (
+              {filteredCalculators.map((calculator) => (
                 <tr key={calculator._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {calculator.name}

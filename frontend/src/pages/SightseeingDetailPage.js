@@ -10,6 +10,7 @@ import { addToCart } from '../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import '../styles/modernDatePicker.css';
 import { buildSightseeingUrl } from '../utils/sightseeingUrl';
 
 const SightseeingDetailPage = () => {
@@ -228,6 +229,26 @@ const SightseeingDetailPage = () => {
     }
   }, [dispatch, sightseeing._id, sightseeing.name]);
 
+  // Helper function to check if a date is available for booking
+  const isDateAvailable = (date) => {
+    if (!sightseeing) return true;
+    
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    
+    // If openDays is specified, only those days are available
+    if (sightseeing.openDays && sightseeing.openDays.length > 0) {
+      return sightseeing.openDays.includes(dayName);
+    }
+    
+    // If closeDays is specified, those days are unavailable
+    if (sightseeing.closeDays && sightseeing.closeDays.length > 0) {
+      return !sightseeing.closeDays.includes(dayName);
+    }
+    
+    // If neither is specified, all days are available
+    return true;
+  };
+
   // Manual refresh function
   const refreshRecommendations = async () => {
     if (!sightseeing.city && !sightseeing.country) {
@@ -265,6 +286,12 @@ const SightseeingDetailPage = () => {
 
   const handleAddToCart = () => {
     if (!sightseeing) return;
+    
+    // Check if selected date is available
+    if (!isDateAvailable(selectedDate)) {
+      toast.error('The selected date is not available for booking. Please choose another date.');
+      return;
+    }
     
     // Create a unique ID that includes the date and pax to allow multiple entries of the same sightseeing
     const uniqueId = `${sightseeing._id}-${selectedDate.getTime()}-${pax}`;
@@ -486,11 +513,17 @@ const SightseeingDetailPage = () => {
                             selected={selectedDate}
                             onChange={(date) => setSelectedDate(date)}
                             minDate={new Date()}
+                            filterDate={isDateAvailable}
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
                             dateFormat="MMMM d, yyyy"
                           />
                           <FiCalendar className="absolute right-3 top-2.5 text-gray-400" />
                         </div>
+                        {!isDateAvailable(selectedDate) && (
+                          <p className="mt-2 text-sm text-red-600">
+                            This date is not available for booking. Please select another date.
+                          </p>
+                        )}
                       </div>
                       
                       <div>
