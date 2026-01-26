@@ -175,6 +175,22 @@ const guestSightseeingSchema = new mongoose.Schema({
       },
       message: 'Videos must be an array of valid URLs'
     }
+  },
+  openDays: {
+    type: [String],
+    default: [],
+    enum: {
+      values: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+      message: 'Invalid day value. Must be one of: monday, tuesday, wednesday, thursday, friday, saturday, sunday'
+    }
+  },
+  closeDays: {
+    type: [String],
+    default: [],
+    enum: {
+      values: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+      message: 'Invalid day value. Must be one of: monday, tuesday, wednesday, thursday, friday, saturday, sunday'
+    }
   }
 }, {
   timestamps: true,

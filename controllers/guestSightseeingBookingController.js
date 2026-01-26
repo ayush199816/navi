@@ -27,6 +27,24 @@ exports.createGuestSightseeingBooking = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Sightseeing not found with id ${sightseeingId}`, 404));
   }
 
+  // Validate that the booking date is available
+  const travelDate = new Date(dateOfTravel);
+  const dayName = travelDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  
+  // Check if the day is in closeDays
+  if (sightseeing.closeDays && sightseeing.closeDays.length > 0) {
+    if (sightseeing.closeDays.includes(dayName)) {
+      return next(new ErrorResponse(`Sightseeing is not available on ${dayName}s. Please select another date.`, 400));
+    }
+  }
+  
+  // Check if openDays is specified - if so, only those days are available
+  if (sightseeing.openDays && sightseeing.openDays.length > 0) {
+    if (!sightseeing.openDays.includes(dayName)) {
+      return next(new ErrorResponse(`Sightseeing is only available on: ${sightseeing.openDays.join(', ')}. Please select another date.`, 400));
+    }
+  }
+
   // Calculate total amount (you can add pricing logic here)
   const hasOffer = sightseeing.offerPrice !== null && sightseeing.offerPrice !== undefined;
   const pricePerPax = hasOffer ? sightseeing.offerPrice : sightseeing.price;
