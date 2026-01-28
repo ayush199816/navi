@@ -36,18 +36,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-  
-  <!-- Sightseeing Pages -->
-  <url>
-    <loc>https://www.bookmysight.com/sightseeing/68d27681d47029a42963b92d/phi-phi-islands-big-boat-tour-with-lunch-on-shared-transfers</loc>
-    <lastmod>2026-01-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.bookmysight.com/sightseeing/68c683f391803c4b2b9cb5a9</loc>
-    <lastmod>2026-01-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
 </urlset>
