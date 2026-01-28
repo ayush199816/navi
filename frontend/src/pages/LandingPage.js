@@ -67,7 +67,7 @@ const LandingPage = () => {
       "name": "BookMySight",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://bookmysight.com/logo.png"
+        "url": "https://www.bookmysight.com/logo.png"
       }
     },
     "mainEntity": {

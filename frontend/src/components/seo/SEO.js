@@ -11,7 +11,7 @@ const SEO = ({
   structuredData = null
 }) => {
   const { pathname } = useLocation();
-  const siteUrl = 'https://bookmysight.com';
+  const siteUrl = (process.env.REACT_APP_FRONTEND_URL || 'https://www.bookmysight.com').replace(/\/+$/, '');
   const canonicalUrl = `${siteUrl}${pathname}`;
   
   const defaultStructuredData = {

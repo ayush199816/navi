@@ -85,6 +85,37 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// Canonical host/scheme redirects (production only)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+
+    // This service runs on Render and primarily serves API traffic. Do not redirect API/static
+    // endpoints or requests to the Render hostname.
+    if (req.path.startsWith('/api/') || req.path === '/api' || req.path.startsWith('/uploads/')) return next();
+
+    const canonicalHost = 'www.bookmysight.com';
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const proto = Array.isArray(forwardedProto) ? forwardedProto[0] : (forwardedProto || req.protocol);
+    const hostHeader = req.headers['x-forwarded-host'] || req.headers.host;
+    const host = Array.isArray(hostHeader) ? hostHeader[0] : hostHeader;
+
+    const hostName = (host || '').split(':')[0];
+    const isBookMySightHost = /(^|\.)bookmysight\.com$/i.test(hostName);
+    if (!isBookMySightHost) return next();
+
+    const needsHttps = proto !== 'https';
+    const needsWww = hostName !== canonicalHost;
+
+    if (needsHttps || needsWww) {
+      return res.redirect(301, `https://${canonicalHost}${req.originalUrl}`);
+    }
+
+    return next();
+  });
+}
+
 // Serve uploaded files with CORS headers
 app.use('/uploads', (req, res, next) => {
   // Set CORS headers for all responses from /uploads

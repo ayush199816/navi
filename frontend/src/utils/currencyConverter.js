@@ -2,7 +2,7 @@
 // Fixed rate: 1 THB = 3.15 INR
 
 // Fixed exchange rate for THB to INR conversion
-const THB_TO_INR_RATE = 3.15;
+const THB_TO_INR_RATE = 3.25;
 
 // Currency symbols
 const CURRENCY_SYMBOLS = {

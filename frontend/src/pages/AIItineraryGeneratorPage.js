@@ -829,7 +829,7 @@ const AIItineraryGeneratorPage = () => {
           </div>
           
           <div class="footer">
-            <p>Generated on ${formattedDate} by <a href="https://bookmysight.com" target="_blank" style="color: #3b82f6; text-decoration: none;">BookMySight</a></p>
+            <p>Generated on ${formattedDate} by <a href="https://www.bookmysight.com" target="_blank" style="color: #3b82f6; text-decoration: none;">BookMySight</a></p>
             <p class="no-print" style="font-size: 11px; margin-top: 0.5rem; color: #9ca3af;">
               To print, use the print dialog in your browser (Ctrl+P or Cmd+P)
             </p>
