@@ -8,11 +8,39 @@ const PackageCalculatorSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, 'Name cannot be more than 100 characters'],
     },
+    adults: {
+      type: Number,
+      min: [0, 'Adults cannot be negative'],
+      default: 0,
+    },
+    children: {
+      type: Number,
+      min: [0, 'Children cannot be negative'],
+      default: 0,
+    },
+    daysCount: {
+      type: Number,
+      min: [1, 'Days must be at least 1'],
+      default: 1,
+    },
+    travelTriangle: {
+      type: Boolean,
+      default: false,
+    },
+    isAgent: {
+      type: Boolean,
+      default: false,
+    },
     adultSightseeings: [{
       sightseeingId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CalculatorSightseeing',
         required: true
+      },
+      day: {
+        type: Number,
+        min: [1, 'Day must be at least 1'],
+        default: 1,
       },
       quantity: {
         type: Number,
@@ -32,6 +60,11 @@ const PackageCalculatorSchema = new mongoose.Schema(
         ref: 'CalculatorSightseeing',
         required: true
       },
+      day: {
+        type: Number,
+        min: [1, 'Day must be at least 1'],
+        default: 1,
+      },
       quantity: {
         type: Number,
         required: true,
@@ -49,6 +82,11 @@ const PackageCalculatorSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CalculatorTransfer',
         required: true
+      },
+      day: {
+        type: Number,
+        min: [1, 'Day must be at least 1'],
+        default: 1,
       },
       quantity: {
         type: Number,
@@ -155,7 +193,9 @@ PackageCalculatorSchema.pre('save', function(next) {
   }, 0);
 
   // Calculate grand total
-  this.grandTotal = this.totalAdultCost + this.totalChildCost + this.totalTransferCost + this.totalHotelCost;
+  if (!this.isModified('grandTotal')) {
+    this.grandTotal = this.totalAdultCost + this.totalChildCost + this.totalTransferCost + this.totalHotelCost;
+  }
 
   next();
 });
