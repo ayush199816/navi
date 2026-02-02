@@ -30,6 +30,7 @@ const PackageCalculator = () => {
     name: '',
     adults: 0,
     children: 0,
+    isAgent: false,
     adultSightseeings: [],
     childSightseeings: [],
     transfers: [],
@@ -305,6 +306,8 @@ const PackageCalculator = () => {
   const calculateTotals = () => {
     const adultsCount = parseInt(formData.adults || 0);
     const childrenCount = parseInt(formData.children || 0);
+    const isAgent = formData.isAgent === true;
+    const currency = formData.currency || 'INR';
     
     // Calculate sightseeing costs (multiply by number of adults/children)
     const adultTotal = formData.adultSightseeings.reduce((sum, item) => 
@@ -322,11 +325,13 @@ const PackageCalculator = () => {
     
     // Calculate visa fees
     const totalPeople = adultsCount + childrenCount;
-    const visaSightseeingFees = totalPeople * 1500;
-    const visaHotelFees = totalPeople * 500;
+    const visaSightseeingFees = isAgent ? 0 : (totalPeople * 1500);
+    const visaHotelFees = isAgent ? 0 : (totalPeople * 500);
     const visaTotal = visaSightseeingFees + visaHotelFees;
+    const agentDiscountPerPax = isAgent ? convertCurrency(250, 'INR', currency) : 0;
+    const agentDiscountTotal = totalPeople * agentDiscountPerPax;
     
-    const grandTotal = adultTotal + childTotal + transferTotal + hotelTotal + visaTotal;
+    const grandTotal = Math.max(0, adultTotal + childTotal + transferTotal + hotelTotal + visaTotal + agentDiscountTotal);
     
     return {
       adultTotal,
@@ -336,7 +341,9 @@ const PackageCalculator = () => {
       visaTotal,
       visaSightseeingFees,
       visaHotelFees,
-      grandTotal
+      grandTotal,
+      agentDiscountPerPax,
+      agentDiscountTotal
     };
   };
 
@@ -349,12 +356,22 @@ const PackageCalculator = () => {
     e.preventDefault();
     setLoading(true);
 
+    const totals = calculateTotals();
+
+    const payload = {
+      ...formData,
+      adults: parseInt(formData.adults) || 0,
+      children: parseInt(formData.children) || 0,
+      isAgent: formData.isAgent === true,
+      grandTotal: totals.grandTotal
+    };
+
     try {
       if (editingCalculator) {
-        await axios.put(`/api/package-calculator/${editingCalculator._id}`, formData);
+        await axios.put(`/api/package-calculator/${editingCalculator._id}`, payload);
         toast.success('Calculator updated successfully');
       } else {
-        await axios.post('/api/package-calculator', formData);
+        await axios.post('/api/package-calculator', payload);
         toast.success('Calculator created successfully');
       }
       
@@ -372,6 +389,7 @@ const PackageCalculator = () => {
       name: '',
       adults: 0,
       children: 0,
+      isAgent: false,
       adultSightseeings: [],
       childSightseeings: [],
       transfers: [],
@@ -389,6 +407,7 @@ const PackageCalculator = () => {
       name: calculator.name,
       adults: calculator.adults || 0,
       children: calculator.children || 0,
+      isAgent: calculator.isAgent === true,
       adultSightseeings: calculator.adultSightseeings,
       childSightseeings: calculator.childSightseeings,
       transfers: calculator.transfers,
@@ -425,15 +444,20 @@ const PackageCalculator = () => {
 
   const calculateViewModalVisaTotals = (calculator) => {
     const totalPeople = parseInt(calculator.adults || 0) + parseInt(calculator.children || 0);
-    const visaSightseeingFees = totalPeople * 1500;
-    const visaHotelFees = totalPeople * 500;
+    const isAgent = calculator.isAgent === true;
+    const visaSightseeingFees = isAgent ? 0 : (totalPeople * 1500);
+    const visaHotelFees = isAgent ? 0 : (totalPeople * 500);
     const visaTotal = visaSightseeingFees + visaHotelFees;
+    const agentDiscountPerPax = isAgent ? convertCurrency(250, 'INR', calculator.currency || 'INR') : 0;
+    const agentDiscountTotal = totalPeople * agentDiscountPerPax;
     
     return {
       totalPeople,
       visaSightseeingFees,
       visaHotelFees,
-      visaTotal
+      visaTotal,
+      agentDiscountPerPax,
+      agentDiscountTotal
     };
   };
 
@@ -617,6 +641,21 @@ const PackageCalculator = () => {
                         Converting prices...
                       </p>
                     )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Agent
+                    </label>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="isAgent"
+                        checked={formData.isAgent === true}
+                        onChange={(e) => setFormData(prev => ({ ...prev, isAgent: e.target.checked }))}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Exclude visa and add {formData.currency} {totals.agentDiscountPerPax ? totals.agentDiscountPerPax.toFixed(2) : '0.00'} per pax</span>
+                    </div>
                   </div>
                 </div>
 
@@ -873,21 +912,28 @@ const PackageCalculator = () => {
                   {/* Visa Breakdown */}
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h4 className="text-md font-semibold mb-2 text-green-700">Visa Section Breakdown</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-600">Total People: {parseInt(formData.adults || 0) + parseInt(formData.children || 0)}</p>
-                        <p className="text-gray-600">Adults: {formData.adults || 0}</p>
-                        <p className="text-gray-600">Children: {formData.children || 0}</p>
+                    {formData.isAgent === true ? (
+                      <div className="text-sm">
+                        <p className="text-gray-600">Visa Breakdown: excluded (Agent)</p>
+                        <p className="text-gray-600">Agent Addition: {parseInt(formData.adults || 0) + parseInt(formData.children || 0)} people × {formData.currency} {totals.agentDiscountPerPax.toFixed(2)} = {formData.currency} {totals.agentDiscountTotal.toFixed(2)}</p>
                       </div>
-                      <div>
-                        <p className="text-gray-600">Sightseeing Visa: {formData.currency} {totals.visaSightseeingFees.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">({parseInt(formData.adults || 0) + parseInt(formData.children || 0)} × 1500)</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">Total People: {parseInt(formData.adults || 0) + parseInt(formData.children || 0)}</p>
+                          <p className="text-gray-600">Adults: {formData.adults || 0}</p>
+                          <p className="text-gray-600">Children: {formData.children || 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Sightseeing Visa: {formData.currency} {totals.visaSightseeingFees.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">({parseInt(formData.adults || 0) + parseInt(formData.children || 0)} × 1500)</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Hotel Visa: {formData.currency} {totals.visaHotelFees.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">({parseInt(formData.adults || 0) + parseInt(formData.children || 0)} × 500)</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-gray-600">Hotel Visa: {formData.currency} {totals.visaHotelFees.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">({parseInt(formData.adults || 0) + parseInt(formData.children || 0)} × 500)</p>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
@@ -1063,21 +1109,28 @@ const PackageCalculator = () => {
                   {/* Visa Breakdown */}
                   <div className="mt-4 pt-4 border-t border-blue-200">
                     <h4 className="text-md font-semibold mb-2 text-green-700">Visa Section Breakdown</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-600">Total People: {calculateViewModalVisaTotals(viewingCalculator).totalPeople}</p>
-                        <p className="text-gray-600">Adults: {viewingCalculator.adults || 0}</p>
-                        <p className="text-gray-600">Children: {viewingCalculator.children || 0}</p>
+                    {viewingCalculator.isAgent === true ? (
+                      <div className="text-sm">
+                        <p className="text-gray-600">Visa Breakdown: excluded (Agent)</p>
+                        <p className="text-gray-600">Agent Addition: {calculateViewModalVisaTotals(viewingCalculator).totalPeople} people × {viewingCalculator.currency} {calculateViewModalVisaTotals(viewingCalculator).agentDiscountPerPax.toFixed(2)} = {viewingCalculator.currency} {calculateViewModalVisaTotals(viewingCalculator).agentDiscountTotal.toFixed(2)}</p>
                       </div>
-                      <div>
-                        <p className="text-gray-600">Sightseeing Visa: {viewingCalculator.currency} {calculateViewModalVisaTotals(viewingCalculator).visaSightseeingFees.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">({calculateViewModalVisaTotals(viewingCalculator).totalPeople} × 1500)</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">Total People: {calculateViewModalVisaTotals(viewingCalculator).totalPeople}</p>
+                          <p className="text-gray-600">Adults: {viewingCalculator.adults || 0}</p>
+                          <p className="text-gray-600">Children: {viewingCalculator.children || 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Sightseeing Visa: {viewingCalculator.currency} {calculateViewModalVisaTotals(viewingCalculator).visaSightseeingFees.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">({calculateViewModalVisaTotals(viewingCalculator).totalPeople} × 1500)</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Hotel Visa: {viewingCalculator.currency} {calculateViewModalVisaTotals(viewingCalculator).visaHotelFees.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">({calculateViewModalVisaTotals(viewingCalculator).totalPeople} × 500)</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-gray-600">Hotel Visa: {viewingCalculator.currency} {calculateViewModalVisaTotals(viewingCalculator).visaHotelFees.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">({calculateViewModalVisaTotals(viewingCalculator).totalPeople} × 500)</p>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>

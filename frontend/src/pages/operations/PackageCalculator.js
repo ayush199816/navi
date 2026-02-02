@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { 
   Plus, 
@@ -8,11 +8,15 @@ import {
   DollarSign, 
   Users, 
   Car,
+  Copy,
+  Download,
   Eye,
   Edit,
   X
 } from 'lucide-react';
 import axios from 'axios';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import { convertCurrency, getExchangeRate } from '../../utils/currencyConverter';
 
 // Searchable Select Component
@@ -88,10 +92,14 @@ const PackageCalculator = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingCalculator, setViewingCalculator] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const pdfContentRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     adults: 0,
     children: 0,
+    daysCount: 1,
+    isAgent: false,
     adultSightseeings: [],
     childSightseeings: [],
     transfers: [],
@@ -101,6 +109,141 @@ const PackageCalculator = () => {
     travelTriangle: false,
     grandTotal: 0
   });
+
+  const createAgentQuoteId = () => {
+    const existingNames = new Set((calculators || []).map(c => (c.name || '').trim()));
+
+    for (let i = 0; i < 20; i += 1) {
+      const num = Math.floor(Math.random() * 9999) + 1;
+      const candidate = `NAVAQ${num}`;
+      if (!existingNames.has(candidate)) return candidate;
+    }
+
+    return `NAVAQ${Date.now()}`;
+  };
+
+  const handleSavePdf = async () => {
+    if (!pdfContentRef.current) return;
+
+    setIsGeneratingPdf(true);
+    try {
+      const canvas = await html2canvas(pdfContentRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const imgWidth = pageWidth - margin * 2;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const printableHeight = pageHeight - margin * 2;
+
+      let heightLeft = imgHeight;
+      let position = margin;
+
+      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      heightLeft -= printableHeight;
+
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position = margin - (imgHeight - heightLeft);
+        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+        heightLeft -= printableHeight;
+      }
+
+      const safeName = (formData.name || 'PackageCalculator')
+        .toString()
+        .trim()
+        .replace(/[^a-z0-9_-]/gi, '_');
+
+      pdf.save(`${safeName || 'PackageCalculator'}.pdf`);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      toast.error('Failed to generate PDF');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const buildCopyText = () => {
+    const totals = calculateTotals();
+
+    const adultsCount = parseInt(formData.adults || 0);
+    const childrenCount = parseInt(formData.children || 0);
+    const totalPeople = adultsCount + childrenCount;
+    const currency = formData.currency || 'INR';
+    const daysCount = Math.max(1, parseInt(formData.daysCount || 1));
+
+    const lines = [];
+    lines.push('PACKAGE CALCULATOR');
+    lines.push('');
+    lines.push(`Name: ${(formData.name || '').toString().trim()}`);
+    lines.push(`Pax: Adults ${adultsCount}, Children ${childrenCount}, Total ${totalPeople}`);
+    lines.push(`Days: ${daysCount}`);
+    lines.push('');
+
+    for (let d = 1; d <= daysCount; d += 1) {
+      const adultItems = (formData.adultSightseeings || []).filter(i => (parseInt(i.day || 1) === d) && i.sightseeingId);
+      const transferItems = (formData.transfers || []).filter(i => (parseInt(i.day || 1) === d) && i.transferId);
+
+      lines.push(`Day ${d}:`);
+
+      const dayLines = [];
+      adultItems.forEach((item) => {
+        dayLines.push(getSightseeingName(item.sightseeingId));
+      });
+      transferItems.forEach((item) => {
+        dayLines.push(getTransferName(item.transferId));
+      });
+
+      lines.push('');
+      if (dayLines.length === 0) {
+        lines.push('None');
+      } else {
+        dayLines.forEach((t) => {
+          lines.push(`- ${t}`);
+        });
+      }
+
+      if (d !== daysCount) lines.push('');
+    }
+
+    lines.push('');
+    lines.push(`Grand Total: ${currency} ${totals.grandTotal.toFixed(2)}`);
+
+    return lines.join('\n');
+  };
+
+  const handleCopy = async (e) => {
+    if (e?.preventDefault) e.preventDefault();
+    if (e?.stopPropagation) e.stopPropagation();
+    try {
+      const text = buildCopyText();
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied');
+    } catch (e) {
+      try {
+        const text = buildCopyText();
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        toast.success('Copied');
+      } catch (err) {
+        toast.error('Failed to copy');
+      }
+    }
+  };
 
   useEffect(() => {
     fetchCalculators();
@@ -190,6 +333,23 @@ const PackageCalculator = () => {
     
     setFormData(prev => {
       const updatedData = { ...prev, [name]: value };
+
+      if (name === 'daysCount') {
+        const nextDays = Math.max(1, parseInt(value || 1));
+        updatedData.daysCount = nextDays;
+        updatedData.adultSightseeings = (prev.adultSightseeings || []).map(item => ({
+          ...item,
+          day: Math.min(Math.max(1, parseInt(item.day || 1)), nextDays)
+        }));
+        updatedData.childSightseeings = (prev.childSightseeings || []).map(item => ({
+          ...item,
+          day: Math.min(Math.max(1, parseInt(item.day || 1)), nextDays)
+        }));
+        updatedData.transfers = (prev.transfers || []).map(item => ({
+          ...item,
+          day: Math.min(Math.max(1, parseInt(item.day || 1)), nextDays)
+        }));
+      }
       
       // Update sightseeing quantities when adults or children change
       if (name === 'adults' || name === 'children') {
@@ -244,6 +404,7 @@ const PackageCalculator = () => {
       ...prev,
       adultSightseeings: [...prev.adultSightseeings, {
         sightseeingId: '',
+        day: 1,
         quantity: parseInt(prev.adults || 0), // Initialize with number of adults
         adultPrice: 0,
         profitPerPax: 0 // Add profit per pax field
@@ -256,6 +417,7 @@ const PackageCalculator = () => {
       ...prev,
       childSightseeings: [...prev.childSightseeings, {
         sightseeingId: '',
+        day: 1,
         quantity: parseInt(prev.children || 0), // Initialize with number of children
         childPrice: 0,
         profitPerPax: 0 // Add profit per pax field
@@ -268,6 +430,7 @@ const PackageCalculator = () => {
       ...prev,
       transfers: [...prev.transfers, {
         transferId: '',
+        day: 1,
         quantity: 1,
         transferPrice: 0
       }]
@@ -391,6 +554,8 @@ const removeHotel = (index) => {
 const calculateTotals = () => {
   const adultsCount = parseInt(formData.adults || 0);
   const childrenCount = parseInt(formData.children || 0);
+  const isAgent = formData.isAgent === true;
+  const currency = formData.currency || 'INR';
   
   // Calculate base sightseeing costs (quantity already includes adults/children count)
   const baseAdultTotal = formData.adultSightseeings.reduce((sum, item) => 
@@ -415,11 +580,13 @@ const calculateTotals = () => {
   
   // Calculate visa fees (not affected by Travel Triangle)
   const totalPeople = adultsCount + childrenCount;
-  const visaSightseeingFees = totalPeople * 1500; // 1500 per person for sightseeing
-  const visaHotelFees = totalPeople * 500; // 500 per person for hotel
+  const visaSightseeingFees = isAgent ? 0 : (totalPeople * 1500); // 1500 per person for sightseeing
+  const visaHotelFees = isAgent ? 0 : (totalPeople * 500); // 500 per person for hotel
   const visaTotal = visaSightseeingFees + visaHotelFees;
+  const agentDiscountPerPax = isAgent ? convertCurrency(250, 'INR', currency) : 0;
+  const agentDiscountTotal = totalPeople * agentDiscountPerPax;
   
-  const grandTotal = adultTotal + childTotal + transferTotal + hotelTotal + visaTotal;
+  const grandTotal = Math.max(0, adultTotal + childTotal + transferTotal + hotelTotal + visaTotal + agentDiscountTotal);
   
   return {
     adultTotal,
@@ -430,6 +597,8 @@ const calculateTotals = () => {
     visaSightseeingFees,
     visaHotelFees,
     grandTotal,
+    agentDiscountPerPax,
+    agentDiscountTotal,
     baseAdultTotal,
     baseChildTotal,
     baseTransferTotal,
@@ -447,6 +616,8 @@ const handleSubmit = async (e) => {
     name: formData.name,
     adults: parseInt(formData.adults) || 0,
     children: parseInt(formData.children) || 0,
+    daysCount: Math.max(1, parseInt(formData.daysCount || 1)),
+    isAgent: formData.isAgent === true,
     adultSightseeings: formData.adultSightseeings,
     childSightseeings: formData.childSightseeings,
     transfers: formData.transfers,
@@ -484,6 +655,8 @@ const handleSubmit = async (e) => {
       name: '',
       adults: 0,
       children: 0,
+      daysCount: 1,
+      isAgent: false,
       adultSightseeings: [],
       childSightseeings: [],
       transfers: [],
@@ -512,19 +685,22 @@ const handleSubmit = async (e) => {
     const fixedAdultSightseeings = (calculator.adultSightseeings || []).map(item => ({
       ...item,
       sightseeingId: typeof item.sightseeingId === 'object' ? item.sightseeingId._id : item.sightseeingId,
+      day: parseInt(item.day || 1),
       profitPerPax: item.profitPerPax || 0
     }));
     
     const fixedChildSightseeings = (calculator.childSightseeings || []).map(item => ({
       ...item,
       sightseeingId: typeof item.sightseeingId === 'object' ? item.sightseeingId._id : item.sightseeingId,
+      day: parseInt(item.day || 1),
       profitPerPax: item.profitPerPax || 0
     }));
     
     // Fix transfer IDs - extract string ID from objects
     const fixedTransfers = (calculator.transfers || []).map(item => ({
       ...item,
-      transferId: typeof item.transferId === 'object' ? item.transferId._id : item.transferId
+      transferId: typeof item.transferId === 'object' ? item.transferId._id : item.transferId,
+      day: parseInt(item.day || 1)
     }));
     
     console.log('Travel Triangle from database:', calculator.travelTriangle);
@@ -535,9 +711,11 @@ const handleSubmit = async (e) => {
       name: calculator.name || '',
       adults: adultsCount,
       children: childrenCount,
+      daysCount: Math.max(1, parseInt(calculator.daysCount || 1)),
+      isAgent: calculator.isAgent === true,
       adultSightseeings: fixedAdultSightseeings,
       childSightseeings: fixedChildSightseeings,
-      transfers: fixedTransfers,
+      transfers: fixedTransfers.map(t => ({ ...t, day: parseInt(t.day || 1) })),
       hotelPrices: calculator.hotelPrices || [],
       currency: calculator.currency || 'INR',
       notes: calculator.notes || '',
@@ -584,13 +762,17 @@ const handleSubmit = async (e) => {
     const transferTotal = baseTransferTotal * travelTriangleMultiplier;
     const hotelTotal = baseHotelTotal * travelTriangleMultiplier;
     
+    const isAgent = calculator.isAgent === true;
+
     // Calculate visa fees (not affected by Travel Triangle)
     const totalPeople = adultsCount + childrenCount;
-    const visaSightseeingFees = totalPeople * 1500;
-    const visaHotelFees = totalPeople * 500;
+    const visaSightseeingFees = isAgent ? 0 : (totalPeople * 1500);
+    const visaHotelFees = isAgent ? 0 : (totalPeople * 500);
     const visaTotal = visaSightseeingFees + visaHotelFees;
+    const agentDiscountPerPax = isAgent ? convertCurrency(250, 'INR', calculator.currency || 'INR') : 0;
+    const agentDiscountTotal = totalPeople * agentDiscountPerPax;
     
-    const grandTotal = adultTotal + childTotal + transferTotal + hotelTotal + visaTotal;
+    const grandTotal = Math.max(0, adultTotal + childTotal + transferTotal + hotelTotal + visaTotal + agentDiscountTotal);
     
     return {
       adultTotal,
@@ -601,6 +783,8 @@ const handleSubmit = async (e) => {
       visaSightseeingFees,
       visaHotelFees,
       grandTotal,
+      agentDiscountPerPax,
+      agentDiscountTotal,
       adultsCount,
       childrenCount
     };
@@ -744,6 +928,7 @@ const handleSubmit = async (e) => {
               </div>
 
               <form onSubmit={handleSubmit}>
+                <div ref={pdfContentRef} className="bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -788,6 +973,20 @@ const handleSubmit = async (e) => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Number of Days
+                    </label>
+                    <input
+                      type="number"
+                      name="daysCount"
+                      value={formData.daysCount}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="1"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Currency
                     </label>
                     <select
@@ -816,6 +1015,36 @@ const handleSubmit = async (e) => {
                       <span className="ml-2 text-sm text-gray-600">Add 10% markup to costs</span>
                     </div>
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Agent
+                    </label>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="isAgent"
+                        checked={formData.isAgent === true}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFormData(prev => {
+                            const next = { ...prev, isAgent: checked };
+
+                            if (checked) {
+                              const currentName = (prev.name || '').trim();
+                              const isAutoQuote = /^NAVAQ\d+$/i.test(currentName);
+                              if (!currentName || isAutoQuote) {
+                                next.name = createAgentQuoteId();
+                              }
+                            }
+
+                            return next;
+                          });
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Exclude visa and add {formData.currency} {totals.agentDiscountPerPax ? totals.agentDiscountPerPax.toFixed(2) : '0.00'} per pax</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Adult Sightseeings */}
@@ -836,6 +1065,15 @@ const handleSubmit = async (e) => {
                   </div>
                   {formData.adultSightseeings.map((item, index) => (
                     <div key={index} className="flex gap-2 mb-2">
+                      <select
+                        value={parseInt(item.day || 1)}
+                        onChange={(e) => updateAdultSightseeing(index, 'day', parseInt(e.target.value))}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Array.from({ length: Math.max(1, parseInt(formData.daysCount || 1)) }, (_, i) => i + 1).map((d) => (
+                          <option key={d} value={d}>Day {d}</option>
+                        ))}
+                      </select>
                       <SearchableSelect
                         options={sightseeings.map(sightseeing => ({
                           value: sightseeing._id,
@@ -896,6 +1134,15 @@ const handleSubmit = async (e) => {
                   </div>
                   {formData.childSightseeings.map((item, index) => (
                     <div key={index} className="flex gap-2 mb-2">
+                      <select
+                        value={parseInt(item.day || 1)}
+                        onChange={(e) => updateChildSightseeing(index, 'day', parseInt(e.target.value))}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Array.from({ length: Math.max(1, parseInt(formData.daysCount || 1)) }, (_, i) => i + 1).map((d) => (
+                          <option key={d} value={d}>Day {d}</option>
+                        ))}
+                      </select>
                       <SearchableSelect
                         options={sightseeings.map(sightseeing => ({
                           value: sightseeing._id,
@@ -956,6 +1203,15 @@ const handleSubmit = async (e) => {
                   </div>
                   {formData.transfers.map((item, index) => (
                     <div key={index} className="flex gap-2 mb-2">
+                      <select
+                        value={parseInt(item.day || 1)}
+                        onChange={(e) => updateTransfer(index, 'day', parseInt(e.target.value))}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Array.from({ length: Math.max(1, parseInt(formData.daysCount || 1)) }, (_, i) => i + 1).map((d) => (
+                          <option key={d} value={d}>Day {d}</option>
+                        ))}
+                      </select>
                       <SearchableSelect
                         options={transfers.map(transfer => ({
                           value: transfer._id,
@@ -1083,11 +1339,24 @@ const handleSubmit = async (e) => {
                     </div>
                   </div>
                   <div className="mt-4 pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-600">
-                      Visa Breakdown: {parseInt(formData.adults || 0) + parseInt(formData.children || 0)} people × 
-                      (₹1500 sightseeing + ₹500 hotel) = ₹{(parseInt(formData.adults || 0) + parseInt(formData.children || 0)) * 2000}
-                    </p>
+                    {formData.isAgent === true ? (
+                      <div>
+                        <p className="text-sm text-gray-600">
+                          Visa Breakdown: excluded (Agent)
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Agent Addition: {parseInt(formData.adults || 0) + parseInt(formData.children || 0)} people × {formData.currency} {totals.agentDiscountPerPax.toFixed(2)} = {formData.currency} {totals.agentDiscountTotal.toFixed(2)}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">
+                        Visa Breakdown: {parseInt(formData.adults || 0) + parseInt(formData.children || 0)} people × 
+                        ({formData.currency} {convertCurrency(1500, 'INR', formData.currency).toFixed(2)} sightseeing + {formData.currency} {convertCurrency(500, 'INR', formData.currency).toFixed(2)} hotel) = {formData.currency} {totals.visaTotal.toFixed(2)}
+                      </p>
+                    )}
                   </div>
+                </div>
+
                 </div>
 
                 {/* Form Actions */}
@@ -1098,6 +1367,23 @@ const handleSubmit = async (e) => {
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
                     Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50"
+                  >
+                    <Copy size={20} />
+                    Copy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSavePdf}
+                    disabled={isGeneratingPdf}
+                    className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <Download size={20} />
+                    {isGeneratingPdf ? 'Generating...' : 'Save PDF'}
                   </button>
                   <button
                     type="submit"
@@ -1265,10 +1551,21 @@ const handleSubmit = async (e) => {
                           </div>
                         </div>
                         <div className="mt-4 pt-4 border-t border-gray-200">
-                          <p className="text-sm text-gray-600">
-                            Visa Breakdown: {viewTotals.adultsCount + viewTotals.childrenCount} people × 
-                            (₹1500 sightseeing + ₹500 hotel) = ₹{(viewTotals.adultsCount + viewTotals.childrenCount) * 2000}
-                          </p>
+                          {viewingCalculator.isAgent === true ? (
+                            <div>
+                              <p className="text-sm text-gray-600">
+                                Visa Breakdown: excluded (Agent)
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Agent Addition: {viewTotals.adultsCount + viewTotals.childrenCount} people × {viewingCalculator.currency} {viewTotals.agentDiscountPerPax.toFixed(2)} = {viewingCalculator.currency} {viewTotals.agentDiscountTotal.toFixed(2)}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-600">
+                              Visa Breakdown: {viewTotals.adultsCount + viewTotals.childrenCount} people × 
+                              ({viewingCalculator.currency} {convertCurrency(1500, 'INR', viewingCalculator.currency).toFixed(2)} sightseeing + {viewingCalculator.currency} {convertCurrency(500, 'INR', viewingCalculator.currency).toFixed(2)} hotel) = {viewingCalculator.currency} {viewTotals.visaTotal.toFixed(2)}
+                            </p>
+                          )}
                         </div>
                       </div>
                     );

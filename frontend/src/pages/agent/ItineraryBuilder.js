@@ -113,6 +113,7 @@ const ItineraryBuilder = () => {
       date.setDate(date.getDate() + 7);
       return date;
     })(),
+    markup: 0,
     specialRequirements: '',
     destination: '',
     country: ''
@@ -225,6 +226,267 @@ const ItineraryBuilder = () => {
         return sum + (itemPrice * itemPax);
       }, 0);
   };
+
+  const getMarkupAmount = () => {
+    const value = parseFloat(formData.markup);
+    return Number.isFinite(value) ? Math.max(0, value) : 0;
+  };
+
+  const calculateGrandTotal = () => {
+    return calculateTotal() + getMarkupAmount();
+  };
+
+  const formatLocalDate = (date) => {
+    if (!date) return '';
+    try {
+      return new Date(date).toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const buildCopyText = () => {
+    const lines = [];
+    lines.push('ITINERARY');
+    lines.push('');
+
+    lines.push('Customer Details');
+    lines.push(`Name: ${formData.guestName || ''}`);
+    lines.push(`Email: ${formData.guestEmail || ''}`);
+    lines.push(`Phone: ${formData.guestPhone || ''}`);
+    lines.push(`Destination: ${formData.destination || ''}`);
+    lines.push(`Country: ${formData.country || ''}`);
+    lines.push(`Adults: ${parseInt(formData.pax, 10) || 1}`);
+    lines.push(`Children: ${parseInt(formData.children, 10) || 0}`);
+    lines.push(`Arrival: ${formatLocalDate(formData.arrivalDate)}`);
+    lines.push(`Departure: ${formatLocalDate(formData.departureDate)}`);
+    if (formData.specialRequirements) {
+      lines.push('');
+      lines.push('Special Requirements');
+      lines.push(formData.specialRequirements);
+    }
+
+    lines.push('');
+    lines.push('Day-wise Itinerary');
+
+    tripDays.forEach((day, index) => {
+      const dayKey = `day${index + 1}`;
+      const dayItems = (itinerary[dayKey] || []).filter(i => i.type !== 'transfer');
+
+      lines.push('');
+      lines.push(`Day ${index + 1} - ${day.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`);
+      if (dayItems.length === 0) {
+        lines.push('No activities');
+        return;
+      }
+
+      dayItems.forEach((item) => {
+        const meta = [item.duration, item.country].filter(Boolean).join(' • ');
+        lines.push(`- ${item.name}${meta ? ` (${meta})` : ''}`);
+      });
+    });
+    const total = calculateGrandTotal();
+
+    lines.push('');
+    lines.push('Package Summary');
+    lines.push(`Total: ${formatPrice(total, 'INR')}`);
+
+    return lines.join('\n');
+  };
+
+  const handleCopy = async () => {
+    try {
+      const text = buildCopyText();
+      await navigator.clipboard.writeText(text);
+      setError('');
+    } catch (e) {
+      try {
+        const text = buildCopyText();
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setError('');
+      } catch (err) {
+        setError('Failed to copy itinerary');
+      }
+    }
+  };
+
+  const handlePrint = () => {
+    const escapeHtml = (value) => {
+      return (value ?? '')
+        .toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+
+    const buildPrintHtml = () => {
+      const customerRows = [
+        { label: 'Name', value: formData.guestName },
+        { label: 'Email', value: formData.guestEmail },
+        { label: 'Phone', value: formData.guestPhone },
+        { label: 'Destination', value: formData.destination },
+        { label: 'Country', value: formData.country || formData.destination },
+        { label: 'Adults', value: (parseInt(formData.pax, 10) || 1).toString() },
+        { label: 'Children', value: (parseInt(formData.children, 10) || 0).toString() },
+        { label: 'Arrival', value: formatLocalDate(formData.arrivalDate) },
+        { label: 'Departure', value: formatLocalDate(formData.departureDate) }
+      ];
+
+      const daysHtml = tripDays.map((day, index) => {
+        const dayKey = `day${index + 1}`;
+        const dayItems = (itinerary[dayKey] || []).filter(i => i.type !== 'transfer');
+        const title = `Day ${index + 1} - ${day.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`;
+
+        const itemsHtml = dayItems.length
+          ? dayItems.map((item) => {
+            const meta = [item.duration, item.country].filter(Boolean).join(' • ');
+            return `
+              <li class="item">
+                <div class="item-title">${escapeHtml(item.name)}</div>
+                ${meta ? `<div class="item-meta">${escapeHtml(meta)}</div>` : ''}
+              </li>
+            `;
+          }).join('')
+          : '<div class="empty">No activities</div>';
+
+        return `
+          <section class="day">
+            <div class="day-header">${escapeHtml(title)}</div>
+            <div class="day-body">
+              ${dayItems.length ? `<ul class="items">${itemsHtml}</ul>` : itemsHtml}
+            </div>
+          </section>
+        `;
+      }).join('');
+
+      const total = calculateGrandTotal();
+      const totalCurrency = getMostCommonCurrency();
+
+      const specialReq = formData.specialRequirements
+        ? `
+          <section class="card">
+            <div class="card-title">Special Requirements</div>
+            <div class="card-body">${escapeHtml(formData.specialRequirements).replace(/\n/g, '<br/>')}</div>
+          </section>
+        `
+        : '';
+
+      return `
+        <div class="page">
+          <header class="header">
+            <div>
+              <div class="brand">Itinerary</div>
+              <div class="subtitle">${escapeHtml(formData.destination || '')}</div>
+            </div>
+            <div class="total-box">
+              <div class="total-label">Total Package</div>
+              <div class="total-value">${escapeHtml(formatPrice(total, totalCurrency))}</div>
+            </div>
+          </header>
+
+          <section class="grid">
+            <section class="card">
+              <div class="card-title">Customer Details</div>
+              <div class="card-body">
+                <div class="table">
+                  ${customerRows.map(r => `
+                    <div class="row">
+                      <div class="cell label">${escapeHtml(r.label)}</div>
+                      <div class="cell value">${escapeHtml(r.value || '')}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </section>
+
+            ${specialReq}
+          </section>
+
+          <section class="card">
+            <div class="card-title">Day-wise Itinerary</div>
+            <div class="card-body">
+              ${daysHtml || '<div class="empty">No itinerary items</div>'}
+            </div>
+          </section>
+
+          <footer class="footer">
+            <div>Generated on ${escapeHtml(new Date().toLocaleString())}</div>
+          </footer>
+        </div>
+      `;
+    };
+
+    const printWindow = window.open('', '_blank', 'width=900,height=650');
+    if (!printWindow) {
+      setError('Popup blocked. Please allow popups to print.');
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Itinerary</title>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width,initial-scale=1" />
+          <style>
+            @page { size: A4; margin: 12mm; }
+            * { box-sizing: border-box; }
+            body { margin: 0; font-family: Inter, Arial, sans-serif; color: #0f172a; background: #ffffff; }
+            .page { width: 100%; }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 14px; background: linear-gradient(180deg, #eff6ff, #ffffff); }
+            .brand { font-size: 20px; font-weight: 800; letter-spacing: 0.2px; }
+            .subtitle { margin-top: 2px; font-size: 12px; color: #475569; }
+            .total-box { text-align: right; padding-left: 16px; }
+            .total-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; }
+            .total-value { margin-top: 2px; font-size: 16px; font-weight: 800; color: #0f172a; }
+            .grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+            .card { border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+            .card-title { padding: 10px 14px; background: #f8fafc; font-weight: 700; font-size: 13px; border-bottom: 1px solid #e2e8f0; }
+            .card-body { padding: 12px 14px; }
+            .table { display: grid; grid-template-columns: 1fr; gap: 6px; }
+            .row { display: grid; grid-template-columns: 120px 1fr; gap: 10px; }
+            .cell { font-size: 12px; line-height: 1.35; }
+            .label { color: #64748b; }
+            .value { color: #0f172a; font-weight: 600; }
+            .day { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 10px; break-inside: avoid; page-break-inside: avoid; }
+            .day-header { padding: 10px 12px; background: #0ea5e9; color: white; font-weight: 700; font-size: 12px; }
+            .day-body { padding: 10px 12px; background: #ffffff; }
+            .items { margin: 0; padding: 0 0 0 16px; }
+            .item { margin-bottom: 8px; }
+            .item-title { font-size: 12px; font-weight: 700; color: #0f172a; }
+            .item-meta { font-size: 11px; color: #64748b; margin-top: 1px; }
+            .empty { font-size: 12px; color: #64748b; padding: 6px 0; }
+            .footer { margin-top: 14px; font-size: 10px; color: #94a3b8; text-align: right; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>
+          ${buildPrintHtml()}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
   
 
   // Get the most common currency from items or default to 'INR'
@@ -277,6 +539,8 @@ const ItineraryBuilder = () => {
         }))
       );
       
+      const totalAmount = calculateGrandTotal();
+
       const quoteData = {
         title: title || `Itinerary for ${formData.guestName}`,
         description: 'Custom travel package',
@@ -305,14 +569,12 @@ const ItineraryBuilder = () => {
         hotelRequired: formData.hotelRequired || false,
         flightBooked: formData.flightBooked || false,
         items,
-        totalAmount: calculateTotal(),
+        totalAmount,
         status: 'draft',
         createdBy: 'agent',
         currency: baseCurrency,
         createdAt: new Date().toISOString()
       };
-      
-      const totalAmount = calculateTotal();
       
       // Create the final payload with all required fields
       const finalPayload = {
@@ -892,13 +1154,50 @@ const ItineraryBuilder = () => {
                         className="w-16 p-1 border rounded text-center"
                       />
                     </div>
-                    <div className="text-xl font-semibold">
-                      Total: {formatPrice(calculateTotal(), 'INR')}
+                    <div className="flex items-center">
+                      <label htmlFor="markup" className="mr-2 text-sm font-medium text-gray-700">Markup:</label>
+                      <input
+                        type="number"
+                        name="markup"
+                        min="0"
+                        value={formData.markup}
+                        onChange={handleInputChange}
+                        className="w-24 p-1 border rounded text-center"
+                      />
                     </div>
                   </div>
                 </div>
+
+                <div className="mt-3 flex justify-end gap-6 text-sm">
+                  <div className="text-gray-600">Markup: <span className="font-semibold text-gray-900">{formatPrice(getMarkupAmount(), 'INR')}</span></div>
+                  <div className="text-gray-600">Total: <span className="font-semibold text-gray-900">{formatPrice(calculateGrandTotal(), 'INR')}</span></div>
+                </div>
                 
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    disabled={Object.values(itinerary).flat().length === 0}
+                    className={`px-4 py-2 rounded font-medium border ${
+                      Object.values(itinerary).flat().length === 0
+                        ? 'bg-gray-100 cursor-not-allowed text-gray-500 border-gray-200'
+                        : 'bg-white hover:bg-gray-50 text-gray-900 border-gray-300'
+                    }`}
+                  >
+                    Copy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    disabled={Object.values(itinerary).flat().length === 0}
+                    className={`px-4 py-2 rounded font-medium border ${
+                      Object.values(itinerary).flat().length === 0
+                        ? 'bg-gray-100 cursor-not-allowed text-gray-500 border-gray-200'
+                        : 'bg-white hover:bg-gray-50 text-gray-900 border-gray-300'
+                    }`}
+                  >
+                    Print
+                  </button>
                   <button
                     type="button"
                     onClick={handleQuoteNow}
