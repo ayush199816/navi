@@ -213,6 +213,18 @@ const PackageCalculator = () => {
       if (d !== daysCount) lines.push('');
     }
 
+    const hotels = (formData.hotelPrices || [])
+      .map(h => (h?.hotelName ?? '').toString().trim())
+      .filter(Boolean);
+
+    if (hotels.length > 0) {
+      lines.push('');
+      lines.push('Hotels:');
+      hotels.forEach((name) => {
+        lines.push(`- ${name}`);
+      });
+    }
+
     lines.push('');
     lines.push(`Grand Total: ${currency} ${totals.grandTotal.toFixed(2)}`);
 
