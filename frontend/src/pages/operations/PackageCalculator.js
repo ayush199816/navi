@@ -187,6 +187,18 @@ const PackageCalculator = () => {
     lines.push(`Days: ${daysCount}`);
     lines.push('');
 
+    const hotels = (formData.hotelPrices || [])
+      .map(h => (h?.hotelName ?? '').toString().trim())
+      .filter(Boolean);
+
+    if (hotels.length > 0) {
+      lines.push('Hotels:');
+      hotels.forEach((name) => {
+        lines.push(`- ${name}`);
+      });
+      lines.push('');
+    }
+
     for (let d = 1; d <= daysCount; d += 1) {
       const adultItems = (formData.adultSightseeings || []).filter(i => (parseInt(i.day || 1) === d) && i.sightseeingId);
       const transferItems = (formData.transfers || []).filter(i => (parseInt(i.day || 1) === d) && i.transferId);
@@ -211,18 +223,6 @@ const PackageCalculator = () => {
       }
 
       if (d !== daysCount) lines.push('');
-    }
-
-    const hotels = (formData.hotelPrices || [])
-      .map(h => (h?.hotelName ?? '').toString().trim())
-      .filter(Boolean);
-
-    if (hotels.length > 0) {
-      lines.push('');
-      lines.push('Hotels:');
-      hotels.forEach((name) => {
-        lines.push(`- ${name}`);
-      });
     }
 
     lines.push('');
