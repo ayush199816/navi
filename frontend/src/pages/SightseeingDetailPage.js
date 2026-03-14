@@ -17,7 +17,8 @@ const SightseeingDetailPage = () => {
   const { country, city, slug } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [pax, setPax] = useState(1);
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [recommendedSightseeings, setRecommendedSightseeings] = useState([]);
@@ -293,32 +294,52 @@ const SightseeingDetailPage = () => {
       return;
     }
     
-    // Create a unique ID that includes the date and pax to allow multiple entries of the same sightseeing
-    const uniqueId = `${sightseeing._id}-${selectedDate.getTime()}-${pax}`;
+    // Create a unique ID that includes the date, adults, and children to allow multiple entries of the same sightseeing
+    const uniqueId = `${sightseeing._id}-${selectedDate.getTime()}-${adults}-${children}`;
     
     // Ensure we're storing prices in USD
-    const priceInUSD = sightseeing.priceCurrency === 'USD' 
+    const adultPriceInUSD = sightseeing.priceCurrency === 'USD' 
       ? sightseeing.price 
       : sightseeing.price / (sightseeing.exchangeRate || 1);
       
-    const offerPriceInUSD = sightseeing.offerPrice && sightseeing.priceCurrency === 'USD'
+    const adultOfferPriceInUSD = sightseeing.offerPrice && sightseeing.priceCurrency === 'USD'
       ? sightseeing.offerPrice
       : sightseeing.offerPrice / (sightseeing.exchangeRate || 1);
       
+    const childPriceInUSD = sightseeing.childPrice && sightseeing.childPriceCurrency === 'USD'
+      ? sightseeing.childPrice
+      : (sightseeing.childPrice || 0) / (sightseeing.exchangeRate || 1);
+      
+    const childOfferPriceInUSD = sightseeing.childOfferPrice && sightseeing.childOfferPriceCurrency === 'USD'
+      ? sightseeing.childOfferPrice
+      : (sightseeing.childOfferPrice || 0) / (sightseeing.exchangeRate || 1);
+      
+    // Calculate effective adult and child prices
+    const effectiveAdultPrice = adultOfferPriceInUSD || adultPriceInUSD;
+    const effectiveChildPrice = childOfferPriceInUSD || childPriceInUSD;
+    
+    // Calculate total price
+    const totalPrice = (adults * effectiveAdultPrice) + (children * effectiveChildPrice);
+    
     const cartItem = {
       id: uniqueId,
       originalId: sightseeing._id, // Keep reference to the original sightseeing ID
       name: sightseeing.name,
-      price: priceInUSD, // Store price in USD
+      price: adultPriceInUSD, // Store adult price in USD
       priceCurrency: 'USD', // Explicitly set to USD
-      offerPrice: sightseeing.offerPrice ? offerPriceInUSD : undefined, // Store offer price in USD if available
+      offerPrice: sightseeing.offerPrice ? adultOfferPriceInUSD : undefined, // Store adult offer price in USD if available
+      childPrice: childPriceInUSD, // Store child price in USD
+      childOfferPrice: sightseeing.childOfferPrice ? childOfferPriceInUSD : undefined, // Store child offer price in USD if available
       quantity: 1, // Each selection is a separate entry
-      pax: pax, // Store pax separately
+      pax: adults + children, // Combined pax count for backward compatibility
+      adults: adults, // Store adults separately
+      children: children, // Store children separately
       date: selectedDate,
       image: sightseeing.images?.[0],
       type: 'sightseeing',
-      totalPrice: (sightseeing.offerPrice ? offerPriceInUSD : priceInUSD) * pax, // Calculate total in USD
-      hasOffer: sightseeing.offerPrice !== null && sightseeing.offerPrice !== undefined
+      totalPrice: totalPrice, // Calculate total in USD
+      hasOffer: sightseeing.offerPrice !== null && sightseeing.offerPrice !== undefined,
+      hasChildOffer: sightseeing.childOfferPrice !== null && sightseeing.childOfferPrice !== undefined
     };
     
     dispatch(addToCart(cartItem));
@@ -488,19 +509,41 @@ const SightseeingDetailPage = () => {
                 <div className="md:w-1/3 mt-8 md:mt-0">
                   <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                     <div className="mb-6">
-                      <div className="text-3xl font-bold text-gray-900 mb-1">
-                        {sightseeing.offerPrice ? (
-                          <>
-                            {formatPrice(sightseeing.offerPrice)}
-                            <span className="ml-2 text-sm text-gray-500 line-through">
-                              {formatPrice(sightseeing.price)}
-                            </span>
-                          </>
-                        ) : (
-                          formatPrice(sightseeing.price || 0)
-                        )}
+                      {/* Adult Price */}
+                      <div className="mb-2">
+                        <div className="text-2xl font-bold text-gray-900">
+                          {sightseeing.offerPrice ? (
+                            <>
+                              {formatPrice(sightseeing.offerPrice)}
+                              <span className="ml-2 text-sm text-gray-500 line-through">
+                                {formatPrice(sightseeing.price)}
+                              </span>
+                            </>
+                          ) : (
+                            formatPrice(sightseeing.price || 0)
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600">per adult</p>
                       </div>
-                      <p className="text-sm text-gray-600">per person</p>
+                      
+                      {/* Child Price - Only show if child price is set */}
+                      {sightseeing.childPrice && (
+                        <div>
+                          <div className="text-lg font-semibold text-gray-900">
+                            {sightseeing.childOfferPrice ? (
+                              <>
+                                {formatPrice(sightseeing.childOfferPrice)}
+                                <span className="ml-2 text-sm text-gray-500 line-through">
+                                  {formatPrice(sightseeing.childPrice)}
+                                </span>
+                              </>
+                            ) : (
+                              formatPrice(sightseeing.childPrice)
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600">per child</p>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="space-y-4">
@@ -530,39 +573,89 @@ const SightseeingDetailPage = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Number of People
                         </label>
-                        <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-                          <button 
-                            type="button" 
-                            onClick={() => setPax(Math.max(1, pax - 1))}
-                            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          >
-                            <FiMinus />
-                          </button>
-                          <div className="flex-1 text-center px-4 py-2">
-                            {pax} {pax === 1 ? 'Person' : 'People'}
+                        <div className="space-y-3">
+                          {/* Adults */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Adults</span>
+                            <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                              <button 
+                                type="button" 
+                                onClick={() => setAdults(Math.max(1, adults - 1))}
+                                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                              >
+                                <FiMinus />
+                              </button>
+                              <div className="flex-1 text-center px-4 py-2">
+                                {adults} {adults === 1 ? 'Adult' : 'Adults'}
+                              </div>
+                              <button 
+                                type="button" 
+                                onClick={() => setAdults(adults + 1)}
+                                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                              >
+                                <FiPlus />
+                              </button>
+                            </div>
                           </div>
-                          <button 
-                            type="button" 
-                            onClick={() => setPax(pax + 1)}
-                            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          >
-                            <FiPlus />
-                          </button>
+                          
+                          {/* Children - Only show if child price is set */}
+                          {sightseeing.childPrice && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">Children</span>
+                              <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                                <button 
+                                  type="button" 
+                                  onClick={() => setChildren(Math.max(0, children - 1))}
+                                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                >
+                                  <FiMinus />
+                                </button>
+                                <div className="flex-1 text-center px-4 py-2">
+                                  {children} {children === 1 ? 'Child' : 'Children'}
+                                </div>
+                                <button 
+                                  type="button" 
+                                  onClick={() => setChildren(children + 1)}
+                                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                >
+                                  <FiPlus />
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       
                       <div className="pt-4 border-t border-gray-200">
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm text-gray-600">Price per person</span>
-                          <span className="text-sm font-medium">
-                            {formatPrice(sightseeing.offerPrice || sightseeing.price || 0)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-lg font-semibold">
-                          <span>Total</span>
-                          <span className="text-blue-900">
-                            {formatPrice((sightseeing.offerPrice || sightseeing.price || 0) * pax)}
-                          </span>
+                        <div className="space-y-2">
+                          {/* Adult price breakdown */}
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Adult price ({adults} × {formatPrice(sightseeing.offerPrice || sightseeing.price || 0)})</span>
+                            <span className="text-sm font-medium">
+                              {formatPrice((sightseeing.offerPrice || sightseeing.price || 0) * adults)}
+                            </span>
+                          </div>
+                          
+                          {/* Child price breakdown - only if children are selected and child price exists */}
+                          {children > 0 && sightseeing.childPrice && (
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Child price ({children} × {formatPrice(sightseeing.childOfferPrice || sightseeing.childPrice)})</span>
+                              <span className="text-sm font-medium">
+                                {formatPrice((sightseeing.childOfferPrice || sightseeing.childPrice) * children)}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Total */}
+                          <div className="flex justify-between text-lg font-semibold border-t pt-2">
+                            <span>Total</span>
+                            <span className="text-blue-900">
+                              {formatPrice(
+                                (adults * (sightseeing.offerPrice || sightseeing.price || 0)) +
+                                (children * (sightseeing.childOfferPrice || sightseeing.childPrice || 0))
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       

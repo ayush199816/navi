@@ -201,7 +201,7 @@ const getGuestSightseeings = asyncHandler(async (req, res, next) => {
   let query = GuestSightseeing.find(filter);
 
   // Select fields
-  const defaultFields = 'name description price offerPrice duration inclusions images videos country isActive createdAt city tourType activityType';
+  const defaultFields = 'name description price offerPrice childPrice childOfferPrice duration inclusions images videos country isActive createdAt city tourType activityType';
   if (select) {
     const fields = select.split(',').join(' ');
     console.log('Selecting fields:', fields);
@@ -733,8 +733,12 @@ const createGuestSightseeing = asyncHandler(async (req, res, next) => {
     }
     
     // Convert prices to numbers
-    if (sightseeingData.price) sightseeingData.price = Number(sightseeingData.price) || 0;
-    if (sightseeingData.offerPrice) sightseeingData.offerPrice = Number(sightseeingData.offerPrice) || 0;
+    console.log('Before price conversion - childPrice:', sightseeingData.childPrice, 'childOfferPrice:', sightseeingData.childOfferPrice);
+    if (sightseeingData.price !== undefined && sightseeingData.price !== '') sightseeingData.price = Number(sightseeingData.price) || 0;
+    if (sightseeingData.offerPrice !== undefined && sightseeingData.offerPrice !== '') sightseeingData.offerPrice = Number(sightseeingData.offerPrice) || 0;
+    if (sightseeingData.childPrice !== undefined && sightseeingData.childPrice !== '') sightseeingData.childPrice = Number(sightseeingData.childPrice) || 0;
+    if (sightseeingData.childOfferPrice !== undefined && sightseeingData.childOfferPrice !== '') sightseeingData.childOfferPrice = Number(sightseeingData.childOfferPrice) || 0;
+    console.log('After price conversion - childPrice:', sightseeingData.childPrice, 'childOfferPrice:', sightseeingData.childOfferPrice);
     
     // Helper function to process array fields and convert to proper array of strings
     const processArrayField = (value) => {
@@ -861,6 +865,28 @@ const updateGuestSightseeing = asyncHandler(async (req, res, next) => {
     } else if (updates.offerPrice === '') {
       // If offerPrice is an empty string, set it to null/undefined to remove it
       updates.offerPrice = undefined;
+    }
+    
+    // Convert childPrice to number if it exists
+    if (updates.childPrice !== undefined && updates.childPrice !== '') {
+      updates.childPrice = Number(updates.childPrice);
+      if (isNaN(updates.childPrice)) {
+        return next(new ErrorResponse('Child price must be a valid number', 400));
+      }
+    } else if (updates.childPrice === '') {
+      // If childPrice is an empty string, set it to null/undefined to remove it
+      updates.childPrice = undefined;
+    }
+    
+    // Convert childOfferPrice to number if it exists and is not empty string
+    if (updates.childOfferPrice !== undefined && updates.childOfferPrice !== '') {
+      updates.childOfferPrice = Number(updates.childOfferPrice);
+      if (isNaN(updates.childOfferPrice)) {
+        return next(new ErrorResponse('Child offer price must be a valid number', 400));
+      }
+    } else if (updates.childOfferPrice === '') {
+      // If childOfferPrice is an empty string, set it to null/undefined to remove it
+      updates.childOfferPrice = undefined;
     }
     
     // Ensure inclusions is an array and handle nested arrays
