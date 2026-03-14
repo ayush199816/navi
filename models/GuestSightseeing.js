@@ -67,6 +67,46 @@ const guestSightseeingSchema = new mongoose.Schema({
       message: 'Currency is required when offer price is specified'
     }
   },
+  childPrice: {
+    type: Number,
+    min: [0, 'Child price cannot be negative'],
+    default: null
+  },
+  childPriceCurrency: {
+    type: String,
+    default: 'USD',
+    uppercase: true,
+    enum: {
+      values: ['USD'],
+      message: 'Only USD currency is supported'
+    },
+    trim: true
+  },
+  childOfferPrice: {
+    type: Number,
+    min: [0, 'Child offer price cannot be negative'],
+    default: null
+  },
+  childOfferPriceCurrency: {
+    type: String,
+    default: 'USD',
+    uppercase: true,
+    enum: {
+      values: ['USD'],
+      message: 'Only USD currency is supported'
+    },
+    trim: true,
+    validate: {
+      validator: function(value) {
+        // If there's a child offer price, currency is required
+        if (this.childOfferPrice !== null && this.childOfferPrice !== undefined) {
+          return !!value;
+        }
+        return true;
+      },
+      message: 'Currency is required when child offer price is specified'
+    }
+  },
   isActive: {
     type: Boolean,
     default: true

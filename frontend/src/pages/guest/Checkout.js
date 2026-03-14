@@ -41,12 +41,12 @@ const Checkout = () => {
   const currentBookingIdRef = useRef(null);
   const { formatPrice } = useCurrency();
   
-  // Calculate pax counts based on the new requirements
+  // Calculate pax counts based on the new adult/child requirements
   const calculatePaxCounts = () => {
     if (cart.items.length === 0) return { totalPax: 0, displayPax: 0, allSamePax: true };
     
-    // Get all pax counts
-    const paxCounts = cart.items.map(item => item.pax || 1);
+    // Get all total pax counts (adults + children)
+    const paxCounts = cart.items.map(item => (item.adults || 1) + (item.children || 0));
     
     // Check if all pax counts are the same
     const allSamePax = paxCounts.every(count => count === paxCounts[0]);
@@ -77,13 +77,24 @@ const Checkout = () => {
   // Alias for paxCount to match the template
   const paxCount = displayPax;
   
-  // Calculate total price from all items in cart
+  // Calculate total price from all items in cart using adult/child pricing
   const totalPrice = cart.items.reduce((total, item) => {
     if (item.type === 'sightseeing') {
-      const hasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
-      const price = hasOffer ? item.offerPrice : item.price;
-      const quantity = item.pax || 1;
-      return total + (price * quantity);
+      // Calculate adult pricing
+      const adultHasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
+      const adultPrice = adultHasOffer ? item.offerPrice : item.price;
+      const itemAdults = item.adults || 1;
+      
+      // Calculate child pricing
+      const childHasOffer = item.hasChildOffer || (item.childOfferPrice !== undefined && item.childOfferPrice !== null);
+      const childPrice = childHasOffer ? item.childOfferPrice : (item.childPrice || 0);
+      const itemChildren = item.children || 0;
+      
+      // Calculate totals
+      const adultTotal = adultPrice * itemAdults;
+      const childTotal = childPrice * itemChildren;
+      
+      return total + adultTotal + childTotal;
     }
     return total + (item.price * (item.quantity || 1));
   }, 0);
@@ -181,9 +192,10 @@ const Checkout = () => {
   const calculateAdditionalPaxCount = () => {
     if (cart.items.length === 0) return 0;
     
-    // If only one activity, use its pax count
+    // If only one activity, use its total pax count (adults + children)
     if (cart.items.length === 1) {
-      return Math.max(0, (cart.items[0].pax || 1) - 1);
+      const item = cart.items[0];
+      return Math.max(0, ((item.adults || 1) + (item.children || 0)) - 1);
     }
     
     // For multiple activities, use the displayPax which is already calculated
@@ -385,8 +397,10 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
     
     // Prepare booking data for each item in cart
     const bookingPromises = cart.items.map(async (item, index) => {
-      const itemPax = item.pax || 1;
-      const itemAdditionalPaxCount = Math.max(0, itemPax - 1);
+      const itemAdults = item.adults || 1;
+      const itemChildren = item.children || 0;
+      const itemTotalPax = itemAdults + itemChildren;
+      const itemAdditionalPaxCount = Math.max(0, itemTotalPax - 1);
       
       // Get the slice of additionalPax for this item
       const itemAdditionalPax = values.additionalPax.slice(
@@ -400,10 +414,16 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
       // Get the booking date for this specific item
       const itemBookingDate = values.items.find(i => i.id === item.id)?.bookingDate || new Date();
       
-      // Calculate the total amount for this item
-      const hasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
-      const itemPrice = hasOffer ? item.offerPrice : item.price;
-      const totalAmount = itemPrice * itemPax;
+      // Calculate the total amount for this item based on adult/child pricing
+      const adultHasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
+      const adultPrice = adultHasOffer ? item.offerPrice : item.price;
+      
+      const childHasOffer = item.hasChildOffer || (item.childOfferPrice !== undefined && item.childOfferPrice !== null);
+      const childPrice = childHasOffer ? item.childOfferPrice : (item.childPrice || 0);
+      
+      const adultTotal = adultPrice * itemAdults;
+      const childTotal = childPrice * itemChildren;
+      const totalAmount = adultTotal + childTotal;
       
       // Ensure all required fields are present
       const leadGuest = {
@@ -418,7 +438,7 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
         sightseeingId: item.originalId || item.id,
         sightseeingName: item.name,
         dateOfTravel: new Date(itemBookingDate).toISOString().split('T')[0],
-        numberOfPax: itemPax,
+        numberOfPax: itemTotalPax,
         leadGuest,
         additionalGuests: itemAdditionalPax.map(pax => ({
           name: pax.name || 'Additional Guest',
@@ -431,9 +451,9 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
       };
       
       return axios.post('/api/guest-sightseeing-bookings', bookingData);
+
     });
-    
-    // Create all bookings sequentially to ensure they're committed before payment
+
     const responses = [];
     for (const bookingPromise of bookingPromises) {
       const response = await bookingPromise;
@@ -443,9 +463,19 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
     if (responses && responses.length > 0 && responses[0]?.data?.data?._id) {
       const firstBooking = responses[0].data.data;
       const totalAmount = cart.items.reduce((total, item) => {
-        const hasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
-        const price = hasOffer ? item.offerPrice : item.price;
-        return total + (price * (item.pax || 1));
+        const adultHasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
+        const adultPrice = adultHasOffer ? item.offerPrice : item.price;
+        
+        const childHasOffer = item.hasChildOffer || (item.childOfferPrice !== undefined && item.childOfferPrice !== null);
+        const childPrice = childHasOffer ? item.childOfferPrice : (item.childPrice || 0);
+        
+        const itemAdults = item.adults || 1;
+        const itemChildren = item.children || 0;
+        
+        const adultTotal = adultPrice * itemAdults;
+        const childTotal = childPrice * itemChildren;
+        
+        return total + adultTotal + childTotal;
       }, 0);
 
       // Create payment session with the first booking ID
@@ -467,13 +497,7 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
       navigate('/guest-dashboard');
     }
   } catch (error) {
-    if (error.response && error.response.status >= 200 && error.response.status < 300) {
-      dispatch(clearCart());
-      toast.success('Booking created successfully!');
-      navigate('/guest-dashboard');
-    } else {
-      toast.error(error.response?.data?.message || 'Failed to process booking. Please try again.');
-    }
+    toast.error(error.response?.data?.message || 'Failed to process booking. Please try again.');
   }
 };
 
@@ -509,10 +533,20 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
               <div className="space-y-6">
                 {cart.items.map((item, index) => {
                   const itemDate = item.date ? new Date(item.date).toLocaleDateString() : 'Date not specified';
-                  const itemPax = item.pax || 1;
-                  const hasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
-                  const displayPrice = hasOffer ? item.offerPrice : item.price;
-                  const itemTotal = displayPrice * itemPax;
+                  const itemAdults = item.adults || 1;
+                  const itemChildren = item.children || 0;
+                  const itemTotalPax = itemAdults + itemChildren;
+                  
+                  // Calculate pricing
+                  const adultHasOffer = item.hasOffer || (item.offerPrice !== undefined && item.offerPrice !== null);
+                  const adultPrice = adultHasOffer ? item.offerPrice : item.price;
+                  
+                  const childHasOffer = item.hasChildOffer || (item.childOfferPrice !== undefined && item.childOfferPrice !== null);
+                  const childPrice = childHasOffer ? item.childOfferPrice : (item.childPrice || 0);
+                  
+                  const adultTotal = adultPrice * itemAdults;
+                  const childTotal = childPrice * itemChildren;
+                  const itemTotal = adultTotal + childTotal;
                   
                   return (
                     <div key={item.id} className="border-b pb-4 last:border-b-0 last:pb-0">
@@ -520,7 +554,7 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
                         <div className="flex-1">
                           <div className="flex justify-between items-start">
                             <h4 className="font-medium text-gray-900">{item.name}</h4>
-                            {hasOffer && (
+                            {(adultHasOffer || childHasOffer) && (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 Special Offer
                               </span>
@@ -528,16 +562,45 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
                           </div>
                           <div className="mt-1 text-sm text-gray-500">
                             <p>Date: {itemDate}</p>
-                            <p>Pax: {itemPax}</p>
-                            <div className="mt-1">
-                              {hasOffer ? (
-                                <div>
-                                  <span className="text-gray-500 line-through mr-2">{formatPrice(item.price * itemPax)}</span>
-                                  <span className="text-green-600 font-medium">{formatPrice(itemTotal)}</span>
+                            <p>Adults: {itemAdults}, Children: {itemChildren} ({itemTotalPax} total)</p>
+                            <div className="mt-1 space-y-1">
+                              {/* Adult pricing */}
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs">Adults ({itemAdults} × {formatPrice(adultPrice)})</span>
+                                <span className={`text-xs ${adultHasOffer ? 'text-green-600' : 'text-gray-700'}`}>
+                                  {adultHasOffer && adultPrice < item.price ? (
+                                    <>
+                                      <span className="line-through text-gray-400 mr-1">{formatPrice(item.price * itemAdults)}</span>
+                                      {formatPrice(adultTotal)}
+                                    </>
+                                  ) : (
+                                    formatPrice(adultTotal)
+                                  )}
+                                </span>
+                              </div>
+                              
+                              {/* Child pricing */}
+                              {itemChildren > 0 && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs">Children ({itemChildren} × {formatPrice(childPrice)})</span>
+                                  <span className={`text-xs ${childHasOffer ? 'text-green-600' : 'text-gray-700'}`}>
+                                    {childHasOffer && childPrice < (item.childPrice || 0) ? (
+                                      <>
+                                        <span className="line-through text-gray-400 mr-1">{formatPrice((item.childPrice || 0) * itemChildren)}</span>
+                                        {formatPrice(childTotal)}
+                                      </>
+                                    ) : (
+                                      formatPrice(childTotal)
+                                    )}
+                                  </span>
                                 </div>
-                              ) : (
-                                <span>{formatPrice(itemTotal)}</span>
                               )}
+                              
+                              {/* Total for this item */}
+                              <div className="flex justify-between items-center pt-1 border-t border-gray-200">
+                                <span className="text-xs font-medium">Total</span>
+                                <span className="text-xs font-medium text-gray-900">{formatPrice(itemTotal)}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -742,19 +805,19 @@ const createPaymentSession = async (bookingId, amount, customerDetails) => {
                     Total Amount
                   </label>
                   <div className="mt-1 text-xl font-bold text-blue-600">
-                    ${totalPrice.toFixed(2)}
+                    {formatPrice(totalPrice)}
                   </div>
                 </div>
 
                 {/* Submit Button */}
                 <div className="mt-6">
                   <button
-  type="submit"
-  disabled={!cashfree || isPaymentProcessing}
-  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 disabled:opacity-50"
->
-  {isPaymentProcessing ? 'Processing Payment...' : 'Proceed to Payment'}
-</button>
+                    type="submit"
+                    disabled={!cashfree || isPaymentProcessing}
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-900 to-orange-600 hover:from-blue-950 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 disabled:opacity-50"
+                  >
+                    {isPaymentProcessing ? 'Processing Payment...' : 'Proceed to Payment'}
+                  </button>
                 </div>
               </div>
             </Form>

@@ -51,6 +51,10 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     priceCurrency: 'USD', // Default currency
     offerPrice: '',
     offerPriceCurrency: 'USD', // Default currency
+    childPrice: '',
+    childPriceCurrency: 'USD', // Default currency
+    childOfferPrice: '',
+    childOfferPriceCurrency: 'USD', // Default currency
     duration: 'Not specified',
     inclusions: ['No inclusions specified'],
     isActive: true,
@@ -89,6 +93,10 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         priceCurrency: 'USD',
         offerPrice: '',
         offerPriceCurrency: 'USD',
+        childPrice: '',
+        childPriceCurrency: 'USD',
+        childOfferPrice: '',
+        childOfferPriceCurrency: 'USD',
         duration: 'Not specified',
         inclusions: ['No inclusions specified'],
         isActive: true,
@@ -157,6 +165,10 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
         priceCurrency: 'USD',
         offerPrice: '',
         offerPriceCurrency: 'USD',
+        childPrice: '',
+        childPriceCurrency: 'USD',
+        childOfferPrice: '',
+        childOfferPriceCurrency: 'USD',
         duration: 'Not specified',
         inclusions: ['No inclusions specified'],
         isActive: true,
@@ -199,13 +211,13 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     let processedValue = value;
 
     if (type === 'checkbox') {
       processedValue = checked;
-    } else if (name === 'price' || name === 'offerPrice') {
+    } else if (name === 'price' || name === 'offerPrice' || name === 'childPrice' || name === 'childOfferPrice') {
       processedValue = value === '' ? '' : Number(value);
       if (Number.isNaN(processedValue)) {
         processedValue = '';
@@ -591,6 +603,52 @@ const GuestSightseeingForm = ({ sightseeing: propSightseeing, onSuccess, onCance
                   />
                 </div>
                 <p className="text-xs text-slate-500">Leave empty if there is no promotional offer.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="childPrice" className="text-sm font-semibold text-slate-700">
+                  Child Price (USD)
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-semibold text-slate-400">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    name="childPrice"
+                    id="childPrice"
+                    min="0"
+                    step="0.01"
+                    value={formData.childPrice}
+                    onChange={handleChange}
+                    className={`${baseInputClasses} pl-8`}
+                    placeholder="0.00"
+                  />
+                </div>
+                <p className="text-xs text-slate-500">Price for children (optional).</p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="childOfferPrice" className="text-sm font-semibold text-slate-700">
+                  Child Offer Price (USD)
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-semibold text-slate-400">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    name="childOfferPrice"
+                    id="childOfferPrice"
+                    min="0"
+                    step="0.01"
+                    value={formData.childOfferPrice}
+                    onChange={handleChange}
+                    className={`${baseInputClasses} pl-8`}
+                    placeholder="0.00"
+                  />
+                </div>
+                <p className="text-xs text-slate-500">Leave empty if there is no child promotional offer.</p>
               </div>
             </div>
           </SectionCard>
