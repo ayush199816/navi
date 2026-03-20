@@ -10,8 +10,10 @@ import {
   FiMoon,
   FiCoffee,
   FiMapPin,
-  FiClock
+  FiClock,
+  FiCalendar
 } from 'react-icons/fi';
+import MapItinerary from '../components/MapItinerary';
 
 const SECTION_KEYWORDS = [
   'Morning',
@@ -81,6 +83,7 @@ const COUNTRY_OPTIONS = [
   'Djibouti',
   'Dominica',
   'Dominican Republic',
+  'Dubai', // Added (City/Emirate)
   'Ecuador',
   'Egypt',
   'El Salvador',
@@ -120,6 +123,7 @@ const COUNTRY_OPTIONS = [
   'Kazakhstan',
   'Kenya',
   'Kiribati',
+  'Kosovo', // Added
   'Kuwait',
   'Kyrgyzstan',
   'Laos',
@@ -163,6 +167,7 @@ const COUNTRY_OPTIONS = [
   'Oman',
   'Pakistan',
   'Palau',
+  'Palestine', // Added
   'Panama',
   'Papua New Guinea',
   'Paraguay',
@@ -376,6 +381,321 @@ const htmlToPlainText = (html = '') => {
     .trim();
 };
 
+// Function to extract places/sightseeing names from itinerary text
+const extractPlacesFromItinerary = (itineraryText = '') => {
+  if (!itineraryText) return [];
+  
+  // Convert HTML to plain text if needed
+  const plainText = htmlToPlainText(itineraryText);
+  
+  // Split into lines and process
+  const lines = plainText.split('\n');
+  const places = [];
+  const seenPlaces = new Set();
+  
+  // Track current day and time
+  let currentDay = '';
+  let currentTime = '';
+  
+  // Pre-process to extract travel dates for day calculation
+  let travelStartDate = null;
+  const travelDatesMatch = itineraryText.match(/Travel Dates:\s*([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})\s+to\s+([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})/);
+  if (travelDatesMatch) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+    const startMonthIndex = monthNames.indexOf(travelDatesMatch[1]);
+    const startDay = parseInt(travelDatesMatch[2]);
+    const startYear = parseInt(travelDatesMatch[3]);
+    
+    if (startMonthIndex !== -1) {
+      travelStartDate = new Date(startYear, startMonthIndex, startDay);
+    }
+  }
+  
+  // Track day mapping for Dubai-style itineraries
+  let dayMapping = new Map();
+  
+  // First pass: collect all day headers to establish proper mapping
+  for (const line of lines) {
+    const dayMatch = line.match(/\b(Day\s+(\d+))\b/i);
+    if (dayMatch) {
+      const originalDay = parseInt(dayMatch[2]);
+      // For Dubai itinerary: Day 2 -> Day 1, Day 3 -> Day 2, etc.
+      if (originalDay >= 2) {
+        dayMapping.set(originalDay, originalDay - 1);
+      }
+    }
+  }
+  
+  // Also handle date-based headers
+  const dateHeaders = [];
+  for (const line of lines) {
+    const dateMatch = line.match(/##?\s+([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})/);
+    if (dateMatch && travelStartDate) {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+      const currentMonthIndex = monthNames.indexOf(dateMatch[1]);
+      const currentDayNum = parseInt(dateMatch[2]);
+      const currentYear = parseInt(dateMatch[3]);
+      
+      if (currentMonthIndex !== -1) {
+        const currentDate = new Date(currentYear, currentMonthIndex, currentDayNum);
+        const dayDifference = Math.ceil((currentDate - travelStartDate) / (1000 * 60 * 60 * 24)) + 1;
+        dateHeaders.push({
+          line: lines.indexOf(line),
+          dayNumber: Math.max(1, dayDifference)
+        });
+      }
+    }
+  }
+  
+  // Reset for main processing
+  currentDay = '';
+  currentTime = '';
+  
+  for (const line of lines) {
+    // Extract day information - handle "Day X" format for Thailand itinerary
+    const dayMatch = line.match(/\b(Day\s+\d+)\b/i);
+    if (dayMatch) {
+      currentDay = dayMatch[1];
+      currentTime = ''; // Reset time when day changes
+      continue;
+    }
+    
+    // Extract time information - handle Thailand format time sections
+    // Look for standalone Morning/Afternoon/Evening or with highlights count
+    const timePatterns = [
+      /^([A-Za-z]+)$/i,  // standalone like "Morning"
+      /^([A-Za-z]+)\s*$/i,  // with whitespace
+      /^([A-Za-z]+)\s*\d+\s*highlights?$/i,  // like "Morning 2 highlights"
+      /^([A-Za-z]+)\s*\d+\s*highlights?\s*:?$/i  // like "Morning 2 highlights:"
+    ];
+    
+    let timeDetected = false;
+    for (const pattern of timePatterns) {
+      const timeMatch = line.match(pattern);
+      if (timeMatch && ['Morning', 'Afternoon', 'Evening'].includes(timeMatch[1])) {
+        currentTime = timeMatch[1];
+        timeDetected = true;
+        break;
+      }
+    }
+    
+    if (timeDetected) {
+      continue;
+    }
+    
+    // Additional time detection for context lines
+    const contextTimeMatch = line.match(/\b(Morning|Afternoon|Evening)\b/i);
+    if (contextTimeMatch && !timeDetected) {
+      currentTime = contextTimeMatch[1];
+      continue;
+    }
+    
+    // Skip lines that are clearly not activity titles
+    const skipPatterns = [
+      // Skip description lines that start with action verbs
+      /^Explore\s/i, /^Marvel\s/i, /^Take\s/i, /^Enjoy\s/i, /^Admire\s/i, /^Visit\s/i, /^Discover\s/i,
+      /^Learn\s/i, /^Experience\s/i, /^Witness\s/i, /^See\s/i, /^Walk\s/i, /^Wander\s/i,
+      // Skip ALL suggestion lines
+      /\*\*Suggestion:\*\*/i, /\*\*Lunch Suggestion:\*\*/i, /\*\*Breakfast Suggestion:\*\*/i, /\*\*Dinner Suggestion:\*\*/i,
+      /\*\*Breakfast\/Lunch Suggestion:\*\*/i, /\*\*Included in Tour Package\*\*/i,
+      /^Suggestion:/i, /^Lunch Suggestion:/i, /^Breakfast Suggestion:/i, /^Dinner Suggestion:/i,
+      /^\/Lunch Suggestion/i, /^\/Breakfast Suggestion/i, /^\/Dinner Suggestion/i,
+      // Skip opening hours and other metadata
+      /^Opening Hours:/i, /^A bustling/i, /^Navigate/i, /^Your Ultimate/i, /^Enjoy a scenic/i,
+      // Skip generic time references and numbers
+      /^\d+\s*highlights?$/i, /^\d+\s*highlights?\s*:?$/i,
+      // Skip breakfast/lunch/dinner activity lines that are not places
+      /^Breakfast$/i, /^Lunch$/i, /^Dinner$/i,
+      // Skip travel and logistics
+      /^Arrival\s/i, /^Transfer\s/i, /^Check-in\s/i, /^Travel\s/i, /^Flight\s/i, /^Transportation:/i,
+      // Skip tips and advice
+      /^Traveler Tips/i, /^Estimated Time/i, /^Additional Notes/i, /^Activities:/i,
+      /^Currency:/i, /^Hydration:/i, /^Utilize/i, /^Packing:/i, /^Confirm/i,
+      /^Sun Protection:/i, /^Environmental Respect:/i, /^Respect/i, /^Relaxation/i,
+      // Skip generic lines and headers
+      /^#+\s*Day\s+\d+/i, /^#+\s*Itinerary/i, /^#+\s*Travel Tips/i,
+      /^\*\*Destination:\*\*/i, /^\*\*Traveler Preferences:\*\*/i, /^Destination:/i, /^Travel Dates:/i, /^Traveler Preferences:/i,
+      /^#+\s*\d+-Day\s+Itinerary/i, /^#+\s*Thailand/i, /^#+\s*Bangkok/i,
+      // Skip cuisine and food-related generic terms
+      /Cuisine$/i, /Restaurant$/i, /Cafe$/i, /Deli$/i, /Seafood/i, /Thai$/i, /Chinese/i,
+      // Skip generic activities and advice
+      /^Immerse$/i, /^Experience$/i, /^Arrange$/i, /^Wear$/i, /^Bargaining$/i, /^Observe$/i,
+      /^Depending$/i, /^For Jim Thompson House/i, /^Chinatown Exploration/i, /^Domestic Flights:/i,
+      /^Snorkeling$/i, /^Swimming$/i, /^Included$/i, /^Another$/i, /^Skytrain$/i,
+      /^Nok Air$/i, /^Lion Air$/i, /^Phuket Accommodation$/i, /^Phuket Old Town$/i,
+      // Skip time estimates that aren't activities
+      /:\s*\d+[-\s]*\d*\s*hours?/i, /:\s*\d+[-\s]*\d*\s*minutes?/i
+    ];
+    
+    const shouldSkip = skipPatterns.some(pattern => pattern.test(line.trim()));
+    if (shouldSkip) {
+      continue;
+    }
+    
+    // Only extract from lines that look like activity titles
+    // Activity titles are typically proper noun phrases, not sentences starting with verbs
+    const trimmedLine = line.trim();
+    
+    // Skip if line starts with lowercase or common words
+    if (/^[a-z]/.test(trimmedLine) || 
+        trimmedLine.startsWith('And ') || 
+        trimmedLine.startsWith('Or ') ||
+        trimmedLine.startsWith('Then ') ||
+        trimmedLine.startsWith('After ') ||
+        trimmedLine.length < 5) {
+      continue;
+    }
+    
+    // Skip lines that are clearly descriptions (contain multiple sentences or long text)
+    if (trimmedLine.includes('. ') && trimmedLine.split('. ').length > 1) {
+      continue;
+    }
+    
+    // Now extract potential place names from what should be activity titles
+    const placePattern = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b/g;
+    
+    let match;
+    while ((match = placePattern.exec(trimmedLine)) !== null) {
+      const potentialPlace = match[1].trim();
+      
+      // Skip very short words and common non-place words
+      if (potentialPlace.length < 3) continue;
+      
+      // Enhanced filtering to exclude generic activities and focus on places
+      const excludeGenericActivities = [
+        // Generic actions that might appear in titles
+        'Breakfast', 'Lunch', 'Dinner', 'Suggestion', 'Highlights', 'Tour', 'Boat', 'Ride', 'Massage',
+        // Time words
+        'Morning', 'Afternoon', 'Evening', 'Night', 'Day',
+        // Generic locations that aren't specific places
+        'Hotel', 'Restaurant', 'Bar', 'Cafe', 'Shop', 'Market', 'Street', 'Road', 'Beach', 'Sea', 'Ocean',
+        // Travel terms
+        'Airport', 'Flight', 'Transfer', 'Transport', 'Taxi', 'Bus', 'Car', 'Vehicle', 'Driver', 'Guide',
+        // Food and cuisine terms
+        'Cuisine', 'Thai', 'Chinese', 'Local', 'Traditional', 'Royal', 'Southern', 'Classic', 'Delicacies',
+        'Rice', 'Porridge', 'Food', 'Stalls', 'Court', 'Deli', 'Bazaar', 'Mall', 'Center', 'Square',
+        // Generic verbs and descriptions
+        'Immerse', 'Experience', 'Explore', 'Wander', 'Admire', 'Marvel', 'Visit', 'See', 'Enjoy', 'Take',
+        'Arrange', 'Wear', 'Bargaining', 'Check-in', 'Arrival', 'Transfer', 'Travel', 'Tips', 'Estimated',
+        'Activities', 'Notes', 'Suggestion', 'Lunch', 'Dinner', 'Breakfast'
+      ];
+      
+      // Check if this is a generic activity that should be excluded
+      const isGenericActivity = excludeGenericActivities.some(activity => 
+        potentialPlace.toLowerCase().includes(activity.toLowerCase()) ||
+        activity.toLowerCase().includes(potentialPlace.toLowerCase())
+      );
+      
+      if (isGenericActivity) {
+        continue; // Skip generic activities
+      }
+      
+      // Place indicators that suggest real attractions
+      const placeIndicators = [
+        // Religious/cultural sites
+        'Wat', 'Temple', 'Church', 'Mosque', 'Monastery', 'Shrine', 'Pagoda', 'Cathedral',
+        'Palace', 'Castle', 'Fort', 'Museum', 'House', 'Hall', 'Tower', 'Gate',
+        // Natural attractions
+        'Beach', 'Island', 'Bay', 'Cove', 'Lagoon', 'Cape', 'Mountain', 'Viewpoint', 
+        'Cave', 'Waterfall', 'Lake', 'River', 'Park', 'Garden', 'Zoo', 'Aquarium',
+        // Urban attractions
+        'Market', 'Mall', 'Center', 'Road', 'Street', 'Square', 'Plaza', 'Bridge',
+        // Specific place names (look for proper nouns with these endings)
+        'Town', 'City', 'Village', 'District', 'Province', 'Kingdom', 'Empire'
+      ];
+      
+      // Check if this looks like a genuine place name
+      const hasPlaceIndicator = placeIndicators.some(indicator => 
+        potentialPlace.includes(indicator) || indicator.includes(potentialPlace)
+      );
+      
+      // Additional checks for genuine places
+      const looksLikePlaceName = (
+        // Multi-word names (e.g., "Grand Palace", "Red Fort")
+        potentialPlace.split(' ').length > 1 ||
+        // Contains place indicators
+        hasPlaceIndicator ||
+        // Long proper nouns (likely specific place names)
+        (potentialPlace.length > 6 && /[A-Z]/.test(potentialPlace)) ||
+        // Contains numbers that might indicate famous sites (e.g., "Big Buddha")
+        /\d/.test(potentialPlace)
+      );
+      
+      // Only consider places that look like legitimate place names
+      if (looksLikePlaceName) {
+        if (!seenPlaces.has(potentialPlace)) {
+          places.push({
+            name: potentialPlace,
+            day: currentDay,
+            time: currentTime,
+            context: trimmedLine
+          });
+          seenPlaces.add(potentialPlace);
+        }
+      }
+    }
+  }
+  
+  // Remove duplicates and limit to top 50 places
+  const uniquePlaces = places.filter((place, index, self) => 
+    index === self.findIndex(p => p.name === place.name)
+  );
+  
+  // Filter out places with N/A values or generic entries
+  const filteredPlaces = uniquePlaces.filter(place => 
+    place.day !== 'N/A' && 
+    place.time !== 'N/A' && 
+    place.name !== 'N/A' &&
+    // Exclude very generic or metadata entries
+    !place.name.includes('Suggestion') &&
+    !place.name.includes('Tips') &&
+    !place.name.includes('Estimated') &&
+    !place.name.includes('Activities') &&
+    !place.name.includes('Notes') &&
+    !place.name.includes('Travel') &&
+    !place.name.includes('Arrival') &&
+    !place.name.includes('Check-in') &&
+    !place.name.includes('Transfer') &&
+    !place.name.includes('Cuisine') &&
+    !place.name.includes('Restaurant') &&
+    !place.name.includes('Destination') &&
+    !place.name.includes('Bangkok') &&
+    // Exclude specific unwanted terms
+    !place.name.includes('Currency') &&
+    !place.name.includes('Hydration') &&
+    !place.name.includes('Utilize') &&
+    !place.name.includes('Discover Bangkok') &&
+    !place.name.includes('International Fusion') &&
+    !place.name.includes('Skytrain') &&
+    !place.name.includes('Transportation') &&
+    !place.name.includes('Relaxation') &&
+    !place.name.includes('Packing') &&
+    !place.name.includes('Confirm') &&
+    !place.name.includes('Depending') &&
+    !place.name.includes('Phuket Accommodation') &&
+    !place.name.includes('Domestic Flights') &&
+    !place.name.includes('Nok Air') &&
+    !place.name.includes('Lion Air') &&
+    !place.name.includes('Environmental Respect') &&
+    !place.name.includes('Respect') &&
+    !place.name.includes('Sun Protection') &&
+    !place.name.includes('Snorkeling') &&
+    !place.name.includes('Swimming') &&
+    !place.name.includes('Observe') &&
+    !place.name.includes('Chinatown Exploration') &&
+    !place.name.includes('For Jim Thompson House') &&
+    !place.name.includes('Souvenir Shopping') &&
+    !place.name.includes('Portuguese') &&
+    !place.name.includes('Phuket Old Town Exploration') &&
+    !place.name.includes('Chalong Bay') &&
+    place.name.length > 3 // Exclude very short entries
+  );
+  
+  return filteredPlaces.slice(0, 50);
+};
+
 const AIItineraryGeneratorPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -391,6 +711,8 @@ const AIItineraryGeneratorPage = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [extractedPlaces, setExtractedPlaces] = useState([]);
+  const [viewMode, setViewMode] = useState('table');
   // Removed unused itineraryRef
 
   const handleChange = (e) => {
@@ -484,6 +806,10 @@ const AIItineraryGeneratorPage = () => {
       }
       
       setItinerary(itineraryText);
+      
+      // Extract places from the generated itinerary
+      const places = extractPlacesFromItinerary(itineraryText);
+      setExtractedPlaces(places);
       
     } catch (err) {
       console.error('Error generating itinerary:', err);
@@ -1437,6 +1763,164 @@ const AIItineraryGeneratorPage = () => {
                 />
               )}
             </div>
+
+            {/* Extracted Places Table - DISABLED */}
+            {false && extractedPlaces.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-green-500 to-teal-600">
+                  <h3 className="text-xl font-semibold text-white flex items-center">
+                    <FiMapPin className="mr-2" />
+                    Extracted Places & Sightseeing
+                  </h3>
+                  <p className="text-green-100 text-sm mt-1">
+                    Places and attractions mentioned in your itinerary with day and time information
+                  </p>
+                </div>
+                
+                {/* Tab Mode Toggle */}
+                <div className="px-6 py-3 bg-gray-50 border-b">
+                  <div className="flex items-center justify-between">
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={() => setViewMode('table')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                          viewMode === 'table'
+                            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Table View
+                      </button>
+                      <button
+                        onClick={() => setViewMode('tabs')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                          viewMode === 'tabs'
+                            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Day-wise Tabs
+                      </button>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {extractedPlaces.length} places found
+                    </div>
+                  </div>
+                </div>
+                
+                {viewMode === 'table' ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Place Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Day
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Context
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {extractedPlaces.map((place, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <FiMapPin className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                                <div className="text-sm font-medium text-gray-900">
+                                  {place.name}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {place.day || 'N/A'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                {place.time || 'N/A'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-600 max-w-md truncate" title={place.context}>
+                                {place.context}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-6">
+                    {/* Tab Mode - Day-wise Display */}
+                    {(() => {
+                      const placesByDay = extractedPlaces.reduce((acc, place) => {
+                        const day = place.day || 'No Day';
+                        if (!acc[day]) acc[day] = [];
+                        acc[day].push(place);
+                        return acc;
+                      }, {});
+                      
+                      const dayKeys = Object.keys(placesByDay).sort();
+                      
+                      return (
+                        <div className="space-y-6">
+                          {dayKeys.map(day => (
+                            <div key={day} className="bg-gray-50 rounded-lg p-4">
+                              <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <FiCalendar className="mr-2 text-blue-600" />
+                                {day}
+                                <span className="ml-2 text-sm font-normal text-gray-600">
+                                  ({placesByDay[day].length} places)
+                                </span>
+                              </h4>
+                              
+                              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                {placesByDay[day].map((place, index) => (
+                                  <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h5 className="font-medium text-gray-900 flex items-center">
+                                        <FiMapPin className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                                        {place.name}
+                                      </h5>
+                                      {place.time && (
+                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                          {place.time}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {place.context && (
+                                      <p className="text-sm text-gray-600 line-clamp-2" title={place.context}>
+                                        {place.context}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Map Itinerary Component */}
+            {extractedPlaces.length > 0 && (
+              <div className="mt-8">
+                <MapItinerary extractedPlaces={extractedPlaces} destination={formData.destination} />
+              </div>
+            )}
 
             <div className="bg-blue-50 rounded-xl p-6 text-center">
               <h3 className="text-lg font-medium text-blue-800">Need to make changes?</h3>
