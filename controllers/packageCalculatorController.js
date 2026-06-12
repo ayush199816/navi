@@ -46,12 +46,17 @@ exports.getPackageCalculator = async (req, res) => {
 // @access  Private/Admin,Operations
 exports.createPackageCalculator = async (req, res) => {
   try {
+    console.log('Received request body:', req.body);
+    console.log('Hotel prices in request:', req.body.hotelPrices);
+    
     const calculatorData = {
       ...req.body,
       createdBy: req.user.id
     };
 
+    console.log('Calculator data before save:', calculatorData);
     const calculator = await PackageCalculator.create(calculatorData);
+    console.log('Saved calculator:', calculator);
     
     const populatedCalculator = await PackageCalculator.findById(calculator._id)
       .populate('adultSightseeings.sightseeingId', 'name description location currency')

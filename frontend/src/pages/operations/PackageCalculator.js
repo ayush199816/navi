@@ -30,6 +30,15 @@ const SearchableSelect = ({ options, value, onChange, placeholder, required, fil
 
   const selectedOption = options.find(option => option.value === value);
 
+  // Initialize searchTerm with selected option's label when value changes
+  useEffect(() => {
+    if (selectedOption) {
+      setSearchTerm(selectedOption[filterKey]);
+    } else if (!value) {
+      setSearchTerm('');
+    }
+  }, [value, selectedOption, filterKey]);
+
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
     setIsOpen(true);
@@ -93,9 +102,16 @@ const PackageCalculator = () => {
   const [viewingCalculator, setViewingCalculator] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [sectionToggles, setSectionToggles] = useState({
+    showInclusionsExclusions: true,
+    showDaywiseItinerary: true,
+    showTransfers: true,
+    showSightseeings: true
+  });
   const pdfContentRef = useRef(null);
   const [formData, setFormData] = useState({
-    name: '',
+    tripId: '',
     adults: 0,
     children: 0,
     daysCount: 1,
@@ -111,7 +127,7 @@ const PackageCalculator = () => {
   });
 
   const createAgentQuoteId = () => {
-    const existingNames = new Set((calculators || []).map(c => (c.name || '').trim()));
+    const existingNames = new Set((calculators || []).map(c => (c.tripId || '').trim()));
 
     for (let i = 0; i < 20; i += 1) {
       const num = Math.floor(Math.random() * 9999) + 1;
@@ -156,7 +172,7 @@ const PackageCalculator = () => {
         heightLeft -= printableHeight;
       }
 
-      const safeName = (formData.name || 'PackageCalculator')
+      const safeName = (formData.tripId || 'PackageCalculator')
         .toString()
         .trim()
         .replace(/[^a-z0-9_-]/gi, '_');
@@ -179,54 +195,209 @@ const PackageCalculator = () => {
     const currency = formData.currency || 'INR';
     const daysCount = Math.max(1, parseInt(formData.daysCount || 1));
 
-    const lines = [];
-    lines.push('PACKAGE CALCULATOR');
-    lines.push('');
-    lines.push(`Name: ${(formData.name || '').toString().trim()}`);
-    lines.push(`Pax: Adults ${adultsCount}, Children ${childrenCount}, Total ${totalPeople}`);
-    lines.push(`Days: ${daysCount}`);
-    lines.push('');
+    // Get hotels data for date calculation
+    const hotels = (formData.hotelPrices || []);
 
-    const hotels = (formData.hotelPrices || [])
-      .map(h => (h?.hotelName ?? '').toString().trim())
-      .filter(Boolean);
+    // Use actual hotel dates for trip dates
+    let startDate, endDate;
+    
+    if (hotels.length > 0) {
+      // Find earliest check-in and latest check-out from hotels
+      const checkInDates = hotels.map(h => new Date(h.checkIn));
+      const checkOutDates = hotels.map(h => new Date(h.checkOut));
+      
+      startDate = new Date(Math.min(...checkInDates));
+      endDate = new Date(Math.max(...checkOutDates));
+    } else {
+      // Fallback to calculated dates if no hotels
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() + 1);
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + daysCount - 1);
+    }
+
+    const formatDate = (date) => {
+      const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    };
+
+    const formatDateShort = (date) => {
+      const options = { month: 'short', day: 'numeric', year: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    };
+
+    const lines = [];
+    
+    // Professional greeting
+    lines.push('Greetings from Navigatio Asia.');
+    lines.push('');
+    lines.push('Thank you for your query with us. As per your requirements, following are the package details.');
+    lines.push('');
+    
+    // Trip details
+    lines.push(`Trip ID ${(formData.tripId || '').toString().trim()}`);
+    lines.push('----------');
+    lines.push('Thailand Trip');
+    lines.push(`* ${formatDate(startDate)} to ${formatDate(endDate)}`);
+    lines.push(`* ${totalPeople} Pax (${adultsCount} Adults${childrenCount > 0 ? `, ${childrenCount} Children` : ''})`);
+    lines.push('');
+    
+    // Price section
+    lines.push(`Price (${currency}):`);
+    lines.push(`* Total Package Cost: ${totals.grandTotal.toLocaleString('en-IN')} ${currency}`);
+    lines.push('');
+    
+    // Calculate separate adult and child prices
+    if (totalPeople > 0) {
+      let adultPrice, childPrice;
+      
+      if (childrenCount > 0) {
+        // Child price is 70% of what would be equal per-person price
+        const equalPerPersonPrice = totals.grandTotal / totalPeople;
+        childPrice = equalPerPersonPrice * 0.7;
+        
+        // Calculate total child cost
+        const totalChildCost = childPrice * childrenCount;
+        
+        // Remaining amount goes to adults
+        const remainingForAdults = totals.grandTotal - totalChildCost;
+        adultPrice = remainingForAdults / adultsCount;
+      } else {
+        // No children, all adults pay equal
+        adultPrice = totals.grandTotal / adultsCount;
+        childPrice = 0;
+      }
+      
+      // Display adult pricing
+      lines.push(`* ${adultPrice.toLocaleString('en-IN')} / Adult x ${adultsCount} Adults = ${(adultPrice * adultsCount).toLocaleString('en-IN')} ${currency}`);
+      
+      // Display child pricing if there are children
+      if (childrenCount > 0) {
+        lines.push(`* ${childPrice.toLocaleString('en-IN')} / Child x ${childrenCount} Children = ${(childPrice * childrenCount).toLocaleString('en-IN')} ${currency}`);
+      }
+      
+      lines.push('');
+    }
+
+    // Hotels section
 
     if (hotels.length > 0) {
-      lines.push('Hotels:');
-      hotels.forEach((name) => {
-        lines.push(`- ${name}`);
+      lines.push('🏨  Hotels');
+      lines.push('-----------');
+      
+      hotels.forEach((hotel, index) => {
+        const checkInDate = new Date(hotel.checkIn);
+        const checkOutDate = new Date(hotel.checkOut);
+        
+        lines.push(`${formatDateShort(checkInDate)} to ${formatDateShort(checkOutDate)}`);
+        lines.push(`Check-in: ${formatDateShort(checkInDate)} & Check-out: ${formatDateShort(checkOutDate)}`);
+        lines.push(`${hotel.hotelName}`);
+        if (index < hotels.length - 1) lines.push('');
       });
       lines.push('');
     }
 
+    // Transfers section
+    const allTransfers = [];
+    (formData.transfers || []).forEach((item) => {
+      if (item.transferId) {
+        allTransfers.push(getTransferName(item.transferId));
+      }
+    });
+
+    if (allTransfers.length > 0 && sectionToggles.showTransfers) {
+      lines.push('🚖  Transfers');
+      lines.push('-----------');
+      allTransfers.forEach((transfer) => {
+        lines.push(`* ${transfer}`);
+      });
+      lines.push('');
+    }
+
+    // Sightseeings section
+    const allSightseeings = [];
+    (formData.adultSightseeings || []).forEach((item) => {
+      if (item.sightseeingId) {
+        allSightseeings.push(getSightseeingName(item.sightseeingId));
+      }
+    });
+
+    if (allSightseeings.length > 0 && sectionToggles.showSightseeings) {
+      lines.push('🎯  Sightseeings');
+      lines.push('-----------');
+      allSightseeings.forEach((sightseeing) => {
+        lines.push(`* ${sightseeing}`);
+      });
+      lines.push('');
+    }
+
+    // Day-wise Itinerary section
+    if (sectionToggles.showDaywiseItinerary) {
+      lines.push('📅  Day-wise Itinerary');
+      lines.push('-----------');
+    
     for (let d = 1; d <= daysCount; d += 1) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + d - 1);
+      
       const adultItems = (formData.adultSightseeings || []).filter(i => (parseInt(i.day || 1) === d) && i.sightseeingId);
       const transferItems = (formData.transfers || []).filter(i => (parseInt(i.day || 1) === d) && i.transferId);
-
-      lines.push(`Day ${d}:`);
-
-      const dayLines = [];
+      
+      const allItems = [];
       adultItems.forEach((item) => {
-        dayLines.push(getSightseeingName(item.sightseeingId));
+        allItems.push({ name: getSightseeingName(item.sightseeingId), type: 'sightseeing' });
       });
       transferItems.forEach((item) => {
-        dayLines.push(getTransferName(item.transferId));
+        allItems.push({ name: getTransferName(item.transferId), type: 'transfer' });
       });
 
-      lines.push('');
-      if (dayLines.length === 0) {
-        lines.push('None');
+      lines.push(`${formatDate(currentDate)}`);
+      lines.push('----');
+      
+      if (allItems.length === 0) {
+        lines.push('No activities scheduled for this day');
       } else {
-        dayLines.forEach((t) => {
-          lines.push(`- ${t}`);
+        allItems.forEach((item) => {
+          // Clean up the item name for detailed description
+          const cleanItem = item.name.split(' - ')[0]; // Remove location details
+          const prefix = item.type === 'transfer' ? 'Transfer - ' : '';
+          lines.push(`${prefix}${cleanItem}`);
         });
       }
-
-      if (d !== daysCount) lines.push('');
+      lines.push('');
     }
 
-    lines.push('');
-    lines.push(`Grand Total: ${currency} ${totals.grandTotal.toFixed(2)}`);
+    // Close the Day-wise Itinerary conditional block
+    }
+
+    // Inclusions and Exclusions section
+    if (sectionToggles.showInclusionsExclusions) {
+      lines.push('Inclusions');
+      lines.push('-----------');
+      lines.push('+ Accommodation in well-rated hotels/resorts as per the itinerary');
+      lines.push('+ Daily breakfast at the hotel (except on Day 1)');
+      lines.push('+ Sightseeing as per itinerary in a private/shared vehicle');
+      lines.push('+ Airport Transfers');
+      lines.push('+ All toll taxes, parking charges, driver allowances');
+      lines.push('+ Entry tickets to attractions (as mentioned in the itinerary)');
+      lines.push('+ Assistance by our local representative');
+      lines.push('');
+
+      lines.push('Exclusions');
+      lines.push('-----------');
+      lines.push('- Airfare / Train fare / Bus tickets');
+      lines.push('- Meals other than those specified in the Hotel inclusions');
+      lines.push('- Personal expenses: Laundry, telephone calls, room service, mini-bar, etc.');
+      lines.push('- Early check-in or late check-out at hotels (subject to availability)');
+      lines.push('- Tips, porterage, and guide charges');
+      lines.push('- Optional tours and activities not mentioned in the itinerary');
+      lines.push('- Cost of any medical or travel insurance (unless included)');
+      lines.push('- Any additional cost due to flight cancellation, delay, natural calamity, etc.');
+      lines.push('- TCS (Tax Collected at Source)');
+      lines.push('- 18% GST (Goods and Services Tax)');
+      lines.push('');
+      lines.push('NOTE: Anything not mentioned in the inclusions is excluded');
+    }
 
     return lines.join('\n');
   };
@@ -234,6 +405,8 @@ const PackageCalculator = () => {
   const handleCopy = async (e) => {
     if (e?.preventDefault) e.preventDefault();
     if (e?.stopPropagation) e.stopPropagation();
+    
+    setIsCopying(true);
     try {
       const text = buildCopyText();
       await navigator.clipboard.writeText(text);
@@ -254,6 +427,8 @@ const PackageCalculator = () => {
       } catch (err) {
         toast.error('Failed to copy');
       }
+    } finally {
+      setIsCopying(false);
     }
   };
 
@@ -450,12 +625,19 @@ const PackageCalculator = () => {
   };
 
   const addHotel = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayAfter = new Date(tomorrow);
+    dayAfter.setDate(tomorrow.getDate() + 1);
+    
     setFormData(prev => ({
       ...prev,
       hotelPrices: [...prev.hotelPrices, {
         hotelName: '',
         price: 0,
-        quantity: 1
+        quantity: 1,
+        checkIn: tomorrow.toISOString().split('T')[0],
+        checkOut: dayAfter.toISOString().split('T')[0]
       }]
     }));
   };
@@ -533,6 +715,13 @@ const PackageCalculator = () => {
     const updated = [...formData.hotelPrices];
     updated[index] = { ...updated[index], [field]: value };
     setFormData(prev => ({ ...prev, hotelPrices: updated }));
+  };
+
+  const handleSectionToggle = (section) => {
+    setSectionToggles(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const removeAdultSightseeing = (index) => {
@@ -625,7 +814,7 @@ const handleSubmit = async (e) => {
   // Calculate grand total before saving
   const totals = calculateTotals();
   const formDataWithTotal = {
-    name: formData.name,
+    tripId: formData.tripId,
     adults: parseInt(formData.adults) || 0,
     children: parseInt(formData.children) || 0,
     daysCount: Math.max(1, parseInt(formData.daysCount || 1)),
@@ -643,6 +832,7 @@ const handleSubmit = async (e) => {
   console.log('Submitting data:', formDataWithTotal);
   console.log('Adults being sent:', formDataWithTotal.adults);
   console.log('Children being sent:', formDataWithTotal.children);
+  console.log('Hotel prices with dates:', formDataWithTotal.hotelPrices);
 
   try {
     if (editingCalculator) {
@@ -664,7 +854,7 @@ const handleSubmit = async (e) => {
 
   const resetForm = () => {
     setFormData({
-      name: '',
+      tripId: '',
       adults: 0,
       children: 0,
       daysCount: 1,
@@ -715,12 +905,20 @@ const handleSubmit = async (e) => {
       day: parseInt(item.day || 1)
     }));
     
+    // Fix hotel dates - format Date objects to YYYY-MM-DD strings for date inputs
+    const fixedHotelPrices = (calculator.hotelPrices || []).map(hotel => ({
+      ...hotel,
+      checkIn: hotel.checkIn ? (new Date(hotel.checkIn)).toISOString().split('T')[0] : '',
+      checkOut: hotel.checkOut ? (new Date(hotel.checkOut)).toISOString().split('T')[0] : ''
+    }));
+    
     console.log('Travel Triangle from database:', calculator.travelTriangle);
     console.log('Type:', typeof calculator.travelTriangle);
+    console.log('Fixed hotel prices with dates:', fixedHotelPrices);
     
     setEditingCalculator(calculator);
     setFormData({
-      name: calculator.name || '',
+      tripId: calculator.tripId || calculator.name || '',
       adults: adultsCount,
       children: childrenCount,
       daysCount: Math.max(1, parseInt(calculator.daysCount || 1)),
@@ -728,7 +926,7 @@ const handleSubmit = async (e) => {
       adultSightseeings: fixedAdultSightseeings,
       childSightseeings: fixedChildSightseeings,
       transfers: fixedTransfers.map(t => ({ ...t, day: parseInt(t.day || 1) })),
-      hotelPrices: calculator.hotelPrices || [],
+      hotelPrices: fixedHotelPrices,
       currency: calculator.currency || 'INR',
       notes: calculator.notes || '',
       travelTriangle: calculator.travelTriangle === true || calculator.travelTriangle === undefined,
@@ -822,7 +1020,7 @@ const handleSubmit = async (e) => {
 
   // Filter calculators based on search term
   const filteredCalculators = calculators.filter(calculator =>
-    calculator.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (calculator.tripId || calculator.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -842,7 +1040,7 @@ const handleSubmit = async (e) => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by package name..."
+          placeholder="Search by Trip ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -856,7 +1054,7 @@ const handleSubmit = async (e) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  Trip ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Adult Items
@@ -882,7 +1080,7 @@ const handleSubmit = async (e) => {
               {filteredCalculators.map((calculator) => (
                 <tr key={calculator._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {calculator.name}
+                    {calculator.tripId || calculator.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {calculator.adultSightseeings.length}
@@ -944,12 +1142,12 @@ const handleSubmit = async (e) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Calculator Name
+                      Trip ID
                     </label>
                     <input
                       type="text"
-                      name="name"
-                      value={formData.name}
+                      name="tripId"
+                      value={formData.tripId}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
@@ -1284,6 +1482,22 @@ const handleSubmit = async (e) => {
                         required
                       />
                       <input
+                        type="date"
+                        value={item.checkIn}
+                        onChange={(e) => updateHotel(index, 'checkIn', e.target.value)}
+                        className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Check-in"
+                        required
+                      />
+                      <input
+                        type="date"
+                        value={item.checkOut}
+                        onChange={(e) => updateHotel(index, 'checkOut', e.target.value)}
+                        className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Check-out"
+                        required
+                      />
+                      <input
                         type="number"
                         value={item.price}
                         onChange={(e) => updateHotel(index, 'price', parseFloat(e.target.value))}
@@ -1371,6 +1585,49 @@ const handleSubmit = async (e) => {
 
                 </div>
 
+                {/* Section Toggles */}
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <h3 className="text-lg font-semibold mb-3">Message Sections</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sectionToggles.showTransfers}
+                        onChange={() => handleSectionToggle('showTransfers')}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm">Transfers</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sectionToggles.showSightseeings}
+                        onChange={() => handleSectionToggle('showSightseeings')}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm">Sightseeings</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sectionToggles.showDaywiseItinerary}
+                        onChange={() => handleSectionToggle('showDaywiseItinerary')}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm">Day-wise Itinerary</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sectionToggles.showInclusionsExclusions}
+                        onChange={() => handleSectionToggle('showInclusionsExclusions')}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm">Inclusions/Exclusions</span>
+                    </label>
+                  </div>
+                </div>
+
                 {/* Form Actions */}
                 <div className="flex gap-4 justify-end">
                   <button
@@ -1383,10 +1640,11 @@ const handleSubmit = async (e) => {
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50"
+                    disabled={isCopying}
+                    className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 disabled:opacity-50"
                   >
                     <Copy size={20} />
-                    Copy
+                    {isCopying ? 'Copying...' : 'Copy'}
                   </button>
                   <button
                     type="button"
