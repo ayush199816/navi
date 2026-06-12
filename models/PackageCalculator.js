@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const PackageCalculatorSchema = new mongoose.Schema(
   {
-    name: {
+    tripId: {
       type: String,
-      required: [true, 'Please add a package name'],
+      required: [true, 'Please add a trip ID'],
       trim: true,
-      maxlength: [100, 'Name cannot be more than 100 characters'],
+      maxlength: [100, 'Trip ID cannot be more than 100 characters'],
     },
     adults: {
       type: Number,
@@ -117,6 +117,14 @@ const PackageCalculatorSchema = new mongoose.Schema(
         required: true,
         min: [1, 'Quantity must be at least 1'],
         default: 1
+      },
+      checkIn: {
+        type: Date,
+        required: true
+      },
+      checkOut: {
+        type: Date,
+        required: true
       }
     }],
     totalAdultCost: {
