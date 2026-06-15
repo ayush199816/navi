@@ -1240,10 +1240,10 @@ const handleSubmit = async (e) => {
                             const next = { ...prev, isAgent: checked };
 
                             if (checked) {
-                              const currentName = (prev.name || '').trim();
+                              const currentName = (prev.tripId || '').trim();
                               const isAutoQuote = /^NAVAQ\d+$/i.test(currentName);
                               if (!currentName || isAutoQuote) {
-                                next.name = createAgentQuoteId();
+                                next.tripId = createAgentQuoteId();
                               }
                             }
 
